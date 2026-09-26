@@ -32,12 +32,13 @@ type DmxButtonUpdateParams = {
 
 type DmxHexSignal = string
 
-type DmxEffectNature = 'Boom' | 'Set' | 'Run' | 'Toggle'
+type DmxEffectNature = 'Boom' | 'Set' | 'Run' | 'InverseRun' | 'Toggle'
 
 type Program = {
     name: string
     id: number
     bpm: number
+    audio_filename: string | null
 }
 
 type ProgramCreationParams = {

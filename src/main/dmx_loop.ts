@@ -2,15 +2,13 @@ import EventEmitter from "events"
 import { emptyDmxHexString } from "./utils"
 import DmxEffect from "./dmx/effects/DmxEffect"
 import { getDmxSignalAt } from "./dmx/effects/utils"
-import { DmxButton } from "./sequelize/models/dmx_button"
 import DmxSet from "./dmx/effects/DmxSet"
 import DmxBoom from "./dmx/effects/DmxBoom"
 import DmxRun from "./dmx/effects/DmxRun"
 import DmxToggle from "./dmx/effects/DmxToggle"
-import { Program } from "./sequelize/models/program"
 import { DmxMidiHandler } from "./dmx_midi_handler"
 import DmxInverseRun from "./dmx/effects/DmxInverseRun"
-import { Op } from "@sequelize/core"
+import { Store, STORE_EVENTS } from "./store/Store"
 
 const LOOP_INTERVAL_MS = 20
 
@@ -51,11 +49,20 @@ export class DmxLoop extends EventEmitter {
             }
                 
         })
+
+        Store.getInstance().on(STORE_EVENTS.CHANGED, () => {
+            this.resyncDmxButtons()
+            this.reloadMidi()
+        })
+        Store.getInstance().on(STORE_EVENTS.PROGRAM_RENAMED, (oldId: number, newId: number) => {
+            if(this.current_program_id == oldId) this.switchProgram(newId)
+        })
+
         this.switchToFirstProgram()
     }
 
     switchToFirstProgram = async() => {
-        const program = await Program.findOne()
+        const program = Store.getInstance().listPrograms()[0]
 
         program && this.switchProgram(program.id)
     }
@@ -68,7 +75,7 @@ export class DmxLoop extends EventEmitter {
     }
 
     resyncDmxButtons = async() => {
-        this.dmxButtons = await DmxButton.findAll({where: {[Op.or]: [{program_id: this.current_program_id}, {program_id: null}]},})
+        this.dmxButtons = Store.getInstance().listButtons(this.current_program_id)
     }    
 
     areDmxButtonChannelsBlack = (dmxButton: DmxButton) => dmxButton.red_channels.every((redChannel) => (
@@ -117,7 +124,7 @@ export class DmxLoop extends EventEmitter {
     }
 
     switchProgram = async(program_id: number) => {
-        const program = await Program.findByPk(program_id)
+        const program = Store.getInstance().findProgram(program_id)
         this.current_program_id = program?.id
         this.resyncDmxButtons()
         this.reloadMidi()
@@ -125,8 +132,9 @@ export class DmxLoop extends EventEmitter {
     }
 
     reloadMidi = async() => {
-        const program = await Program.findByPk(this.current_program_id)
-        const dmxMidi = await program?.getOrInitDmxMidi()
+        const dmxMidi = this.current_program_id
+            ? Store.getInstance().getOrInitDmxMidi(this.current_program_id)
+            : undefined
         this.dmxMidiHandler.setMidiPatterns(dmxMidi?.midi_patterns || [])
     }
 

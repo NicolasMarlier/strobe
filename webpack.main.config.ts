@@ -1,5 +1,4 @@
 import type { Configuration } from 'webpack';
-import { IgnorePlugin } from 'webpack';
 
 import { rules } from './webpack.rules';
 import { plugins } from './webpack.plugins';
@@ -14,13 +13,7 @@ export const mainConfig: Configuration = {
   module: {
     rules,
   },
-  plugins: [
-    ...plugins,
-    // @sequelize/core optionally requires every dialect; we only use sqlite
-    new IgnorePlugin({
-      resourceRegExp: /^@sequelize\/(db2|db2-ibmi|mariadb|mssql|mysql|oracle|postgres|snowflake)$/,
-    }),
-  ],
+  plugins,
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
   },

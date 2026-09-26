@@ -1,8 +1,7 @@
-import { Request, Response } from "express"
 // import multer from "multer"
 import path from "path"
 import fs from "fs"
-import { Program } from "../sequelize/models/program"
+import { Store } from "../store/Store"
 import { handleErrors, NotFoundError } from "./application.controller"
 
 const UPLOADS_DIR = path.join(__dirname, "../../uploads/audio")
@@ -17,11 +16,7 @@ const UPLOADS_DIR = path.join(__dirname, "../../uploads/audio")
 
 // export const audioUpload = multer({ storage })
 
-const getProgram = async (program_id: number) => {
-  const program = await Program.findByPk(program_id)
-  if (!program) throw new NotFoundError("Program not found")
-  return program
-}
+const getProgram = async (program_id: number) => Store.getInstance().getProgram(program_id)
 
 const existingAudioPath = (programId: number): string | null => {
   const candidates = fs.readdirSync(UPLOADS_DIR).filter(f => f.startsWith(`program_${programId}.`))
@@ -60,8 +55,7 @@ export class ProgramsAudioController {
     const existing = existingAudioPath(program.id)
     if (existing) fs.unlinkSync(existing)
 
-    await program.update({ audio_filename: null })
-    return program
+    return Store.getInstance().updateProgram(program.id, { audio_filename: null })
   })
 
   

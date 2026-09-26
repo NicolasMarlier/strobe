@@ -1,4 +1,3 @@
-import { DmxButton } from "../../sequelize/models/dmx_button"
 import DmxEffect from "./DmxEffect"
 
 class DmxToggle extends DmxEffect {

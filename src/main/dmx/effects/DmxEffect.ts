@@ -1,4 +1,3 @@
-import { DmxButton } from "../../sequelize/models/dmx_button"
 import { colorHexToArray, setDmxAt } from "./utils"
 
 type DmxHexSignal = string

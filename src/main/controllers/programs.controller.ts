@@ -1,38 +1,14 @@
-import { Program } from "../sequelize/models/program";
-import { handleErrors, NotFoundError } from "./application.controller";
-import { DmxMidi } from "../sequelize/models/dmx_midi";
+import { handleErrors } from "./application.controller";
 import { DmxLoop } from "../dmx_loop";
-
-
-const getProgram = async(id: number) => {
-  const program = await Program.findByPk(id);
-
-  if (!program) {
-    throw new NotFoundError("Program not found")
-  }
-  return program
-}
+import { Store } from "../store/Store";
 
 
 export class ProgramsController {
 
-    static list = async() => handleErrors(async() => {
-        const programs = await Program.findAll(
-            {order: [['id', 'ASC']]}
-        )
-
-        return programs
-    })
-      
+    static list = async() => handleErrors(async() => Store.getInstance().listPrograms())
 
     static create = async(params: ProgramCreationParams) => handleErrors(async() => {
-        const program = await Program
-            .create(params)
-        await DmxMidi
-            .create({
-                program_id: program.id,
-                midi_patterns: []
-            })
+        const program = Store.getInstance().createProgram(params)
 
         return {
             status: 'ok',
@@ -41,20 +17,18 @@ export class ProgramsController {
     })
 
     static select = async(id: number) => handleErrors(async() => {
-        const program = await getProgram(id)
+        const program = Store.getInstance().getProgram(id)
         await DmxLoop.getInstance().switchProgram(program.id)
         return {status: 'ok'}
     })
 
     static update = async(id: number, params: ProgramUpdateParams) => handleErrors(async() => {
-        const program = await getProgram(id)
-        program.update(params)
+        Store.getInstance().updateProgram(id, params)
         return {status: 'ok'}
     })
 
     static destroy = async(id: number) => handleErrors(async() => {
-        const program = await getProgram(id)
-        await program.destroy();
+        Store.getInstance().destroyProgram(id)
         return { success: true }
     })
 }
