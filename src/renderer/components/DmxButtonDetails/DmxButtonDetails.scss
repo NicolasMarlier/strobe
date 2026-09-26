@@ -1,22 +1,26 @@
 .dmx-button-details {
     border-radius: 5px;
     box-shadow: 3px 3px 0px #111 inset, 2px 2px 0px #333;
-    width: 100%;
-    height: 80px;
+    // Vertical column on the right of the buttons, fields stacked.
+    // Fixed width: a flex item otherwise grows to fit its widest control (select, "Attach" button),
+    // so the panel was wider with a button selected than with the placeholder
+    flex: none;
+    width: 160px;
+    min-width: 160px;
+    max-width: 160px;
 
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 60px);
-    
+    display: flex;
+    flex-direction: column;
+
     text-align: left;
-    justify-content: space-between;
     gap: 10px;
     box-sizing: border-box;
-    padding: 20px 25px 20px 20px;
-    align-items: flex-end;
+    padding: 20px;
 
     &.placeholder {
         align-items: center;
         justify-content: center;
+        text-align: center;
         font-size: 12px;
         font-weight: 600;
         color: #333;
@@ -50,6 +54,7 @@
 
     select {
         width: 100%;
+        min-width: 0;
     }
 
 
@@ -67,6 +72,11 @@
 
     input {
         width: 100%;
+    }
+
+    input[type=checkbox] {
+        width: auto;
+        margin: 4px 0 0;
     }
 
     .signal-container {
@@ -104,7 +114,7 @@
 
     // NB: the `.attaching-signal` rule inside `.signal-container` above is dead
     // (nothing renders `.signal-container`); this is the one that applies.
-    // Keeps the "Attach C1" target inside its 60px column instead of widening it.
+    // Keeps the "Attach C1" target inside the panel's width instead of widening it.
     .attaching-signal {
         width: 100%;
 
@@ -153,8 +163,9 @@
         }
     }
 
-    // No `flex` override: it takes the shared 60px column width from `> div`.
+    // Pinned to the bottom of the column, away from the fields
     .delete-btn {
+        margin-top: auto;
         padding: 2px 0;
         height: 22px;
         box-sizing: border-box;

@@ -19,7 +19,8 @@ h1 {
 #app {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 50px auto 1fr;
+  // Buttons and scene split the height evenly
+  grid-template-rows: 50px 1fr 1fr;
   grid-template-areas:
     "commands commands"
     "midi     buttons"
@@ -49,6 +50,11 @@ h1 {
     &.buttons {
       grid-area: buttons;
       padding: 20px;
+      // Buttons on the left, the selected button's details on the right
+      flex-direction: row;
+      // Keeps the row at half height: many buttons scroll instead of stretching it
+      min-height: 0;
+      overflow-y: auto;
     }
 
     &.scene {
@@ -87,7 +93,7 @@ h1 {
 @media (max-width: 800px) {
   #app {
     grid-template-columns: 100%;
-    grid-template-rows: 50px 100px auto 1fr;
+    grid-template-rows: 50px 100px 1fr 1fr;
     grid-template-areas:
       "commands"
       "midi"

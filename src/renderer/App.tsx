@@ -18,7 +18,14 @@ import SaveButton from './components/SaveButton/SaveButton';
 
 
 function App() {
-  const { track } = useDmxButtonsContext()
+  const { track, setSelectedDmxButtonId } = useDmxButtonsContext()
+
+  // A click on the section's empty space deselects the button; clicks on a button,
+  // "New DMX button" or the details panel keep their own behavior
+  const onButtonsSectionClick = (e: React.MouseEvent) => {
+    if ((e.target as Element).closest('.dmx-button, .empty-btn, .dmx-button-details')) return
+    setSelectedDmxButtonId(undefined)
+  }
   const { selectedMidiPatterns, isRecording, setIsRecording } = useDmxMidiContext()
   const { debug } = useRealTimeContext()
   
@@ -48,10 +55,10 @@ function App() {
           {selectedMidiPatterns.length == 1 && <NoteEditor pattern={ selectedMidiPatterns[0]}/>}
         </div>
 
-        <div className="section buttons">
-          <DmxButtonDetails/>
-          
+        <div className="section buttons" onClick={onButtonsSectionClick}>
           <DmxButtonsCollection/>
+
+          <DmxButtonDetails/>
         </div>
         <div className="section scene">
           <DmxScene/>

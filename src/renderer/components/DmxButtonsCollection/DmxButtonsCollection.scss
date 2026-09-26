@@ -1,6 +1,11 @@
 .dmx-buttons {
+  // Takes the section's width left by the details column, as many columns as fit
+  flex: 1;
+  min-width: 0;
+  align-content: start;
   display: grid;
-  grid-template-columns: repeat(6, 84px);
+  grid-template-columns: repeat(auto-fill, 84px);
+  column-gap: 10px;
   grid-auto-rows: 84px;
   justify-content: space-between;
   row-gap: 25px;
@@ -9,10 +14,4 @@
   // track sits flush against the content edge and the shadow spills into `.dmx`'s padding
   padding-right: 5px;
   padding-bottom: 5px;
-}
-
-@media (max-width: 1200px) {
-  .dmx-buttons {
-      grid-template-columns: repeat(4, 84px);
-  }
 }
