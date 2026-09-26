@@ -18,7 +18,7 @@
 
 "@electron-forge/cli@^7.11.2":
   version "7.11.2"
-  resolved "https://registry.npmjs.org/@electron-forge/cli/-/cli-7.11.2.tgz"
+  resolved "https://registry.yarnpkg.com/@electron-forge/cli/-/cli-7.11.2.tgz#6bdf82da337b2ca7f69c8184383ab629c0598c6d"
   integrity sha512-c+C4ndLfHbxwZuCn9G8iT9wD/woLdaVkoSVjAIbj+0nJhi8UmiVsz/+Gxlj4cvhMRTzBMBxudstLU7RocMikfg==
   dependencies:
     "@electron-forge/core" "7.11.2"
@@ -284,9 +284,9 @@
     glob "^7.1.6"
     minimatch "^3.0.4"
 
-"@electron/fuses@^1.8.0":
+"@electron/fuses@^1.0.0":
   version "1.8.0"
-  resolved "https://registry.npmjs.org/@electron/fuses/-/fuses-1.8.0.tgz"
+  resolved "https://registry.yarnpkg.com/@electron/fuses/-/fuses-1.8.0.tgz#ad34d3cc4703b1258b83f6989917052cfc1490a0"
   integrity sha512-zx0EIq78WlY/lBb1uXlziZmDZI4ubcCXIMJ4uGjXzZW0nS19TjSPeXPAjzzTmKQlJUZm0SbmZhPKP7tuQ1SsEw==
   dependencies:
     chalk "^4.1.1"
@@ -2685,7 +2685,7 @@ electron-installer-redhat@^3.2.0:
 
 electron-squirrel-startup@^1.0.1:
   version "1.0.1"
-  resolved "https://registry.npmjs.org/electron-squirrel-startup/-/electron-squirrel-startup-1.0.1.tgz"
+  resolved "https://registry.yarnpkg.com/electron-squirrel-startup/-/electron-squirrel-startup-1.0.1.tgz#c9171568d724884c7a2b03760bfeedcf921c63ab"
   integrity sha512-sTfFIHGku+7PsHLJ7v0dRcZNkALrV+YEozINTW8X1nM//e5O3L+rfYuvSW00lmGHnYmUjARZulD8F2V8ISI9RA==
   dependencies:
     debug "^2.2.0"

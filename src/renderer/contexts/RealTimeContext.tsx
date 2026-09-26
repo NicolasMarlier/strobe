@@ -2,7 +2,6 @@ import { createContext, useContext, useEffect, useRef, useState, type RefObject 
 import { useDmxButtonsContext } from "./DmxButtonsContext"
 
 interface RealTimeContextType {
-    webSocketReadyState: ReadyState
     midiCurrentTickRef: RefObject<number>,
     lastReceivedMidiKey: ReceivedMidiKey | undefined
     setLastReceivedMidiKey: (received_midi_key: ReceivedMidiKey | undefined) => void
@@ -101,8 +100,6 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
             sendCurrentTickToServer,
 
             dmxHexSignal,
-
-            webSocketReadyState: readyState,
             enttecOpenUSBState,
             
             debug,
