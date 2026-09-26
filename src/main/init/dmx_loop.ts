@@ -16,7 +16,6 @@ export const initDmxLoop = () => {
     })
 
     DmxLoop.getInstance().on(DMX_LOOP_EVENTS.PROGRAM_CHANGE, (program_id: number) => {
-        console.log("YOYYO")
         sendToAllWindows('program:change', program_id)
         DmxLoop.getInstance().dmxMidiHandler.stop({reset: true})
     });
