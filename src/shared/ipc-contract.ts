@@ -93,6 +93,10 @@ export interface ApiContract {
     args: [dir: string]
     result: void
   }
+  'show:remove_recent': {
+    args: [dir: string]
+    result: RecentShow[]
+  }
 
 }
 

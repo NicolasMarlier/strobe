@@ -39,6 +39,35 @@
         padding: 10px 16px;
         cursor: pointer;
         border-bottom: 1px solid #444;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+
+        .details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        // Barely visible, clearer when hovering the show, fully when hovering the cross
+        .remove {
+            flex: 0 0 auto;
+            width: 20px;
+            height: 20px;
+            line-height: 20px;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 16px;
+            color: #ffffff1a;
+
+            &:hover {
+                color: #000;
+                background-color: #00000022;
+            }
+        }
+
+        &:hover .remove {
+            color: #00000066;
+        }
 
         &:last-child {
             border-bottom: none;

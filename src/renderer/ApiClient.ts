@@ -53,6 +53,9 @@ export const openShow = () =>
 export const openRecentShow = (dir: string) =>
     i('show:open_recent', dir)
 
+export const removeRecentShow = (dir: string) =>
+    i('show:remove_recent', dir)
+
 export const getProgramAudio = (program_id: number) =>
     i('programs:audio:get', program_id)
 

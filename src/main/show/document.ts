@@ -3,11 +3,15 @@ import path from "path"
 import { Store, STORE_EVENTS } from "../store/Store"
 import fs from "fs"
 import { audioDir, readShow, SHOW_EXTENSION, writeShow } from "./show_file"
+import { newShowData } from "./new_show"
 import { addRecentShow, describeRecentShow, listRecentShows, removeRecentShow } from "./recent_shows"
 
 const APP_NAME = 'DMX CONTROL'
 
-// Folder of the show currently open, null until the show is opened or saved
+// Whether a show is open. A new show is open but lives in memory until it's saved
+let isShowOpen = false
+
+// Folder of the show currently open, null while a new show hasn't been saved yet
 let currentShowDir: string | null = null
 
 // Whether the store has changes that are not saved in currentShowDir
@@ -80,18 +84,21 @@ export const guardWindowClose = (win: BrowserWindow) => {
     })
 }
 
+const startShow = (win: BrowserWindow, data: ShowData, dir: string | null) => {
+    Store.getInstance().load(data)
+    isShowOpen = true
+    currentShowDir = dir
+    if (dir) addRecentShow(dir)
+    setDirty(false)
+    // Start the UI from a clean state on the new show's data
+    win.webContents.reload()
+}
+
 const loadShow = (win: BrowserWindow, dir: string) =>
-    withErrorBox('Could not open show', () => {
-        Store.getInstance().load(readShow(dir))
-        currentShowDir = dir
-        addRecentShow(dir)
-        setDirty(false)
-        // Start the UI from a clean state on the new show's data
-        win.webContents.reload()
-    })
+    withErrorBox('Could not open show', () => startShow(win, readShow(dir), dir))
 
 export const showState = (): ShowState => ({
-    isOpen: currentShowDir != null,
+    isOpen: isShowOpen,
     recentShows: listRecentShows().map(describeRecentShow),
 })
 
@@ -107,17 +114,11 @@ const askShowDir = async(win: BrowserWindow, title: string, defaultName: string)
     return filePath.endsWith(SHOW_EXTENSION) ? filePath : `${filePath}${SHOW_EXTENSION}`
 }
 
-// Creates an empty show where the user chooses, then opens it
+// Opens a new show, kept in memory until it's saved
 export const newShow = async(win: BrowserWindow) => {
     if (!await confirmDiscardChanges(win)) return
 
-    const dir = await askShowDir(win, 'New Show', 'Untitled')
-    if (!dir) return
-
-    const created = withErrorBox('Could not create show', () =>
-        writeShow(dir, { programs: [], dmx_buttons: [], dmx_midis: [], dmx_scene: { led_bars: [] } }, null)
-    )
-    if (created) loadShow(win, dir)
+    startShow(win, newShowData(), null)
 }
 
 export const openShow = async(win: BrowserWindow) => {
@@ -133,6 +134,12 @@ export const openShow = async(win: BrowserWindow) => {
     loadShow(win, filePaths[0])
 }
 
+// Removes a show from the recent shows (the show itself is left untouched)
+export const forgetRecentShow = (dir: string): RecentShow[] => {
+    removeRecentShow(dir)
+    return listRecentShows().map(describeRecentShow)
+}
+
 export const openRecentShow = async(win: BrowserWindow, dir: string) => {
     if (!fs.existsSync(dir)) {
         dialog.showErrorBox('Could not open show', `${dir} no longer exists.`)
@@ -145,8 +152,10 @@ export const openRecentShow = async(win: BrowserWindow, dir: string) => {
 }
 
 // Save and Save As only apply to an open show: without one there is nothing to edit
-export const saveShow = async(_win: BrowserWindow): Promise<boolean> => {
-    if (!currentShowDir) return false
+export const saveShow = async(win: BrowserWindow): Promise<boolean> => {
+    if (!isShowOpen) return false
+    // A new show is saved for the first time: ask where
+    if (!currentShowDir) return saveShowAs(win)
 
     const dir = currentShowDir
     return withErrorBox('Could not save show', () => {
@@ -156,7 +165,7 @@ export const saveShow = async(_win: BrowserWindow): Promise<boolean> => {
 }
 
 export const saveShowAs = async(win: BrowserWindow): Promise<boolean> => {
-    if (!currentShowDir) return false
+    if (!isShowOpen) return false
 
     const dir = await askShowDir(win, 'Save Show As', showName())
     if (!dir) return false

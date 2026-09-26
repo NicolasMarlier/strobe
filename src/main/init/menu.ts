@@ -29,7 +29,7 @@ const buildMenu = () => {
         {
             label: 'File',
             submenu: [
-                { label: 'New Show…', accelerator: 'CmdOrCtrl+N', click: onWindow(newShow) },
+                { label: 'New Show', accelerator: 'CmdOrCtrl+N', click: onWindow(newShow) },
                 { label: 'Open Show…', accelerator: 'CmdOrCtrl+O', click: onWindow(openShow) },
                 { label: 'Open Recent', submenu: openRecentSubmenu() },
                 { type: 'separator' },

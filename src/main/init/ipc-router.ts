@@ -6,7 +6,7 @@ import { DmxMidiController } from '../controllers/dmx_midi.controller';
 import { DmxButtonController } from '../controllers/dmx_buttons.controller';
 import { MainLoopController } from '../controllers/main_loop.controller';
 import { ApiReverseContract, ReverseChannel } from '../../shared/ipc-reverse-contract';
-import { newShow, openRecentShow, openShow, showState } from '../show/document';
+import { forgetRecentShow, newShow, openRecentShow, openShow, showState } from '../show/document';
 import { Store } from '../store/Store';
 
 export function handle<C extends Channel>(
@@ -61,6 +61,7 @@ handle('show:state', async () => showState())
 handleWithWindow('show:new', newShow)
 handleWithWindow('show:open', openShow)
 handleWithWindow('show:open_recent', openRecentShow)
+handle('show:remove_recent', async (dir) => forgetRecentShow(dir))
 
 
 export function sendToAllWindows<C extends ReverseChannel>(
