@@ -37,11 +37,16 @@ export const readShow = (dir: string): ShowData => {
     if (!Array.isArray(file.programs) || !Array.isArray(file.dmx_buttons) || !Array.isArray(file.dmx_midis)) {
         throw new ShowFileError('show.json is missing programs, dmx_buttons or dmx_midis')
     }
+    if (file.dmx_scene !== undefined && !Array.isArray(file.dmx_scene?.led_bars)) {
+        throw new ShowFileError('show.json has a dmx_scene without led_bars')
+    }
 
     return {
         programs: file.programs,
         dmx_buttons: file.dmx_buttons,
         dmx_midis: file.dmx_midis,
+        // Shows made before the scene was part of the show have none
+        dmx_scene: file.dmx_scene ?? { led_bars: [] },
     }
 }
 

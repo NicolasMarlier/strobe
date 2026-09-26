@@ -115,7 +115,7 @@ export const newShow = async(win: BrowserWindow) => {
     if (!dir) return
 
     const created = withErrorBox('Could not create show', () =>
-        writeShow(dir, { programs: [], dmx_buttons: [], dmx_midis: [] }, null)
+        writeShow(dir, { programs: [], dmx_buttons: [], dmx_midis: [], dmx_scene: { led_bars: [] } }, null)
     )
     if (created) loadShow(win, dir)
 }

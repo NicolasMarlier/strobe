@@ -38,6 +38,9 @@ export const deleteDmxButton = (id: string) =>
 export const uploadProgramAudio = (program_id: number, file: File) =>
     i('programs:audio:upload', program_id, file)
 
+export const getDmxScene = () =>
+    i('dmx_scene:get')
+
 export const getShowState = () =>
     i('show:state')
 

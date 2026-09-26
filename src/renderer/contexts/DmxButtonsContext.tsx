@@ -20,7 +20,6 @@ interface DmxButtonsContextType {
   audioUrl: string | undefined
   uploadProgramAudioAndSync: (file: File) => void
 
-  ledBarConfigs: LedBarConfig[],
 
   createDmxButtonAndSync: () => void
   updateDmxButtonAndSync: (id: string, params: DmxButtonUpdateParams) => void,
@@ -132,44 +131,6 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
     return () => { cancelled = true }
   }, [programs])
 
-  const ledBarConfigs = [
-    {
-      channel: 1,
-      rgbDotsCount: 8,
-      style: {
-        transform: 'rotateY(110deg) rotateZ(11deg)',
-        left: '-30%',
-        bottom: '20%'
-      }
-    },
-    {
-      channel: 25,
-      rgbDotsCount: 8,
-      style: {
-        transform: 'rotateY(110deg) rotateZ(-11deg)',
-        right: '-30%',
-        bottom: '20%'
-      }
-    },
-    // {channel: 49, rgbDotsCount: 8},
-    // {channel: 73, rgbDotsCount: 8},
-    {
-      channel: 97,
-      rgbDotsCount: 16,
-      style: {
-        transform: 'rotate(90deg) scale(0.5)',
-        top: '25%'
-      }
-
-    },
-    {
-      channel: 145, rgbDotsCount: 1,
-      style: {
-        transform: 'scale(0.5)',
-        bottom: '-10%',
-      }
-    },
-  ]
   
 
   const [selectedDmxButtonId, setSelectedDmxButtonId] = useState(undefined as string | undefined)  
@@ -186,8 +147,6 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
         audioUrl, uploadProgramAudioAndSync,
 
         currentProgramId, setCurrentProgramId,
-
-        ledBarConfigs,
 
         createDmxButtonAndSync, updateDmxButtonAndSync, deleteDmxButtonAndSync,
         } }>

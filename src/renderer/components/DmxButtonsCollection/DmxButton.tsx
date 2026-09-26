@@ -1,5 +1,5 @@
 
-import { useDmxButtonsContext } from '../../contexts/DmxButtonsContext'
+import { useDmxSceneContext } from '../../contexts/DmxSceneContext'
 import { humanizeMidiKey } from '../../utils'
 import './DmxButton.scss' 
 
@@ -17,10 +17,10 @@ const DmxButton = (props: Props) => {
         isPlaying,
         dmxButton: dmxButton
     } = props
-    const { ledBarConfigs } = useDmxButtonsContext()
+    const { dmxScene } = useDmxSceneContext()
 
     const isLighted = (dmxButton: DmxButton, ledBarConfig: LedBarConfig) => (
-        dmxButton.red_channels.some(c => c >= ledBarConfig.channel && c < ledBarConfig.channel + ledBarConfig.rgbDotsCount * 3)
+        dmxButton.red_channels.some(c => c >= ledBarConfig.channel && c < ledBarConfig.channel + ledBarConfig.rgb_dots_count * 3)
     )
     const global = dmxButton.program_id == null
 
@@ -32,7 +32,7 @@ const DmxButton = (props: Props) => {
             </div> }
             
             <div className='color-symbols'>
-                { ledBarConfigs.map(ledBarConfig => (
+                { dmxScene.led_bars.map(ledBarConfig => (
                     <div className='color-symbol' style={isLighted(dmxButton, ledBarConfig) ? {background: dmxButton.color} : {}}/>
                 ))}
             </div>

@@ -90,6 +90,7 @@ type ShowData = {
     programs: Program[]
     dmx_buttons: DmxButton[]
     dmx_midis: DmxMidiRecord[]
+    dmx_scene: DmxScene
 }
 
 type DmxMidiUpdateParams = {
@@ -129,10 +130,16 @@ type MouseSelection = {
     rect: Rectangle
 }
 
+// A LED bar of the scene: rgb_dots_count RGB dots, starting at DMX channel `channel` (red of the first dot)
 type LedBarConfig = {
     channel: number,
-    rgbDotsCount: number,
+    rgb_dots_count: number,
     style?: LedBarStyle
+}
+
+// How the lights are laid out on screen
+type DmxScene = {
+    led_bars: LedBarConfig[]
 }
 
 type LedBarStyle = {

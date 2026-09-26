@@ -139,11 +139,13 @@ describe('load and toData', () => {
             programs: [{ id: 31, name: 'INTRO', bpm: 70, audio_filename: null }],
             dmx_buttons: [],
             dmx_midis: [{ program_id: 31, midi_patterns: [] }],
+            dmx_scene: { led_bars: [{ channel: 97, rgb_dots_count: 16 }] },
         }
         store.load(data)
 
         expect(loaded).toHaveBeenCalledTimes(1)
         expect(store.toData()).toEqual(data)
+        expect(store.getDmxScene()).toEqual(data.dmx_scene)
         expect(store.createProgram({ name: 'Next' }).id).toBe(32)
 
         // The store does not keep references to the loaded object

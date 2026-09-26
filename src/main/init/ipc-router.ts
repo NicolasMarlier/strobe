@@ -7,6 +7,7 @@ import { DmxButtonController } from '../controllers/dmx_buttons.controller';
 import { MainLoopController } from '../controllers/main_loop.controller';
 import { ApiReverseContract, ReverseChannel } from '../../shared/ipc-reverse-contract';
 import { newShow, openRecentShow, openShow, showState } from '../show/document';
+import { Store } from '../store/Store';
 
 export function handle<C extends Channel>(
   channel: C,
@@ -53,6 +54,8 @@ handle('dmx_buttons:destroy', DmxButtonController.destroy)
 
 
 handle('main_loop:update_current_tick', MainLoopController.update_current_tick)
+
+handle('dmx_scene:get', async () => Store.getInstance().getDmxScene())
 
 handle('show:state', async () => showState())
 handleWithWindow('show:new', newShow)

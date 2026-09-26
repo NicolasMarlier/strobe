@@ -16,6 +16,7 @@ export class Store extends EventEmitter {
     private programs: Program[] = []
     private dmxButtons: DmxButton[] = []
     private dmxMidis: DmxMidiRecord[] = []
+    private dmxScene: DmxScene = { led_bars: [] }
 
     static getInstance(): Store {
         if (!Store.instance) {
@@ -32,6 +33,7 @@ export class Store extends EventEmitter {
         this.programs = structuredClone(data.programs)
         this.dmxButtons = structuredClone(data.dmx_buttons)
         this.dmxMidis = structuredClone(data.dmx_midis)
+        this.dmxScene = structuredClone(data.dmx_scene)
         this.emit(STORE_EVENTS.LOADED)
     }
 
@@ -39,7 +41,10 @@ export class Store extends EventEmitter {
         programs: this.programs,
         dmx_buttons: this.dmxButtons,
         dmx_midis: this.dmxMidis,
+        dmx_scene: this.dmxScene,
     })
+
+    getDmxScene = (): DmxScene => structuredClone(this.dmxScene)
 
     // Programs
 

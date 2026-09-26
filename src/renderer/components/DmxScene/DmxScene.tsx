@@ -2,10 +2,12 @@ import './DmxScene.scss'
 import LedBar from "./LedBar";
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext";
 import { useRealTimeContext } from "../../contexts/RealTimeContext";
+import { useDmxSceneContext } from "../../contexts/DmxSceneContext";
 
 
 const DmxScene = () => {
-    const { dmxButtons, selectedDmxButtonId, ledBarConfigs } = useDmxButtonsContext()
+    const { dmxButtons, selectedDmxButtonId } = useDmxButtonsContext()
+    const { dmxScene } = useDmxSceneContext()
     const { dmxHexSignal } = useRealTimeContext()
 
     const { updateDmxButtonAndSync } = useDmxButtonsContext()
@@ -24,12 +26,12 @@ const DmxScene = () => {
     }
 
     return <div className='dmx-scene'>
-      { ledBarConfigs.map((ledBarConfig, index) => (
+      { dmxScene.led_bars.map((ledBarConfig, index) => (
           <LedBar
             key={index}
             style={ledBarConfig.style}
             dmxHexSignal={dmxHexSignal}
-            size={ledBarConfig.rgbDotsCount}
+            size={ledBarConfig.rgb_dots_count}
             channel={ledBarConfig.channel}
             selectedRedChannels={selectedRedChannels}
             onSelectRedChannels={onSelectRedChannels}/>

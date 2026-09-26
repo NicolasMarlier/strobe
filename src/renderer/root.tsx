@@ -6,6 +6,7 @@ import { DmxButtonsContextProvider } from './contexts/DmxButtonsContext'
 import { RealTimeContextProvider } from './contexts/RealTimeContext'
 import { DmxMidiContextProvider } from './contexts/DmxMidiContext'
 import Welcome from './components/Welcome/Welcome'
+import { DmxSceneContextProvider } from './contexts/DmxSceneContext'
 import { getShowState } from './ApiClient'
 
 const root = createRoot(document.body)
@@ -15,14 +16,16 @@ const root = createRoot(document.body)
 getShowState().then(({ isOpen, recentShows }) => root.render(
   isOpen
     //<StrictMode>
-    ? <DmxButtonsContextProvider>
-        <DmxMidiContextProvider>
-          <RealTimeContextProvider>
-            <App /> 
-            YO 
-          </RealTimeContextProvider>
-        </DmxMidiContextProvider>
-      </DmxButtonsContextProvider>
+    ? <DmxSceneContextProvider>
+        <DmxButtonsContextProvider>
+          <DmxMidiContextProvider>
+            <RealTimeContextProvider>
+              <App /> 
+              YO 
+            </RealTimeContextProvider>
+          </DmxMidiContextProvider>
+        </DmxButtonsContextProvider>
+      </DmxSceneContextProvider>
     //</StrictMode>,
     : <Welcome recentShows={recentShows} />
 ))

@@ -13,6 +13,7 @@ const data: ShowData = {
         red_channels: [1, 4], nature: 'Boom', triggering_midi_key: 36,
     }],
     dmx_midis: [{ program_id: 31, midi_patterns: [{ ticks: 0, midi_notes: [], durationTicks: 960 }] }],
+    dmx_scene: { led_bars: [{ channel: 1, rgb_dots_count: 8, style: { top: '10%' } }] },
 }
 
 const writeAudio = (dir: string, name: string, content: string) => {
@@ -30,6 +31,18 @@ describe('show files', () => {
         expect(readShow(dir)).toEqual(data)
         expect(fs.existsSync(path.join(dir, 'audio'))).toBe(true)
         expect(fs.existsSync(path.join(dir, 'show.json.tmp'))).toBe(false)
+    })
+
+    it('gives shows made before the scene existed an empty scene', () => {
+        const dir = path.join(tmp, 'Old.dmxshow')
+        fs.mkdirSync(dir)
+        const { dmx_scene, ...withoutScene } = data
+        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 1, ...withoutScene }))
+        expect(dmx_scene.led_bars).not.toEqual([])
+        expect(readShow(dir).dmx_scene).toEqual({ led_bars: [] })
+
+        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 1, ...withoutScene, dmx_scene: {} }))
+        expect(() => readShow(dir)).toThrow(/led_bars/)
     })
 
     it('saving in place keeps the audio', () => {

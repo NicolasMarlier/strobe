@@ -72,6 +72,11 @@ export interface ApiContract {
     result: void
   }
 
+  'dmx_scene:get': {
+    args: []
+    result: DmxScene
+  }
+
   'show:state': {
     args: []
     result: ShowState
