@@ -144,6 +144,7 @@ export class Store extends EventEmitter {
     updateButton = (id: string, params: DmxButtonUpdateParams): DmxButton => {
         const button = this.dmxButtons.find(b => b.id == id)
         if (!button) throw new NotFoundError("DmxButton not found")
+        const before = JSON.stringify(button)
 
         button.track_id = 'track_id' in params ? params.track_id ?? null : button.track_id
         button.color = params.color ?? button.color
@@ -154,7 +155,9 @@ export class Store extends EventEmitter {
             ? params.triggering_midi_key ?? null
             : button.triggering_midi_key
 
-        this.changed()
+        // The button details panel sends the button's values back when it's selected:
+        // that must not mark the show as modified
+        if (JSON.stringify(button) != before) this.changed()
         return structuredClone(button)
     }
 

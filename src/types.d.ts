@@ -83,6 +83,8 @@ type RecentShow = {
 
 type ShowState = {
     isOpen: boolean
+    // Whether the open show has changes that are not saved
+    isDirty: boolean
     recentShows: RecentShow[]
 }
 

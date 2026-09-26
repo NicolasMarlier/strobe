@@ -101,6 +101,11 @@ export interface ApiContract {
     args: [dir: string]
     result: RecentShow[]
   }
+  // Returns whether the show was saved (Save As can be cancelled)
+  'show:save': {
+    args: []
+    result: boolean
+  }
 
 }
 

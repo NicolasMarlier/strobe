@@ -59,6 +59,9 @@ export const openRecentShow = (dir: string) =>
 export const removeRecentShow = (dir: string) =>
     i('show:remove_recent', dir)
 
+export const saveShow = () =>
+    i('show:save')
+
 export const getTrackAudio = (track_id: number) =>
     i('tracks:audio:get', track_id)
 

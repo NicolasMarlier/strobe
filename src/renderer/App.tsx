@@ -13,6 +13,7 @@ import { useDmxMidiContext } from './contexts/DmxMidiContext';
 import SmallButton from './components/DesignSystem/SmallButton/SmallButton';
 import { RecordIcon } from './components/DesignSystem/Icons';
 import AudioPlayer from './components/MidiPlayer/AudioPlayer';
+import SaveButton from './components/SaveButton/SaveButton';
 
 
 
@@ -26,6 +27,7 @@ function App() {
         { debug && <DebugConsole/>}
         
         <div className='section commands-bar'>
+          <SaveButton/>
           <TrackSelect/>
           
           <div className="small-buttons-bar">

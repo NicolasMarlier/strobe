@@ -24,6 +24,12 @@ export const RecordIcon = ({ fill = "currentColor", className }: IconProps) => (
   </svg>
 );
 
+export const SaveIcon = ({ fill = "currentColor", className }: IconProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={fill} className={className}>
+    <path fillRule="evenodd" d="M6 4 H15.5 L20 8.5 V18 Q20 20 18 20 H6 Q4 20 4 18 V6 Q4 4 6 4 Z M7 6 V10 H15 V6 Z M12 13 A2.5 2.5 0 1 0 12 18 A2.5 2.5 0 1 0 12 13 Z"/>
+  </svg>
+);
+
 export const StopIcon = ({ fill = "currentColor", className }: IconProps) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill={fill} className={className}>
     <rect x="5" y="5" width="14" height="14" rx="2"/>

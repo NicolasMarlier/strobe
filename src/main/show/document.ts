@@ -28,8 +28,13 @@ export const updateWindowTitle = (win: BrowserWindow) => {
 }
 
 const setDirty = (value: boolean) => {
+    const changed = dirty != value
     dirty = value
-    BrowserWindow.getAllWindows().forEach(updateWindowTitle)
+    BrowserWindow.getAllWindows().forEach(win => {
+        updateWindowTitle(win)
+        // The store changes many times per edit: only tell the UI when it flips
+        if (changed) win.webContents.send('show:dirty', dirty)
+    })
 }
 
 Store.getInstance().on(STORE_EVENTS.CHANGED, () => setDirty(true))
@@ -99,6 +104,7 @@ const loadShow = (win: BrowserWindow, dir: string) =>
 
 export const showState = (): ShowState => ({
     isOpen: isShowOpen,
+    isDirty: dirty,
     recentShows: listRecentShows().map(describeRecentShow),
 })
 
