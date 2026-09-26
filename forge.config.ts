@@ -35,6 +35,13 @@ const config: ForgeConfig = {
     new AutoUnpackNativesPlugin({}),
     new WebpackPlugin({
       mainConfig,
+      // Forge's default dev policy, plus loading the show's audio (show-audio://, see src/main/init/audio_protocol.ts)
+      devContentSecurityPolicy: [
+        "default-src 'self' 'unsafe-inline' data:",
+        "script-src 'self' 'unsafe-eval' 'unsafe-inline' data:",
+        "connect-src 'self' data: show-audio:",
+        "media-src 'self' data: show-audio:",
+      ].join('; '),
       renderer: {
         config: rendererConfig,
         entryPoints: [

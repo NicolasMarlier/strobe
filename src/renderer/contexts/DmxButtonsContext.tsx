@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
+import { precomputeWaves } from "../components/MidiPlayer/waves";
 import { createDmxButton, deleteDmxButton, getProgramAudio, listDmxButtons, listPrograms, selectProgram, updateDmxButton, uploadProgramAudio } from "../ApiClient";
 
 interface DmxButtonsContextType {
@@ -69,13 +70,12 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
       setAudioUrl(undefined)
       return
     }
-    getProgramAudio(program.id).then((audioUrl) => setAudioUrl(audioUrl || undefined))
+    // Without audio, the main process answers with an error object instead of a URL
+    getProgramAudio(program.id).then((audioUrl) => setAudioUrl(typeof audioUrl == 'string' ? audioUrl : undefined))
   }
 
   useEffect(syncProgramAudio, [program?.id])
 
-  // Free the previous blob once consumers switched to the new one
-  useEffect(() => () => { if(audioUrl) URL.revokeObjectURL(audioUrl) }, [audioUrl])
 
   const uploadProgramAudioAndSync = (file: File) => {
     program && uploadProgramAudio(program.id, file).then(syncProgramAudio)
@@ -124,6 +124,13 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
 
 
   useEffect(() => { syncPrograms() }, []) 
+
+  // Prepare every program's waveform in the background, so switching programs is instant
+  useEffect(() => {
+    let cancelled = false
+    precomputeWaves(programs, () => cancelled)
+    return () => { cancelled = true }
+  }, [programs])
 
   const ledBarConfigs = [
     {

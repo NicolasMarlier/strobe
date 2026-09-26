@@ -2,7 +2,7 @@ import './TrackEditor.scss'
 
 import { useEffect, useRef, useState } from 'react';
 import { useRealTimeContext } from '../../contexts/RealTimeContext';
-import { computeWave } from './utils_audio';
+import { getWave } from './waves';
 import { redrawFullCanvas } from './TrackEditorCanvasDrawer';
 import Draggable from '../DesignSystem/Draggable/Draggable';
 import { addNoteAtTick, insertPatternsAtTick, magnettedTick, nextFreeTick, toggleLoopForPatterns } from './utils_midi_notes';
@@ -211,9 +211,9 @@ const MidiPlayer = (props: Props) => {
             return
         }
         let cancelled = false
-        computeWave(audioUrl, program.bpm, PPQ).then(waveData => { if(!cancelled) setAudioWaveData(waveData) })
+        getWave(audioUrl, program.bpm).then(waveData => { if(!cancelled) setAudioWaveData(waveData) })
         return () => { cancelled = true }
-    }, [audioUrl])
+    }, [audioUrl, program.bpm])
 
     const redrawMidiCanvas = () => {
         if(!canvasRef.current) return

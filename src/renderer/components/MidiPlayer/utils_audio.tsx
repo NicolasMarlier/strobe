@@ -1,34 +1,24 @@
-const sampleSignal = (signal: Float32Array, blockSize=10) => {
-    const samples = Math.ceil(signal.length / blockSize)
-    const dataArray = new Uint8Array(samples)
+// The wave only needs a few samples per tick (about 12 per tick at 85 BPM):
+// decoding at a low sample rate is faster and gives far fewer samples to go through
+const WAVE_SAMPLE_RATE = 8000
 
-    signal.forEach((dataPoint, i) => {
-        dataArray[Math.round(i/blockSize)] = Math.max(
-            dataArray[Math.round(i/blockSize)],
-            Math.round(Math.abs(dataPoint) * 255)
-        )
-    })
-    return dataArray
-}
-
+// Peak amplitude (0-255) of the audio for each tick
 export const computeWave = async(audioUrl: string, bpm: number, ppq: number) => {
-    const audioCtx = new window.AudioContext()
     const response = await fetch(audioUrl)
-    const arrayBuffer = await response.arrayBuffer()                                                                                                                                                       
-    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer)                                                                                                                                        
-    // audioBuffer.sampleRate is 44_100 or 48_000 (Hz), ie signal per second
+    const arrayBuffer = await response.arrayBuffer()
+    const audioBuffer = await new OfflineAudioContext(1, 1, WAVE_SAMPLE_RATE).decodeAudioData(arrayBuffer)
 
-    // 1 second = SAMPLE_RATE datapoints
-    // BPM beats = 60 seconds
-    // 1 beat = PPQ ticks
-    // 1 tick = 60  * SAMPLE_RATE / (PPQ * BPM) datapoints
+    // 1 beat = ppq ticks, bpm beats = 60 seconds
+    const samplesPerTick = 60 * audioBuffer.sampleRate / (ppq * bpm)
 
-    const dataPointsPerTick = 60 * audioBuffer.sampleRate / (ppq * bpm)
+    const left = audioBuffer.getChannelData(0)
+    const right = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : left
 
-    
-    const channelDataLeft = audioBuffer.getChannelData(0)
-    const channelDataRight = audioBuffer.getChannelData(1)
-    const channelData = channelDataLeft.map((e, i) => (e + channelDataRight[i])/2);
-
-    return sampleSignal(channelData, dataPointsPerTick)
+    const wave = new Uint8Array(Math.round(left.length / samplesPerTick) + 1)
+    for(let i = 0; i < left.length; i++) {
+        const amplitude = Math.round(Math.abs((left[i] + right[i]) / 2) * 255)
+        const tick = Math.round(i / samplesPerTick)
+        if(amplitude > wave[tick]) wave[tick] = amplitude
+    }
+    return wave
 }

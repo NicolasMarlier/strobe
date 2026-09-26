@@ -18,7 +18,14 @@ import { currentAudioDir } from "../show/document"
 const getProgram = async (program_id: number) => Store.getInstance().getProgram(program_id)
 
 // Audio lives in the open show's audio/ folder; an unsaved show has none
-const existingAudioPath = (programId: number): string | null => {
+// Served by the protocol in src/main/init/audio_protocol.ts
+export const AUDIO_SCHEME = 'show-audio'
+
+// The version changes when the file does, so the renderer doesn't reuse a stale cached copy
+const programAudioUrl = (programId: number, filePath: string) =>
+  `${AUDIO_SCHEME}://program/${programId}?v=${Math.round(fs.statSync(filePath).mtimeMs)}`
+
+export const existingAudioPath = (programId: number): string | null => {
   const dir = currentAudioDir()
   if (!dir || !fs.existsSync(dir)) return null
 
@@ -26,12 +33,6 @@ const existingAudioPath = (programId: number): string | null => {
   return candidates.length > 0 ? path.join(dir, candidates[0]!) : null
 }
 
-const audioDataUrl = (filename: string) => {
-  const buffer = fs.readFileSync(filename);
-  const mimeType = 'audio/wav';
-  const base64String = buffer.toString('base64');
-  return `data:${mimeType};base64,${base64String}`;
-}
 
 export class ProgramsAudioController {
 
@@ -69,9 +70,6 @@ export class ProgramsAudioController {
     const filePath = existingAudioPath(program.id)
     if (!filePath) throw new NotFoundError("No audio file for this program")
 
-    // res.sendFile(filePath)
-
-    
-    return audioDataUrl(filePath)
+    return programAudioUrl(program.id, filePath)
   })
 }
