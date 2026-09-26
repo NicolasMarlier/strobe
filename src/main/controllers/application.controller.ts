@@ -24,7 +24,9 @@ export class NotFoundError extends Error {}
 
 export const handleErrors = async(action: () => void) =>  {
     try {
-        return JSON.parse(JSON.stringify(await action()))
+        const result = await action()
+        // JSON.stringify(undefined) isn't JSON: actions that return nothing would throw here
+        return result === undefined ? undefined : JSON.parse(JSON.stringify(result))
     } catch (error) {
         if (error instanceof InvalidParamError) {
             return { error: error.message }
