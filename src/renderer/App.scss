@@ -52,6 +52,8 @@ h1 {
       padding: 20px;
       // Buttons on the left, the selected button's details on the right
       flex-direction: row;
+      // The SelectionLink between them is positioned in the section
+      position: relative;
       // Keeps the row at half height: many buttons scroll instead of stretching it
       min-height: 0;
       overflow-y: auto;

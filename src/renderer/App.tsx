@@ -14,6 +14,7 @@ import SmallButton from './components/DesignSystem/SmallButton/SmallButton';
 import { RecordIcon } from './components/DesignSystem/Icons';
 import AudioPlayer from './components/MidiPlayer/AudioPlayer';
 import SaveButton from './components/SaveButton/SaveButton';
+import SelectionLink from './components/SelectionLink/SelectionLink';
 
 
 
@@ -59,6 +60,8 @@ function App() {
           <DmxButtonsCollection/>
 
           <DmxButtonDetails/>
+
+          <SelectionLink/>
         </div>
         <div className="section scene">
           <DmxScene/>

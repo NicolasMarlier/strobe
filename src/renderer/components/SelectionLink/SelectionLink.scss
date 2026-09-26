@@ -1,0 +1,84 @@
+.selection-link {
+    // Covers the section; what's drawn past its box (scrolled buttons) still shows
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 1;
+
+    path {
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    // pathLength="1" on these two: a dash of 1 is the whole line, offset from 1 to 0 draws it in
+    .glow,
+    .core {
+        stroke: var(--link-color);
+        stroke-dasharray: 1;
+        animation: selection-link-draw 0.3s ease-out both;
+    }
+
+    .glow {
+        stroke-width: 7;
+        opacity: 0.7;
+        filter: blur(4px);
+    }
+
+    .core {
+        stroke-width: 2;
+        filter: drop-shadow(0 0 2px var(--link-color));
+    }
+
+    // Faint sparks running from the button to the panel, once the line is drawn
+    .pulses {
+        stroke: #fff;
+        stroke-width: 1;
+        stroke-dasharray: 2 26;
+        // Also what shows when reduced motion turns the fade-in off
+        opacity: 0.35;
+        animation:
+            selection-link-appear 0.4s 0.3s both,
+            selection-link-flow 1.4s linear infinite;
+    }
+
+    .end {
+        fill: #fff;
+        filter: drop-shadow(0 0 3px var(--link-color)) drop-shadow(0 0 8px var(--link-color));
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: selection-link-pop 0.25s 0.25s ease-out both;
+    }
+}
+
+@keyframes selection-link-draw {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
+}
+
+// One dash period (2 + 26) per loop, toward the end of the path
+@keyframes selection-link-flow {
+    to { stroke-dashoffset: -28; }
+}
+
+@keyframes selection-link-appear {
+    from { opacity: 0; }
+    to { opacity: 0.35; }
+}
+
+@keyframes selection-link-pop {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.6); }
+    100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .selection-link {
+        .glow, .core, .end { animation: none; }
+        .pulses { animation: none; }
+    }
+}
