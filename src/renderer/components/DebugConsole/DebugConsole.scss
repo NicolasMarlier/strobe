@@ -1,0 +1,22 @@
+.debug-console {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    bottom: 20px;
+    width: 250px;
+    background-color: #440000;
+    box-shadow: 0 0 20px #00000066 inset;
+    border-radius: 4px;
+    padding: 20px;
+    color: #ff8888;
+    text-align: left;
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 600;
+    text-shadow: 0 0 5px #ffffff44;
+    font-size: 12px;
+
+    .details {
+        height: 200px;
+        overflow: scroll;
+    }
+}

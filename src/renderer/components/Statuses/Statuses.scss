@@ -1,0 +1,17 @@
+.status-icon {
+    height: 24px;
+    width: 24px;
+    fill: #ffffff44;
+    display: flex;
+    align-items: center;
+
+    &.green {
+        fill: #8fdf61;
+    }
+    &.orange {
+        fill: #df9a61;
+    }
+    svg {
+        height: 80%
+    }
+}

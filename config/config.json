@@ -1,0 +1,10 @@
+{
+  "development": {
+    "storage": "./main.sqlite",
+    "dialect": "sqlite"
+  },
+  "test": {
+    "dialect": "sqlite",
+    "storage": ":memory:"
+  }
+}

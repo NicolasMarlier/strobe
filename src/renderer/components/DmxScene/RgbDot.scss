@@ -1,0 +1,27 @@
+.rgb-dot {
+    display: flex;
+}
+.rgb-dot {
+    user-select: none;
+    position: relative;
+    
+    width: 20px;
+    height: 20px;
+    border-radius: 12px;
+    border: 2px solid #ffffff00;
+    cursor: pointer;
+
+    .content {
+        width: 20px;
+        height: 20px;
+        border-radius: 12px;
+    }
+
+    &.selected {
+        box-shadow: 0 0 10px #ffffffaa;
+    }
+
+    &:hover {
+        box-shadow: 0 0 10px #ffffff88;
+    }
+}

@@ -1,0 +1,203 @@
+.program-item {
+    &.selected {
+        background-color: #fff;
+        color: #000;
+    }
+}
+.current-program {
+    border: 2px solid #444;
+    border-radius: 5px;
+    box-shadow: 5px 5px 0px #111;  
+    position: relative;
+    cursor: pointer;
+    padding: 2px 10px;
+    flex: 0 0 auto;
+
+    &:hover {
+        top: 1px;
+        left: 1px;
+        box-shadow: 4px 4px 0px #000000;  
+    }
+}
+.current-program-placeholder {
+    border: 2px solid #333;
+    border-radius: 5px;
+    box-shadow: 5px 5px 0px #111 inset;
+    color: #666;
+    cursor: pointer;
+    padding: 2px 10px;
+    margin: 5px 20px 5px 0;
+
+    &:hover {
+        color: #999;
+    }
+}
+.picker-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000000aa;
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .picker {
+        flex: 0 1 500px;
+        height: 50%;
+        background: #222;
+
+        border: 2px solid #aaa;
+        border-radius: 5px;
+        overflow-y: scroll;
+        position: relative;
+
+        .picker-option {
+            border-bottom: 1px solid #444;
+            cursor: pointer;
+            padding: 10px 20px;
+            text-align: left;
+            display: flex;
+            box-sizing: border-box;
+            position: relative;
+
+            input {
+                border: 1px solid #ffffff22;
+                outline: none;
+                border-radius: 4px;
+                padding: 8px 10px;
+                font-size: 15px;
+                background: transparent;
+
+                &:disabled {
+                    border: 1px solid transparent;
+                    color: #fff;
+                }
+                
+                &:focus {
+                    border: 1px solid #ffffffaa;
+                }
+
+                &.id {
+                    width: 40px;
+                }
+
+                &.name {
+                    width: 80px;
+                }
+
+                &.bpm {
+                    width: 60px;
+                }
+            }
+
+            .separator {
+                border-right: 1px solid #333;
+                height: 100%;
+                margin: -10px 10px;
+            }
+
+            .navigate-button {
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: transparent;
+                z-index: 20;
+                cursor: pointer;
+                border-left: 10px solid #aaa;
+            }
+
+            .edit-btn, .delete-btn, .save-btn {
+                display: none;
+                z-index: 30;
+                padding: 0 10px;
+                margin: 0px 5px;
+                height: 30px;
+                line-height: 30px;
+            }
+            
+            &.new-program {
+                margin-top: 50px;
+                border-top: 1px solid #444;
+            }
+
+            .blur-on-top {
+                display: none;
+                background-color: #222222ee;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 30;
+                cursor: default;
+            }
+        }
+
+        
+        
+
+        &.editing {
+            .picker-option {
+                
+                .blur-on-top {
+                    display: block;
+                }
+
+                &.editing {
+                    //background-color: #111;
+
+                    .blur-on-top {
+                        display: none;
+                    }
+                    .save-btn {
+                        display: block;
+                    }
+                }
+
+                
+            }
+        }
+
+        &.not-editing {
+            .picker-option {
+                &:hover {
+                    //background-color: #111;
+                    .navigate-button {
+                        display: block;
+                    }
+
+                    .edit-btn, .delete-btn {
+                        display: block;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.modale-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000000aa;
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .modale {
+        flex: 1 0 0;
+        height: 50%;
+        background: red;
+    }
+}

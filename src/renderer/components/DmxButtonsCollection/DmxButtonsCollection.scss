@@ -1,0 +1,18 @@
+.dmx-buttons {
+  display: grid;
+  grid-template-columns: repeat(6, 84px);
+  grid-auto-rows: 84px;
+  justify-content: space-between;
+  row-gap: 25px;
+
+  // breathing room for the buttons' `box-shadow: 5px 5px`; with `space-between` the last
+  // track sits flush against the content edge and the shadow spills into `.dmx`'s padding
+  padding-right: 5px;
+  padding-bottom: 5px;
+}
+
+@media (max-width: 1200px) {
+  .dmx-buttons {
+      grid-template-columns: repeat(4, 84px);
+  }
+}

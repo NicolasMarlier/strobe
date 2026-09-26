@@ -1,0 +1,60 @@
+.toggle {
+    width: 60px;
+    height: 30px;
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 0 10px #000000 inset;
+    transition: background-color 0.4s;
+
+    .toggle-pin {
+        width: 22px;
+        height: 22px;
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        background: #222;
+        border-radius: 20px;
+        box-shadow: 0 0 10px #000000;
+        transition: transform 0.05s, left 0.2s;
+        
+    }
+
+    &.active {
+        background-color: rgb(114, 203, 63);
+
+        .toggle-pin {
+            left: 35px;
+        }
+    }
+    &:hover {
+        .toggle-pin {
+            transform: scale(1.05);
+        }
+    }
+
+    &.enabled {
+        cursor: pointer;
+        background-color: #111;
+        cursor: pointer;
+
+        svg {
+            fill: #ffffff66;
+            height: 12px;
+        }
+
+        &.active {
+            background-color: rgb(114, 203, 63);
+
+            svg {
+                fill: rgb(114, 203, 63);
+                height: 12px;
+            }
+        }
+        
+        &:hover {
+            .small-button-pin {
+                transform: scale(1.05);
+            }
+        }
+    }
+}

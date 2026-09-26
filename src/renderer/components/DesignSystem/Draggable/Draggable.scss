@@ -1,0 +1,8 @@
+.draggable {
+    &.drag-over {
+        &.drag-over {
+            outline: 2px dashed #ffffff66;
+            background-color: #333;
+        }
+    }
+}

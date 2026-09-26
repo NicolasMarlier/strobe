@@ -1,0 +1,43 @@
+.midi-container {
+  display: flex;
+  flex: 0 1 auto;
+  column-gap: 10px;
+  flex-direction: row;
+  height: 100px;
+  margin: 0 0 20px 0;
+
+  .midi-canvas-container {
+    height: 100%;
+    box-sizing: border-box;
+    background-color: #222;
+    overflow: hidden;
+    min-width: 0;
+    position: relative;
+    transition: border-color 0.1s ease;
+    border-left: 3px solid #111;
+
+    &--focused {
+      border-left: 3px solid #48ff00;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+  }
+  .controls-panel {
+    width: 160px;
+    // box-shadow: 3px 3px 0px #111 inset, 2px 2px 0px #333;
+    border-radius: 5px;
+    padding: 10px;
+
+    .label {
+      display: flex;
+      justify-content: space-around;
+      padding: 6px 0;
+      font-size: 12px;
+      align-items: center;
+      color: #ffffff66;
+    }
+  }
+}

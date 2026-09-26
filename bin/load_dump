@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+#
+# Restores a dump, replacing the SQLite database file.
+#
+# Accepts three kinds of dump:
+#   - a SQLite database file (copied as is),
+#   - a SQLite SQL script (as produced by `sqlite3 main.sqlite .dump`),
+#   - a Postgres dump from ../bin/dump (converted by bin/lib/pg_to_sqlite.py).
+#
+# The dump is loaded into a fresh temporary file next to the database, checked,
+# then moved over it. What you get is exactly the dump, never a merge, and a
+# failed load leaves the current database untouched.
+
+set -euo pipefail
+
+APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+# Sequelize opens 'main.sqlite' relative to the app directory.
+DB_FILE="${DB_FILE:-$APP_DIR/main.sqlite}"
+
+ASSUME_YES="${DMX_YES:-0}"
+if [ "${1:-}" = "-y" ]; then ASSUME_YES=1; shift; fi
+
+INPUT_FILE="${1:?Usage: $0 [-y] <dump_file>}"
+[ -f "$INPUT_FILE" ] || { echo "No such dump file: $INPUT_FILE" >&2; exit 1; }
+
+# A running app keeps the file open and would keep writing to the replaced
+# inode. Fail fast instead -- the fix is to stop the app and retry.
+if [ -f "$DB_FILE" ] && lsof "$DB_FILE" >/dev/null 2>&1; then
+  echo "$DB_FILE is open by another process (is the app running?):" >&2
+  lsof "$DB_FILE" >&2
+  exit 1
+fi
+
+# This wipes real data, so say what is about to happen and ask -- unless the
+# caller already decided (-y, or a non-interactive run).
+if [ "$ASSUME_YES" != "1" ] && [ -t 0 ] && [ -f "$DB_FILE" ]; then
+  echo "About to ERASE $DB_FILE and replace it with:"
+  echo "  $INPUT_FILE"
+  read -r -p "Continue? [y/N] " reply
+  case "$reply" in
+    [yY]|[yY][eE][sS]) ;;
+    *) echo "Aborted."; exit 1 ;;
+  esac
+fi
+
+TMP_FILE="$(mktemp "$DB_FILE.loading.XXXXXX")"
+trap 'rm -f "$TMP_FILE"' EXIT
+
+if [ "$(head -c 15 "$INPUT_FILE")" = "SQLite format 3" ]; then
+  cp "$INPUT_FILE" "$TMP_FILE"
+elif grep -q -m1 '^-- PostgreSQL database dump' "$INPUT_FILE"; then
+  python3 "$APP_DIR/bin/lib/pg_to_sqlite.py" "$INPUT_FILE" | sqlite3 -bail "$TMP_FILE"
+else
+  sqlite3 -bail "$TMP_FILE" < "$INPUT_FILE"
+fi
+
+CHECK="$(sqlite3 "$TMP_FILE" 'PRAGMA integrity_check; PRAGMA foreign_key_check;')"
+if [ "$CHECK" != "ok" ]; then
+  echo "Loaded database failed its checks, $DB_FILE left untouched:" >&2
+  echo "$CHECK" >&2
+  exit 1
+fi
+
+# Stale journal files from the old database must not be replayed on the new one.
+rm -f "$DB_FILE-wal" "$DB_FILE-shm" "$DB_FILE-journal"
+mv "$TMP_FILE" "$DB_FILE"
+trap - EXIT
+
+echo "Loaded $INPUT_FILE into $DB_FILE"
