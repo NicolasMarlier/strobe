@@ -21,12 +21,12 @@ const writeAudio = (dir: string, name: string, content: string) => {
     fs.writeFileSync(path.join(dir, 'audio', name), content)
 }
 
-beforeEach(() => { tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'dmxshow-')) })
+beforeEach(() => { tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'strobe-')) })
 afterEach(() => fs.rmSync(tmp, { recursive: true, force: true }))
 
 describe('show files', () => {
     it('round-trips the data', () => {
-        const dir = path.join(tmp, 'A.dmxshow')
+        const dir = path.join(tmp, 'A.strobe')
         writeShow(dir, data, null)
         expect(readShow(dir)).toEqual(data)
         expect(fs.existsSync(path.join(dir, 'audio'))).toBe(true)
@@ -34,19 +34,19 @@ describe('show files', () => {
     })
 
     it('gives shows made before the scene existed an empty scene', () => {
-        const dir = path.join(tmp, 'Old.dmxshow')
+        const dir = path.join(tmp, 'Old.strobe')
         fs.mkdirSync(dir)
         const { dmx_scene, ...withoutScene } = data
-        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 2, ...withoutScene }))
+        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'strobe-show', version: 2, ...withoutScene }))
         expect(dmx_scene.led_bars).not.toEqual([])
         expect(readShow(dir).dmx_scene).toEqual({ led_bars: [] })
 
-        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 2, ...withoutScene, dmx_scene: {} }))
+        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'strobe-show', version: 2, ...withoutScene, dmx_scene: {} }))
         expect(() => readShow(dir)).toThrow(/led_bars/)
     })
 
     it('saving in place keeps the audio', () => {
-        const dir = path.join(tmp, 'A.dmxshow')
+        const dir = path.join(tmp, 'A.strobe')
         writeShow(dir, data, null)
         writeAudio(dir, 'track_31.mp3', 'intro')
         writeShow(dir, data, dir)
@@ -54,11 +54,11 @@ describe('show files', () => {
     })
 
     it('save as copies the audio and replaces the audio of an overwritten show', () => {
-        const from = path.join(tmp, 'A.dmxshow')
+        const from = path.join(tmp, 'A.strobe')
         writeShow(from, data, null)
         writeAudio(from, 'track_31.mp3', 'intro')
 
-        const to = path.join(tmp, 'B.dmxshow')
+        const to = path.join(tmp, 'B.strobe')
         writeShow(to, data, null)
         writeAudio(to, 'track_2.wav', 'old show audio')
 
@@ -81,13 +81,13 @@ describe('show files', () => {
         fs.writeFileSync(path.join(tmp, 'show.json'), '{ nope')
         expect(() => readShow(tmp)).toThrow(/not valid JSON/)
 
-        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ ...data, format: 'dmx-control-show', version: 3 }))
+        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ ...data, format: 'strobe-show', version: 3 }))
         expect(() => readShow(tmp)).toThrow(/newer version/)
 
-        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ programs: [], dmx_buttons: [], dmx_midis: [], format: 'dmx-control-show', version: 1 }))
+        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ programs: [], dmx_buttons: [], dmx_midis: [], format: 'strobe-show', version: 1 }))
         expect(() => readShow(tmp)).toThrow(/older format/)
 
-        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 2 }))
+        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ format: 'strobe-show', version: 2 }))
         expect(() => readShow(tmp)).toThrow(/missing/)
     })
 })

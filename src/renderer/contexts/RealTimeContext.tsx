@@ -66,7 +66,7 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
     // each of them running on every 'dmx' message (50 per second)
     useEffect(() => {
       const unsubscribes = [
-        window.dmxControl.api.onMessage('dmx', (data) => {
+        window.strobe.api.onMessage('dmx', (data) => {
           const {
                 enttecOpenDMXUSB: {
                   state: state
@@ -79,12 +79,12 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
           midiCurrentTickRef.current = midiCurrentTick
         }),
 
-        window.dmxControl.api.onMessage('track:change', trackId => {
+        window.strobe.api.onMessage('track:change', trackId => {
           setCurrentTrackId(trackId)
           syncTracksRef.current()
         }),
 
-        window.dmxControl.api.onMessage('midi:note_on', params => {
+        window.strobe.api.onMessage('midi:note_on', params => {
           const {
             midi
           } = params
@@ -98,7 +98,7 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
     }, [])
 
     const sendCurrentTickToServer = (midiCurrentTick: number) => {
-      window.dmxControl.api.invoke('main_loop:update_current_tick', midiCurrentTick)
+      window.strobe.api.invoke('main_loop:update_current_tick', midiCurrentTick)
     }
     
     return (

@@ -19,7 +19,11 @@ h1 {
 #app {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 50px 1fr;
+  grid-template-rows: 50px auto 1fr;
+  grid-template-areas:
+    "commands commands"
+    "midi     buttons"
+    "midi     scene";
   grid-gap: 20px;
 
   width: 100%;
@@ -38,17 +42,24 @@ h1 {
     gap: 20px;
 
     &.midi {
+      grid-area: midi;
       justify-content: space-between;
     }
 
-    &.dmx {
+    &.buttons {
+      grid-area: buttons;
       padding: 20px;
-      justify-content: space-between;
     }
 
+    &.scene {
+      grid-area: scene;
+      padding: 20px;
+      // Lets the scene shrink to the row's height instead of overflowing the window
+      min-height: 0;
+    }
 
     &.commands-bar {
-      grid-column-start: span 2;
+      grid-area: commands;
       padding: 10px;
       flex-direction: row;
       align-items: center;
@@ -76,13 +87,12 @@ h1 {
 @media (max-width: 800px) {
   #app {
     grid-template-columns: 100%;
-    grid-template-rows: 50px 100px 1fr;
-
-    .section {
-      &.commands-bar {
-        grid-column-start: span 1;
-      }
-    }
+    grid-template-rows: 50px 100px auto 1fr;
+    grid-template-areas:
+      "commands"
+      "midi"
+      "buttons"
+      "scene";
   }
 }
 

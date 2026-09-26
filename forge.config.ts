@@ -14,6 +14,8 @@ import { rendererConfig } from './webpack.renderer.config';
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    // Extension is resolved per platform: icon.icns (macOS), icon.ico (Windows)
+    icon: './assets/icon',
     // Only sign & notarize when Apple credentials are provided
     ...(process.env.APPLE_ID && {
       osxSign: {},
@@ -26,10 +28,10 @@ const config: ForgeConfig = {
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}),
+    new MakerSquirrel({ setupIcon: './assets/icon.ico' }),
     new MakerZIP({}, ['darwin']),
-    new MakerRpm({}),
-    new MakerDeb({}),
+    new MakerRpm({ options: { icon: './assets/icon.png' } }),
+    new MakerDeb({ options: { icon: './assets/icon.png' } }),
   ],
   plugins: [
     new AutoUnpackNativesPlugin({}),

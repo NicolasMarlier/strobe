@@ -13,8 +13,8 @@ const onMessage = <C extends ReverseChannel>(channel: C, callback: (params: ApiR
   return () => { ipcRenderer.removeListener(channel, listener) };
 };
 
-contextBridge.exposeInMainWorld('dmxControl', {
-  appName: 'DMX CONTROL',
+contextBridge.exposeInMainWorld('strobe', {
+  appName: 'STROBE',
   version: process.versions.electron,
   api: {
     invoke,
@@ -24,7 +24,7 @@ contextBridge.exposeInMainWorld('dmxControl', {
 
 declare global {
   interface Window {
-    dmxControl: {
+    strobe: {
       api: {
         invoke: typeof invoke
         onMessage: typeof onMessage

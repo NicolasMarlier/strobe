@@ -2,12 +2,12 @@ import fs from "fs"
 import path from "path"
 
 // A show is a folder:
-//   MyShow.dmxshow/
+//   MyShow.strobe/
 //   ├── show.json
 //   └── audio/track_<id>.<ext>
 
-export const SHOW_EXTENSION = '.dmxshow'
-const FORMAT = 'dmx-control-show'
+export const SHOW_EXTENSION = '.strobe'
+const FORMAT = 'strobe-show'
 // 2: programs renamed to tracks (tracks, track_id, audio/track_<id>.<ext>)
 const VERSION = 2
 
@@ -33,9 +33,9 @@ export const readShow = (dir: string): ShowData => {
         throw new ShowFileError(`show.json is not valid JSON: ${(e as Error).message}`)
     }
 
-    if (file.format != FORMAT) throw new ShowFileError('show.json is not a DMX Control show')
-    if (file.version > VERSION) throw new ShowFileError('This show was made by a newer version of DMX Control')
-    if (file.version < VERSION) throw new ShowFileError('This show uses an older format (programs instead of tracks) that this version of DMX Control does not open')
+    if (file.format != FORMAT) throw new ShowFileError('show.json is not a Strobe show')
+    if (file.version > VERSION) throw new ShowFileError('This show was made by a newer version of Strobe')
+    if (file.version < VERSION) throw new ShowFileError('This show uses an older format (programs instead of tracks) that this version of Strobe does not open')
     if (!Array.isArray(file.tracks) || !Array.isArray(file.dmx_buttons) || !Array.isArray(file.dmx_midis)) {
         throw new ShowFileError('show.json is missing tracks, dmx_buttons or dmx_midis')
     }

@@ -6,7 +6,7 @@ import { audioDir, readShow, SHOW_EXTENSION, writeShow } from "./show_file"
 import { newShowData } from "./new_show"
 import { addRecentShow, describeRecentShow, listRecentShows, removeRecentShow } from "./recent_shows"
 
-const APP_NAME = 'DMX CONTROL'
+const APP_NAME = 'STROBE'
 
 // Whether a show is open. A new show is open but lives in memory until it's saved
 let isShowOpen = false
@@ -102,7 +102,7 @@ export const showState = (): ShowState => ({
     recentShows: listRecentShows().map(describeRecentShow),
 })
 
-const showDialogFilters = [{ name: 'DMX Show', extensions: [SHOW_EXTENSION.slice(1)] }]
+const showDialogFilters = [{ name: 'Strobe Show', extensions: [SHOW_EXTENSION.slice(1)] }]
 
 const askShowDir = async(win: BrowserWindow, title: string, defaultName: string) => {
     const { canceled, filePath } = await dialog.showSaveDialog(win, {

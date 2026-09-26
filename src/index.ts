@@ -1,4 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
+import path from 'path';
 import './main/init/ipc-router'
 import { initMidiRouter } from './main/init/midi_router';
 import { initDmxLoop } from './main/init/dmx_loop';
@@ -48,6 +49,10 @@ const createWindow = (): void => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', async() => {
   try {
+    // Packaged builds get the icon from the bundle; `npm start` runs the stock Electron binary
+    if (!app.isPackaged && process.platform === 'darwin') {
+      app.dock?.setIcon(path.join(app.getAppPath(), 'assets/icon.png'))
+    }
     initMenu()
     initAudioProtocol()
     await createWindow()

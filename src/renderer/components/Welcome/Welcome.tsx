@@ -19,7 +19,7 @@ const Welcome = (props: Props) => {
 
     return <div className="welcome">
         <div className="welcome-panel">
-            <div className="welcome-title">DMX CONTROL</div>
+            <div className="welcome-title">STROBE</div>
 
             { recentShows.length > 0 && <>
                 <div className="welcome-section-title">Recent shows</div>

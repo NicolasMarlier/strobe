@@ -46,13 +46,15 @@ function App() {
           {selectedMidiPatterns.length == 1 && <NoteEditor pattern={ selectedMidiPatterns[0]}/>}
         </div>
 
-        <div className="section dmx">
+        <div className="section buttons">
           <DmxButtonDetails/>
           
           <DmxButtonsCollection/>
-
+        </div>
+        <div className="section scene">
           <DmxScene/>
         </div>
+
       </div>
   )
 }

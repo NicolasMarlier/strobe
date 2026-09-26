@@ -1,8 +1,8 @@
 {
-  "name": "dmx-control-electron",
-  "productName": "dmx-control-electron",
+  "name": "strobe",
+  "productName": "Strobe",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "Strobe: a DMX show runner on your Macbook",
   "main": ".webpack/main",
   "private": true,
   "scripts": {

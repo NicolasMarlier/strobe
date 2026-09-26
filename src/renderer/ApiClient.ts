@@ -1,4 +1,4 @@
-const i = window.dmxControl.api.invoke
+const i = window.strobe.api.invoke
 
 
 
