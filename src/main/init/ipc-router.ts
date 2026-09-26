@@ -6,6 +6,7 @@ import { DmxMidiController } from '../controllers/dmx_midi.controller';
 import { DmxButtonController } from '../controllers/dmx_buttons.controller';
 import { MainLoopController } from '../controllers/main_loop.controller';
 import { ApiReverseContract, ReverseChannel } from '../../shared/ipc-reverse-contract';
+import { newShow, openRecentShow, openShow, showState } from '../show/document';
 
 export function handle<C extends Channel>(
   channel: C,
@@ -14,6 +15,18 @@ export function handle<C extends Channel>(
   ipcMain.handle(channel, async (event, ...args) => {
     // Middleware possible ici : log, vérification de event.senderFrame.url, etc.
     return fn(...(args as ApiContract[C]['args']));
+  });
+}
+
+// Same as handle, for actions that need the calling window (e.g. to attach dialogs to it)
+function handleWithWindow<C extends Channel>(
+  channel: C,
+  fn: (win: BrowserWindow, ...args: ApiContract[C]['args']) => Promise<ApiContract[C]['result']>,
+) {
+  ipcMain.handle(channel, async (event, ...args) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (!win) throw new Error(`No window for ${channel}`);
+    return fn(win, ...(args as ApiContract[C]['args']));
   });
 }
 
@@ -40,6 +53,11 @@ handle('dmx_buttons:destroy', DmxButtonController.destroy)
 
 
 handle('main_loop:update_current_tick', MainLoopController.update_current_tick)
+
+handle('show:state', async () => showState())
+handleWithWindow('show:new', newShow)
+handleWithWindow('show:open', openShow)
+handleWithWindow('show:open_recent', openRecentShow)
 
 
 export function sendToAllWindows<C extends ReverseChannel>(

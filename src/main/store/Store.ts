@@ -2,14 +2,10 @@ import EventEmitter from "events"
 import { randomUUID } from "crypto"
 import { InvalidParamError, NotFoundError } from "../controllers/application.controller"
 
-type DmxMidiRecord = {
-    program_id: number
-    midi_patterns: MidiPattern[]
-}
-
 export const STORE_EVENTS = {
     CHANGED: 'changed',
     PROGRAM_RENAMED: 'programRenamed',
+    LOADED: 'loaded',
 }
 
 // In-memory replacement for the former SQLite database.
@@ -29,6 +25,21 @@ export class Store extends EventEmitter {
     }
 
     private changed = () => this.emit(STORE_EVENTS.CHANGED)
+
+    // Whole data set, used to open and save shows
+
+    load = (data: ShowData): void => {
+        this.programs = structuredClone(data.programs)
+        this.dmxButtons = structuredClone(data.dmx_buttons)
+        this.dmxMidis = structuredClone(data.dmx_midis)
+        this.emit(STORE_EVENTS.LOADED)
+    }
+
+    toData = (): ShowData => structuredClone({
+        programs: this.programs,
+        dmx_buttons: this.dmxButtons,
+        dmx_midis: this.dmxMidis,
+    })
 
     // Programs
 

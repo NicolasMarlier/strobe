@@ -70,6 +70,28 @@ type DmxMidi = {
     midi_patterns: MidiPattern[]
 }
 
+type DmxMidiRecord = {
+    program_id: number
+    midi_patterns: MidiPattern[]
+}
+
+type RecentShow = {
+    dir: string
+    name: string
+    folder: string
+}
+
+type ShowState = {
+    isOpen: boolean
+    recentShows: RecentShow[]
+}
+
+type ShowData = {
+    programs: Program[]
+    dmx_buttons: DmxButton[]
+    dmx_midis: DmxMidiRecord[]
+}
+
 type DmxMidiUpdateParams = {
     midi_patterns: MidiPattern[]
 }

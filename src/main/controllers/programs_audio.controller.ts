@@ -3,8 +3,7 @@ import path from "path"
 import fs from "fs"
 import { Store } from "../store/Store"
 import { handleErrors, NotFoundError } from "./application.controller"
-
-const UPLOADS_DIR = path.join(__dirname, "../../uploads/audio")
+import { currentAudioDir } from "../show/document"
 
 // const storage = multer.diskStorage({
 //   destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
@@ -18,9 +17,13 @@ const UPLOADS_DIR = path.join(__dirname, "../../uploads/audio")
 
 const getProgram = async (program_id: number) => Store.getInstance().getProgram(program_id)
 
+// Audio lives in the open show's audio/ folder; an unsaved show has none
 const existingAudioPath = (programId: number): string | null => {
-  const candidates = fs.readdirSync(UPLOADS_DIR).filter(f => f.startsWith(`program_${programId}.`))
-  return candidates.length > 0 ? path.join(UPLOADS_DIR, candidates[0]!) : null
+  const dir = currentAudioDir()
+  if (!dir || !fs.existsSync(dir)) return null
+
+  const candidates = fs.readdirSync(dir).filter(f => f.startsWith(`program_${programId}.`))
+  return candidates.length > 0 ? path.join(dir, candidates[0]!) : null
 }
 
 const audioDataUrl = (filename: string) => {

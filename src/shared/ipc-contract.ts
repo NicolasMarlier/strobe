@@ -72,6 +72,23 @@ export interface ApiContract {
     result: void
   }
 
+  'show:state': {
+    args: []
+    result: ShowState
+  }
+  'show:new': {
+    args: []
+    result: void
+  }
+  'show:open': {
+    args: []
+    result: void
+  }
+  'show:open_recent': {
+    args: [dir: string]
+    result: void
+  }
+
 }
 
 export type Channel = keyof ApiContract;

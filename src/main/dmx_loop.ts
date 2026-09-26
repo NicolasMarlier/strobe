@@ -54,6 +54,14 @@ export class DmxLoop extends EventEmitter {
             this.resyncDmxButtons()
             this.reloadMidi()
         })
+        Store.getInstance().on(STORE_EVENTS.LOADED, () => {
+            this.dmx_buttons_triggered = {}
+            this.dmxMidiHandler.stop({reset: true})
+            this.current_program_id = undefined
+            this.resyncDmxButtons()
+            this.reloadMidi()
+            this.switchToFirstProgram()
+        })
         Store.getInstance().on(STORE_EVENTS.PROGRAM_RENAMED, (oldId: number, newId: number) => {
             if(this.current_program_id == oldId) this.switchProgram(newId)
         })

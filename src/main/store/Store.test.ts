@@ -129,6 +129,29 @@ describe('dmx buttons', () => {
     })
 })
 
+describe('load and toData', () => {
+    it('replaces the whole data set and emits loaded', () => {
+        store.createProgram({ name: 'Old' })
+        const loaded = vi.fn()
+        store.on(STORE_EVENTS.LOADED, loaded)
+
+        const data: ShowData = {
+            programs: [{ id: 31, name: 'INTRO', bpm: 70, audio_filename: null }],
+            dmx_buttons: [],
+            dmx_midis: [{ program_id: 31, midi_patterns: [] }],
+        }
+        store.load(data)
+
+        expect(loaded).toHaveBeenCalledTimes(1)
+        expect(store.toData()).toEqual(data)
+        expect(store.createProgram({ name: 'Next' }).id).toBe(32)
+
+        // The store does not keep references to the loaded object
+        data.programs[0].name = 'changed'
+        expect(store.getProgram(31).name).toBe('INTRO')
+    })
+})
+
 describe('events and isolation', () => {
     it('emits changed on mutations but not on lazy midi init', () => {
         const changed = vi.fn()
