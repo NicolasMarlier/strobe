@@ -76,6 +76,10 @@ export interface ApiContract {
     args: []
     result: DmxScene
   }
+  'dmx_scene:update': {
+    args: [dmxScene: DmxScene]
+    result: DmxScene
+  }
 
   'show:state': {
     args: []

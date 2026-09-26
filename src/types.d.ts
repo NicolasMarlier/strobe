@@ -137,17 +137,18 @@ type LedBarConfig = {
     style?: LedBarStyle
 }
 
-// How the lights are laid out on screen
-type DmxScene = {
-    led_bars: LedBarConfig[]
-}
-
+// Where a LED bar is drawn in the scene (CSS values)
 type LedBarStyle = {
     transform?: string,
     left?: string,
     right?: string,
     top?: string,
     bottom?: string
+}
+
+// How the lights are laid out on screen
+type DmxScene = {
+    led_bars: LedBarConfig[]
 }
 
 type DmxTriggerState = 'up' | 'down'

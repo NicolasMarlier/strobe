@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getDmxScene } from "../ApiClient";
+import { getDmxScene, updateDmxScene as saveDmxScene } from "../ApiClient";
 
 interface DmxSceneContextType {
   dmxScene: DmxScene
+  updateDmxScene: (dmxScene: DmxScene) => void
 }
 
 const DmxSceneContext = createContext<DmxSceneContextType | null>(null);
@@ -25,8 +26,14 @@ export const DmxSceneContextProvider = ({ children }: {children: React.ReactNode
 
   useEffect(() => { getDmxScene().then(setDmxScene) }, [])
 
+  // Shown right away, saved in the background
+  const updateDmxScene = (dmxScene: DmxScene) => {
+    setDmxScene(dmxScene)
+    saveDmxScene(dmxScene)
+  }
+
   return (
-    <DmxSceneContext.Provider value={ { dmxScene } }>
+    <DmxSceneContext.Provider value={ { dmxScene, updateDmxScene } }>
       {children}
     </DmxSceneContext.Provider>
   )

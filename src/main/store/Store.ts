@@ -46,6 +46,12 @@ export class Store extends EventEmitter {
 
     getDmxScene = (): DmxScene => structuredClone(this.dmxScene)
 
+    updateDmxScene = (dmxScene: DmxScene): DmxScene => {
+        this.dmxScene = structuredClone(dmxScene)
+        this.changed()
+        return structuredClone(this.dmxScene)
+    }
+
     // Programs
 
     listPrograms = (): Program[] =>

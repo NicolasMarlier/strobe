@@ -1,0 +1,91 @@
+.dmx-scene-editor {
+    height: 100%;
+    box-sizing: border-box;
+    // Room for the Display / Edit switch floating over the scene
+    padding-top: 30px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-align: left;
+
+    .led-bar-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #333;
+    }
+
+    .led-bar-preview {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .led-bar-index {
+            color: #666;
+            font-size: 11px;
+            font-weight: 600;
+            width: 24px;
+        }
+    }
+
+    .led-bar-fields {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 8px;
+        padding-left: 34px;
+    }
+
+    .led-bar-field {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        span {
+            text-transform: uppercase;
+            font-size: 10px;
+            line-height: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        input {
+            width: 64px;
+            height: 22px;
+            box-sizing: border-box;
+        }
+    }
+
+    .led-bar-delete {
+        margin-left: auto;
+        width: 22px;
+        height: 22px;
+        line-height: 22px;
+        text-align: center;
+        border-radius: 50%;
+        font-size: 16px;
+        color: #ffffff33;
+        cursor: pointer;
+
+        &:hover {
+            color: #fff;
+            background-color: #ffffff22;
+        }
+    }
+
+    .led-bar-add {
+        align-self: flex-start;
+        padding: 8px 12px;
+    }
+}
+
+// In the editor, bars are shown straight in the flow instead of placed on the scene
+.led-bar.flat {
+    position: static;
+    margin: 0;
+    flex: 1;
+    width: auto;
+    cursor: default;
+}

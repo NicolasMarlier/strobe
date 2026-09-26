@@ -139,7 +139,7 @@ describe('load and toData', () => {
             programs: [{ id: 31, name: 'INTRO', bpm: 70, audio_filename: null }],
             dmx_buttons: [],
             dmx_midis: [{ program_id: 31, midi_patterns: [] }],
-            dmx_scene: { led_bars: [{ channel: 97, rgb_dots_count: 16 }] },
+            dmx_scene: { led_bars: [{ channel: 97, rgb_dots_count: 16, style: { transform: 'rotate(90deg) scale(0.5)', top: '25%' } }] },
         }
         store.load(data)
 
@@ -151,6 +151,20 @@ describe('load and toData', () => {
         // The store does not keep references to the loaded object
         data.programs[0].name = 'changed'
         expect(store.getProgram(31).name).toBe('INTRO')
+    })
+})
+
+describe('dmx scene', () => {
+    it('replaces the scene and emits changed', () => {
+        const changed = vi.fn()
+        store.on(STORE_EVENTS.CHANGED, changed)
+        const scene: DmxScene = { led_bars: [{ channel: 1, rgb_dots_count: 8 }] }
+
+        store.updateDmxScene(scene)
+        scene.led_bars[0].channel = 99
+
+        expect(changed).toHaveBeenCalledTimes(1)
+        expect(store.getDmxScene().led_bars[0].channel).toBe(1)
     })
 })
 

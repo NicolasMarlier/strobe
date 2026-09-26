@@ -56,6 +56,7 @@ handle('dmx_buttons:destroy', DmxButtonController.destroy)
 handle('main_loop:update_current_tick', MainLoopController.update_current_tick)
 
 handle('dmx_scene:get', async () => Store.getInstance().getDmxScene())
+handle('dmx_scene:update', async (dmxScene) => Store.getInstance().updateDmxScene(dmxScene))
 
 handle('show:state', async () => showState())
 handleWithWindow('show:new', newShow)

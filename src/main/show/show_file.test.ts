@@ -13,7 +13,7 @@ const data: ShowData = {
         red_channels: [1, 4], nature: 'Boom', triggering_midi_key: 36,
     }],
     dmx_midis: [{ program_id: 31, midi_patterns: [{ ticks: 0, midi_notes: [], durationTicks: 960 }] }],
-    dmx_scene: { led_bars: [{ channel: 1, rgb_dots_count: 8, style: { top: '10%' } }] },
+    dmx_scene: { led_bars: [{ channel: 1, rgb_dots_count: 8, style: { transform: 'rotateY(110deg) rotateZ(11deg)', left: '-30%', bottom: '20%' } }] },
 }
 
 const writeAudio = (dir: string, name: string, content: string) => {

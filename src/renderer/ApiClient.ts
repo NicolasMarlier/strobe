@@ -41,6 +41,9 @@ export const uploadProgramAudio = (program_id: number, file: File) =>
 export const getDmxScene = () =>
     i('dmx_scene:get')
 
+export const updateDmxScene = (dmxScene: DmxScene) =>
+    i('dmx_scene:update', dmxScene)
+
 export const getShowState = () =>
     i('show:state')
 
