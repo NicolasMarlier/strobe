@@ -8,11 +8,24 @@ export const setupCanvasDPR = (
     const dpr = window.devicePixelRatio || 1
     const width = canvas.clientWidth
     const height = canvas.clientHeight + heightAdjust
-    canvas.width = Math.floor(width * dpr)
-    canvas.height = Math.floor(height * dpr)
+    const backingWidth = Math.floor(width * dpr)
+    const backingHeight = Math.floor(height * dpr)
+
+    // Assigning width/height reallocates the backing store, even with the same values:
+    // only do it when the size really changed, otherwise just clear and reset the context
+    if(canvas.width != backingWidth || canvas.height != backingHeight) {
+        canvas.width = backingWidth
+        canvas.height = backingHeight
+    }
+    else {
+        ctx.reset()
+    }
     ctx.scale(dpr, dpr)
     return { width, height }
 }
+
+// Whether a horizontal range in pixels overlaps a canvas of the given width
+export const isVisibleX = (x0: number, x1: number, width: number) => x1 >= 0 && x0 <= width
 
 export const ticksDurationToPixels = (ticksDuration: number, pixelsPerBeat: number) =>
     ticksDuration * pixelsPerBeat / PPQ

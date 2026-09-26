@@ -58,33 +58,44 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
       }
     }, [lastReceivedMidiKey])
 
-    window.dmxControl.api.onMessage('dmx', (data) => {
-      const {
-            enttecOpenDMXUSB: {
-              state: state
-            },
-            dmxHexSignal: dmxHexSignal,
-            midiCurrentTick: midiCurrentTick
-      } = data
-      setEnttecOpenUSBState(state)
-      setDmxHexSignal(dmxHexSignal)
-      midiCurrentTickRef.current = midiCurrentTick
-    })
+    // Keep the latest syncPrograms for the listener below, which is registered only once
+    const syncProgramsRef = useRef(syncPrograms)
+    syncProgramsRef.current = syncPrograms
 
-    window.dmxControl.api.onMessage('program:change', programId => {
-      setCurrentProgramId(programId)
-      syncPrograms()
-    })
+    // Subscribe once: subscribing on every render would pile up listeners,
+    // each of them running on every 'dmx' message (50 per second)
+    useEffect(() => {
+      const unsubscribes = [
+        window.dmxControl.api.onMessage('dmx', (data) => {
+          const {
+                enttecOpenDMXUSB: {
+                  state: state
+                },
+                dmxHexSignal: dmxHexSignal,
+                midiCurrentTick: midiCurrentTick
+          } = data
+          setEnttecOpenUSBState(state)
+          setDmxHexSignal(dmxHexSignal)
+          midiCurrentTickRef.current = midiCurrentTick
+        }),
 
-    window.dmxControl.api.onMessage('midi:note_on', params => {
-      const {
-        midi
-      } = params
-      setLastReceivedMidiKey({
-        midi: midi,
-        at: Date.now()
-      })
-    })
+        window.dmxControl.api.onMessage('program:change', programId => {
+          setCurrentProgramId(programId)
+          syncProgramsRef.current()
+        }),
+
+        window.dmxControl.api.onMessage('midi:note_on', params => {
+          const {
+            midi
+          } = params
+          setLastReceivedMidiKey({
+            midi: midi,
+            at: Date.now()
+          })
+        }),
+      ]
+      return () => unsubscribes.forEach(unsubscribe => unsubscribe())
+    }, [])
 
     const sendCurrentTickToServer = (midiCurrentTick: number) => {
       window.dmxControl.api.invoke('main_loop:update_current_tick', midiCurrentTick)

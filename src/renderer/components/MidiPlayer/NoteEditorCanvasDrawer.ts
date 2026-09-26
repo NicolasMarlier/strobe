@@ -1,6 +1,6 @@
 import { humanizeMidiKey } from '../../utils'
 import { drawBeatsGrid, drawCurrentSelection, drawCurrentTick, drawTimeline, ITEM_COLOR, PRIMARY_GRID_COLOR, SELECTED_COLOR, type DrawerFunctionProps } from './GenericCanvasDrawer'
-import { PPQ, setupCanvasDPR, ticksDurationToPixels, ticksOffsetToPixels, xToTicks } from './utils'
+import { isVisibleX, PPQ, setupCanvasDPR, ticksDurationToPixels, ticksOffsetToPixels, xToTicks } from './utils'
 import { midiNotesIncludes } from './utils_midi_notes'
 
 export const TIMELINE_HEIGHT = 24
@@ -78,7 +78,7 @@ export const midiNoteToRectangle = (midiNote: MidiNote, ticksScroll: number, pix
     }
 }
 const drawMidiNote = (props: DrawerFunctionProps, args: DrawNoteArgs) => {
-    const {ctx, allMidiKeys, pixelsPerBeat, ticksScroll} = props
+    const {ctx, width, allMidiKeys, pixelsPerBeat, ticksScroll} = props
     const { note, fillColor, strokeColor } = args
 
     const rowIndex = allMidiKeys.indexOf(note.midi)
@@ -86,6 +86,8 @@ const drawMidiNote = (props: DrawerFunctionProps, args: DrawNoteArgs) => {
     const x = ticksOffsetToPixels(note.ticks, ticksScroll, pixelsPerBeat, PIANO_KEY_WIDTH)
     const y = rowToY(rowIndex)
     const w = ticksDurationToPixels(note.durationTicks, pixelsPerBeat) - 1
+    if(!isVisibleX(x, x + w, width)) return
+
     const h = NOTE_ROW_HEIGHT - 1
     ctx.fillStyle = fillColor
     ctx.beginPath(); ctx.roundRect(x, y + 1, w, h, 3); ctx.fill()

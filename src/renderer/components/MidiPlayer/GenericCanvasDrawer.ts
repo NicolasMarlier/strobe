@@ -44,33 +44,45 @@ export const drawCurrentTick = (props: DrawerFunctionProps, currentMidiTick: num
     )
 }
 
-const primaryGridRatio = (tick: number, props: DrawerFunctionProps)  => {
-    const { ppq, pixelsPerBeat } = props
-    if(pixelsPerBeat > 20) return tick % ppq == 0
-    else if(pixelsPerBeat > 10) return tick % (ppq * 4) == 0
-    else return tick % (ppq * 16) == 0
+const primaryGridStep = ({ ppq, pixelsPerBeat }: DrawerFunctionProps) => {
+    if(pixelsPerBeat > 20) return ppq
+    else if(pixelsPerBeat > 10) return ppq * 4
+    else return ppq * 16
 }
-const secondaryGridRatio = (tick: number, props: DrawerFunctionProps)  => {
-    const { ppq, pixelsPerBeat } = props
-    if(pixelsPerBeat > 20) return tick % (ppq / 4) == 0
-    else if(pixelsPerBeat > 10) return tick % ppq == 0
-    else return tick % (ppq * 4) == 0
+const secondaryGridStep = ({ ppq, pixelsPerBeat }: DrawerFunctionProps) => {
+    if(pixelsPerBeat > 20) return ppq / 4
+    else if(pixelsPerBeat > 10) return ppq
+    else return ppq * 4
+}
+
+// Multiples of `step` within the first 10 minutes that are visible on the canvas
+// (with a margin on the left for labels drawn to the right of their tick)
+const visibleTicks = (props: DrawerFunctionProps, step: number, marginPx = 50) => {
+    const { ppq, width, ticksScroll, pixelsPerBeat, baseXOffset } = props
+    const pixelsToTicks = (px: number) => px * ppq / pixelsPerBeat
+    const firstTick = Math.max(0, ticksScroll - pixelsToTicks((baseXOffset || 0) + marginPx))
+    const lastTick = Math.min(ppq * 60 * 10, ticksScroll + pixelsToTicks(width - (baseXOffset || 0)))
+
+    const ticks: number[] = []
+    for(let tick = Math.ceil(firstTick / step) * step; tick <= lastTick; tick += step) {
+        ticks.push(tick)
+    }
+    return ticks
 }
 
 export const drawBeatsGrid = (props: DrawerFunctionProps) => {
-    const { ctx, ppq, height, ticksScroll, pixelsPerBeat, baseXOffset, baseYOffset } = props
-    for(let tick=0; tick <= ppq * 60 * 10; tick+= 1) {
-        const isPrimary = primaryGridRatio(tick, props)
-        const isSecondary = secondaryGridRatio(tick, props)
-        if(isPrimary || isSecondary) {
-            ctx.fillStyle = isPrimary ? PRIMARY_GRID_COLOR : SECONDARY_GRID_COLOR;
-            ctx.fillRect(
-                ticksOffsetToPixels(tick, ticksScroll, pixelsPerBeat, baseXOffset),
-                (baseYOffset || 0)- (isPrimary ? 6 : 3),
-                1,
-                height + (isPrimary ? 6 : 3)
-            )
-        }
+    const { ctx, height, ticksScroll, pixelsPerBeat, baseXOffset, baseYOffset } = props
+    const primaryStep = primaryGridStep(props)
+    // The secondary step divides the primary one, so this also covers every primary line
+    for(const tick of visibleTicks(props, secondaryGridStep(props))) {
+        const isPrimary = tick % primaryStep == 0
+        ctx.fillStyle = isPrimary ? PRIMARY_GRID_COLOR : SECONDARY_GRID_COLOR;
+        ctx.fillRect(
+            ticksOffsetToPixels(tick, ticksScroll, pixelsPerBeat, baseXOffset),
+            (baseYOffset || 0)- (isPrimary ? 6 : 3),
+            1,
+            height + (isPrimary ? 6 : 3)
+        )
     }
 }
 
@@ -82,10 +94,8 @@ export const drawTimeline = (props: DrawerFunctionProps) => {
     ctx.textAlign = "left"
     ctx.textBaseline = "middle"
     ctx.fillStyle = "#ffffff66";
-    for(let tick=0; tick <= ppq * 60 * 10; tick+= 1) {
-        if(primaryGridRatio(tick, props)) {
-            ctx.fillText(`${tick / ppq + 1}`, ticksOffsetToPixels(tick, ticksScroll, pixelsPerBeat, baseXOffset) + 3, (baseYOffset || 0) / 2);
-        }
+    for(const tick of visibleTicks(props, primaryGridStep(props))) {
+        ctx.fillText(`${tick / ppq + 1}`, ticksOffsetToPixels(tick, ticksScroll, pixelsPerBeat, baseXOffset) + 3, (baseYOffset || 0) / 2);
     }
 
     ctx.fillStyle = '#111'

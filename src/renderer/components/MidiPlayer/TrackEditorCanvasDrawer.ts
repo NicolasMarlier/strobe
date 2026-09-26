@@ -1,5 +1,5 @@
 import { drawBeatsGrid, drawTimeline, drawCurrentTick, type DrawerFunctionProps, drawCurrentSelection, SELECTED_COLOR, ITEM_COLOR, drawRoundedRect, RECORDING_COLOR } from "./GenericCanvasDrawer";
-import { midiKeyToPixelsHeight, midiKeyToPixelsOffset, midiPatternToRectangle, setupCanvasDPR, ticksDurationToPixels, ticksOffsetToPixels } from "./utils";
+import { isVisibleX, midiKeyToPixelsHeight, midiKeyToPixelsOffset, midiPatternToRectangle, setupCanvasDPR, ticksDurationToPixels, ticksOffsetToPixels } from "./utils";
 
 interface Props {
     canvas: HTMLCanvasElement
@@ -19,7 +19,7 @@ interface Props {
 
 
 const drawAudioWave = (props: DrawerFunctionProps, audioWaveData: Uint8Array) => {
-    const { ctx, ticksScroll, pixelsPerBeat, width, height } = props
+    const { ctx, ppq, ticksScroll, pixelsPerBeat, width, height } = props
 
     ctx.fillStyle = "#000000aa";
     ctx.beginPath();
@@ -32,20 +32,24 @@ const drawAudioWave = (props: DrawerFunctionProps, audioWaveData: Uint8Array) =>
     )
     ctx.fill();
     
+    // One data point per tick: only draw the ticks that are on screen
+    const firstTick = Math.max(0, Math.floor(ticksScroll - ppq / pixelsPerBeat))
+    const lastTick = Math.min(audioWaveData.length - 1, Math.ceil(ticksScroll + width * ppq / pixelsPerBeat))
+
     ctx.fillStyle = "#ffffff06";
-    audioWaveData.forEach((dataPoint, ticks) => {
-        const dataPointHeight = dataPoint * height * 2 / (255 * 5)
+    for(let ticks = firstTick; ticks <= lastTick; ticks++) {
+        const dataPointHeight = audioWaveData[ticks] * height * 2 / (255 * 5)
         ctx.fillRect(
             ticksOffsetToPixels(ticks, ticksScroll, pixelsPerBeat),
             height * 4 / 5 - dataPointHeight / 2,
             1,
             dataPointHeight
         )
-    })
+    }
 }
 
 const drawMidiPattern = (props: DrawerFunctionProps, params: {midiPattern: MidiPattern, currentMidiTick: number}) => {
-    const { ctx,  height, ticksScroll, pixelsPerBeat, allMidiKeys } = props
+    const { ctx, width, height, ticksScroll, pixelsPerBeat, allMidiKeys } = props
     const { midiPattern, currentMidiTick } = params
     const rect = midiPatternToRectangle(
         midiPattern,
@@ -53,6 +57,8 @@ const drawMidiPattern = (props: DrawerFunctionProps, params: {midiPattern: MidiP
         ticksScroll,
         pixelsPerBeat
     )
+    if(!isVisibleX(rect.x0, rect.x1, width)) return
+
     drawRoundedRect(ctx, rect)
     midiPattern.midi_notes.forEach((midiNote) => {
         ctx.fillStyle = "#00000055";

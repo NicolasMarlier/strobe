@@ -6,8 +6,12 @@ import { ApiReverseContract, ReverseChannel } from './shared/ipc-reverse-contrac
 const invoke = <C extends Channel>(channel: C, ...args: ApiContract[C]['args']) =>
   ipcRenderer.invoke(channel, ...args) as Promise<ApiContract[C]['result']>;
 
-const onMessage = <C extends ReverseChannel>(channel: C, callback: (params: ApiReverseContract[C]['params']) => void) => 
-  ipcRenderer.on(channel, (_event, args) => callback(args));
+// Returns a function that removes the listener
+const onMessage = <C extends ReverseChannel>(channel: C, callback: (params: ApiReverseContract[C]['params']) => void) => {
+  const listener = (_event: Electron.IpcRendererEvent, args: ApiReverseContract[C]['params']) => callback(args);
+  ipcRenderer.on(channel, listener);
+  return () => { ipcRenderer.removeListener(channel, listener) };
+};
 
 contextBridge.exposeInMainWorld('dmxControl', {
   appName: 'DMX CONTROL',

@@ -144,8 +144,13 @@ const NoteEditor = (props: Props) => {
     }
 
     useEffect(() => {
-        const interval = setInterval(mainLoop, 20)
-        return () => clearInterval(interval)   
+        // Redraw on every frame, right before it's painted: with a timer, frames painted between
+        // two redraws show the canvas stretched to its new size while the window is resized
+        let frame = requestAnimationFrame(function loop() {
+            mainLoop()
+            frame = requestAnimationFrame(loop)
+        })
+        return () => cancelAnimationFrame(frame)
     }, [])
 
     const updateSelectedMidiNote = (updatedMidiNotes: MidiNote[]) => {
