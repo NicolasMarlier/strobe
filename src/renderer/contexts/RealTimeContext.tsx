@@ -1,7 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, type RefObject } from "react"
-//import useWebSocket, { ReadyState } from "react-use-websocket"
 import { useDmxButtonsContext } from "./DmxButtonsContext"
-import LostConnectionOverlay from "../components/LostConnectionOverlay/LostConnectionOverlay"
 
 interface RealTimeContextType {
     webSocketReadyState: ReadyState
@@ -18,8 +16,6 @@ interface RealTimeContextType {
     debugIncomingWsPayloads: IncomingWsPayload[]
     debugOutgoingWsPayloads: OutgoingWsPayload[]
 }
-
-//const WS_URL = import.meta.env.VITE_WS_URL || `ws://127.0.0.1:8080`
 
 const RealTimeContext = createContext<RealTimeContextType | null>(null)
 
@@ -79,52 +75,22 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
     window.dmxControl.api.onMessage('program:change', programId => {
       setCurrentProgramId(programId)
       syncPrograms()
-    }) 
+    })
 
-    // useEffect(() => {
-    //   if(lastMessage !== null) {
-    //     const jsonMessage = JSON.parse(lastMessage.data)
-    //     if(debug) {
-    //       setDebugIncomingWsPayloads(p => [...[jsonMessage], ...p])
-    //     }
-    //     if(jsonMessage.channel === 'dmx') {
-    //       const {
-    //         enttecOpenDMXUSB: {
-    //           state: state
-    //         },
-    //         dmxHexSignal: dmxHexSignal,
-    //         midiCurrentTick: midiCurrentTick
-    //       } = jsonMessage.data
-    //       setEnttecOpenUSBState(state)
-    //       setDmxHexSignal(dmxHexSignal)
-    //       midiCurrentTickRef.current = midiCurrentTick
-    //     }
-    //     else if(jsonMessage.channel === 'control') {
-    //       if(jsonMessage.action == 'change_program') {
-    //         setCurrentProgramId(jsonMessage.data.program_id)
-    //         syncPrograms()
-    //       }
-    //     }
-    //     else if(jsonMessage.channel === 'midi_input') {
-    //       if(jsonMessage.action == 'note_on') {
-    //         const message = jsonMessage.data as WSMidiNoteOnMessage
-    //         setLastReceivedMidiKey({
-    //           midi: message.midi,
-    //           at: Date.now()
-    //         })
-    //       }
-    //     }
-    //     else {
-    //       console.log("Received unknown WS message", jsonMessage)
-    //     }
-    //   }
-    // }, [lastMessage, programs])
+    window.dmxControl.api.onMessage('midi:note_on', params => {
+      const {
+        midi
+      } = params
+      setLastReceivedMidiKey({
+        midi: midi,
+        at: Date.now()
+      })
+    })
 
     const sendCurrentTickToServer = (midiCurrentTick: number) => {
       window.dmxControl.api.invoke('main_loop:update_current_tick', midiCurrentTick)
     }
     
-
     return (
         <RealTimeContext.Provider value={ {
             lastReceivedMidiKey,
@@ -143,7 +109,6 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
             debugIncomingWsPayloads,
             debugOutgoingWsPayloads,
             } }>
-            { readyState != "open" && <LostConnectionOverlay/> }
             {children}
         </RealTimeContext.Provider>
     )
