@@ -15,23 +15,23 @@ import { isSelected, midiPatternArrayEqual, midiPatternsInclude, splitPatternsAt
 const BEATS_OFFSET = 2
 
 interface Props {
-    program: Program
+    track: Track
 }
 
 const BASE_PIXELS_PER_BEAT = 40
 
 const MidiPlayer = (props: Props) => {
-    const { program } = props
+    const { track } = props
     const {
         midiPatterns,
-        updateProgramDmxMidiAndSync,
+        updateTrackDmxMidiAndSync,
         allMidiKeys,
         activeEditor,
         isRecording,
         setSelectedMidiPatterns,
     } = useDmxMidiContext()
 
-    const { audioUrl, uploadProgramAudioAndSync } = useDmxButtonsContext()
+    const { audioUrl, uploadTrackAudioAndSync } = useDmxButtonsContext()
 
     const allMidiKeysRef = useRef(allMidiKeys)
     allMidiKeysRef.current = allMidiKeys
@@ -58,11 +58,11 @@ const MidiPlayer = (props: Props) => {
 
     const ghostMidiPatternRef = useRef<MidiPattern | undefined>(undefined)
 
-    const updateProgramDmxMidiAndSyncRef = useRef(updateProgramDmxMidiAndSync)
-    updateProgramDmxMidiAndSyncRef.current = updateProgramDmxMidiAndSync
+    const updateTrackDmxMidiAndSyncRef = useRef(updateTrackDmxMidiAndSync)
+    updateTrackDmxMidiAndSyncRef.current = updateTrackDmxMidiAndSync
 
     const splitAtCurrentTick = () => {
-        updateProgramDmxMidiAndSyncRef.current(splitPatternsAtTick(midiPatternsRef.current, midiCurrentTickRef.current))
+        updateTrackDmxMidiAndSyncRef.current(splitPatternsAtTick(midiPatternsRef.current, midiCurrentTickRef.current))
         selectedMidiPatternsRef.current = []
     }
 
@@ -73,7 +73,7 @@ const MidiPlayer = (props: Props) => {
 
 
     const deleteSelectedMidiPatterns = () => {
-        updateProgramDmxMidiAndSyncRef.current(
+        updateTrackDmxMidiAndSyncRef.current(
             midiPatternsRef.current.filter(midiPattern => !isSelected(midiPattern, selectedMidiPatternsRef.current))
         )
     }
@@ -83,7 +83,7 @@ const MidiPlayer = (props: Props) => {
     }
 
     const pasteSelectedMidiPatterns = () => {
-        updateProgramDmxMidiAndSyncRef.current(
+        updateTrackDmxMidiAndSyncRef.current(
             insertPatternsAtTick({
                 midiPatterns: midiPatternsRef.current,
                 midiPatternsToInsert: clipboard.current,
@@ -94,7 +94,7 @@ const MidiPlayer = (props: Props) => {
     }
 
     const joinSelection = () => {
-        updateProgramDmxMidiAndSyncRef.current(
+        updateTrackDmxMidiAndSyncRef.current(
             [
                 ...midiPatternsRef.current.filter(midiPattern => !isSelected(midiPattern, selectedMidiPatternsRef.current)),
                 ...[sum(selectedMidiPatternsRef.current)]
@@ -104,7 +104,7 @@ const MidiPlayer = (props: Props) => {
 
     const toggleLoop = () => {
         if(!selectedMidiPatternsRef.current) return
-        updateProgramDmxMidiAndSyncRef.current(toggleLoopForPatterns(midiPatternsRef.current, selectedMidiPatternsRef.current))
+        updateTrackDmxMidiAndSyncRef.current(toggleLoopForPatterns(midiPatternsRef.current, selectedMidiPatternsRef.current))
     }
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -145,14 +145,14 @@ const MidiPlayer = (props: Props) => {
     }
 
     const onDropAudioFile = (file: File) => {
-        uploadProgramAudioAndSync(file)
+        uploadTrackAudioAndSync(file)
     }
 
     const persistRecordingPattern = () => {
         if(!recordingPatternRef.current) return
         if(recordingPatternRef.current.midi_notes.length == 0) return
 
-        updateProgramDmxMidiAndSyncRef.current([...midiPatternsRef.current, ...[recordingPatternRef.current]])
+        updateTrackDmxMidiAndSyncRef.current([...midiPatternsRef.current, ...[recordingPatternRef.current]])
         recordingPatternRef.current = null
     }
 
@@ -211,9 +211,9 @@ const MidiPlayer = (props: Props) => {
             return
         }
         let cancelled = false
-        getWave(audioUrl, program.bpm).then(waveData => { if(!cancelled) setAudioWaveData(waveData) })
+        getWave(audioUrl, track.bpm).then(waveData => { if(!cancelled) setAudioWaveData(waveData) })
         return () => { cancelled = true }
-    }, [audioUrl, program.bpm])
+    }, [audioUrl, track.bpm])
 
     const redrawMidiCanvas = () => {
         if(!canvasRef.current) return
@@ -313,7 +313,7 @@ const MidiPlayer = (props: Props) => {
         ]
         selectedMidiPatternsRef.current = updatedMidiPatterns
         midiPatternsRef.current = newPatterns
-        updateProgramDmxMidiAndSyncRef.current(newPatterns)
+        updateTrackDmxMidiAndSyncRef.current(newPatterns)
     }
 
     

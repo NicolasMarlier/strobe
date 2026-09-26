@@ -9,7 +9,6 @@ interface Props {
     dmxHexSignal: string
 }
 
-// Where a bar is placed (its style) isn't edited here: it's set in show.json
 interface Field {
     key: 'channel' | 'rgb_dots_count'
     label: string
@@ -19,6 +18,15 @@ interface Field {
 const FIELDS: Field[] = [
     { key: 'channel', label: 'Channel', max: DMX_CHANNELS },
     { key: 'rgb_dots_count', label: 'Dots', max: Math.floor(DMX_CHANNELS / 3) },
+]
+
+// Where the bar is drawn in the scene, as CSS values (e.g. 'rotateY(110deg) rotateZ(11deg)', '-30%')
+const STYLE_FIELDS: { key: keyof LedBarStyle, label: string }[] = [
+    { key: 'transform', label: 'Transform' },
+    { key: 'left', label: 'Left' },
+    { key: 'right', label: 'Right' },
+    { key: 'top', label: 'Top' },
+    { key: 'bottom', label: 'Bottom' },
 ]
 
 // First channel after the last LED bar, so a new bar doesn't overlap the others
@@ -49,6 +57,17 @@ const DmxSceneEditor = ({ dmxHexSignal }: Props) => {
         // Let the field be empty or incomplete while typing
         if (Number.isNaN(number)) return
         updateLedBar(index, { [field.key]: Math.min(field.max, Math.max(1, number)) })
+    }
+
+    // An empty field removes the value, and a bar without any keeps no style at all
+    const onStyleFieldChange = (index: number, key: keyof LedBarStyle, value: string) => {
+        const style: LedBarStyle = { ...ledBars[index].style }
+        if (value.trim()) style[key] = value.trim()
+        else delete style[key]
+
+        const ledBar: LedBarConfig = { ...ledBars[index], style }
+        if (Object.keys(style).length == 0) delete ledBar.style
+        updateDmxScene({ led_bars: ledBars.map((current, i) => i == index ? ledBar : current) })
     }
 
     return <div className='dmx-scene-editor'>
@@ -82,6 +101,18 @@ const DmxSceneEditor = ({ dmxHexSignal }: Props) => {
                         </label>
                     ))}
                     <div className='led-bar-delete' title='Delete this LED bar' onClick={() => deleteLedBar(index)}>×</div>
+                </div>
+                <div className='led-bar-fields'>
+                    { STYLE_FIELDS.map(({ key, label }) => (
+                        <label key={key} className={`led-bar-field style-field ${key}`}>
+                            <span>{label}</span>
+                            <input
+                                type='text'
+                                spellCheck={false}
+                                defaultValue={ledBar.style?.[key] ?? ''}
+                                onChange={(e) => onStyleFieldChange(index, key, e.target.value)}/>
+                        </label>
+                    ))}
                 </div>
             </div>
         ))}

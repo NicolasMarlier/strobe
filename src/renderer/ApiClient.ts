@@ -2,26 +2,26 @@ const i = window.dmxControl.api.invoke
 
 
 
-export const listPrograms  = () =>
-    i('programs:list')
-export const createProgram = (dict: {name: string}) =>
-    i('programs:create', dict)
-export const updateProgram = (id: number, program: ProgramUpdateParams) =>
-    i('programs:update', id, program)
-export const deleteProgram = (id: number) =>
-    i('programs:destroy', id)
-export const selectProgram = (id: number) =>
-    i('programs:select', id)
+export const listTracks  = () =>
+    i('tracks:list')
+export const createTrack = (dict: {name: string}) =>
+    i('tracks:create', dict)
+export const updateTrack = (id: number, track: TrackUpdateParams) =>
+    i('tracks:update', id, track)
+export const deleteTrack = (id: number) =>
+    i('tracks:destroy', id)
+export const selectTrack = (id: number) =>
+    i('tracks:select', id)
 
-export const getProgramDmxMidi = (program_id: number) =>
-    i('programs:dmx_midi:get', program_id)
+export const getTrackDmxMidi = (track_id: number) =>
+    i('tracks:dmx_midi:get', track_id)
 
-export const updateProgramDmxMidi = (program_id: number, params: DmxMidiUpdateParams) =>
-    i('programs:dmx_midi:update', program_id, params)
+export const updateTrackDmxMidi = (track_id: number, params: DmxMidiUpdateParams) =>
+    i('tracks:dmx_midi:update', track_id, params)
 
 
-export const listDmxButtons = (program_id: number) =>
-    i('dmx_buttons:list', program_id)
+export const listDmxButtons = (track_id: number) =>
+    i('dmx_buttons:list', track_id)
 
 export const createDmxButton = (params: DmxButtonCreationParams) =>
     i('dmx_buttons:create', params)
@@ -35,8 +35,8 @@ export const playDmxButton = (id: string) =>
 export const deleteDmxButton = (id: string) =>
     i('dmx_buttons:destroy', id)
 
-export const uploadProgramAudio = (program_id: number, file: File) =>
-    i('programs:audio:upload', program_id, file)
+export const uploadTrackAudio = (track_id: number, file: File) =>
+    i('tracks:audio:upload', track_id, file)
 
 export const getDmxScene = () =>
     i('dmx_scene:get')
@@ -59,6 +59,6 @@ export const openRecentShow = (dir: string) =>
 export const removeRecentShow = (dir: string) =>
     i('show:remove_recent', dir)
 
-export const getProgramAudio = (program_id: number) =>
-    i('programs:audio:get', program_id)
+export const getTrackAudio = (track_id: number) =>
+    i('tracks:audio:get', track_id)
 

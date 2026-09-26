@@ -5,9 +5,10 @@ import { sendToAllWindows } from "./ipc-router"
 export const initMidiRouter = () => {
     const midi_router = new MidiRouter() 
     
+    // MIDI Program Change messages select the track
     midi_router.on('programchange', (e) => {
-        const programId = e.data1 + 1
-        DmxLoop.getInstance().switchProgram(programId)
+        const trackId = e.data1 + 1
+        DmxLoop.getInstance().switchTrack(trackId)
     })
     midi_router.on('noteon', (e) => {
         const midiKey = e.data1

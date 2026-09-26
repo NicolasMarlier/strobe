@@ -22,7 +22,7 @@ const DmxButton = (props: Props) => {
     const isLighted = (dmxButton: DmxButton, ledBarConfig: LedBarConfig) => (
         dmxButton.red_channels.some(c => c >= ledBarConfig.channel && c < ledBarConfig.channel + ledBarConfig.rgb_dots_count * 3)
     )
-    const global = dmxButton.program_id == null
+    const global = dmxButton.track_id == null
 
     return <div className={`dmx-button ${isPlaying ? 'playing': ''} ${selected ? 'selected' : ''} ${global ? 'global' : ''}`}
         onClick={onTap}>

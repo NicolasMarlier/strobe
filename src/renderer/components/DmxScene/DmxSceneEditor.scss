@@ -56,6 +56,10 @@
             height: 22px;
             box-sizing: border-box;
         }
+
+        &.style-field.transform input {
+            width: 220px;
+        }
     }
 
     .led-bar-delete {

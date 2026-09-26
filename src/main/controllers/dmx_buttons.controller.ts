@@ -4,8 +4,8 @@ import { handleErrors } from "./application.controller";
 
 
 export class DmxButtonController {
-  static list = async(program_id: number) => handleErrors(async() =>
-    Store.getInstance().listButtons(program_id)
+  static list = async(track_id: number) => handleErrors(async() =>
+    Store.getInstance().listButtons(track_id)
   )
 
   static get = async(id: string) => handleErrors(async() => Store.getInstance().getButton(id))

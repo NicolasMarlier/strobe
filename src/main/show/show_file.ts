@@ -4,11 +4,12 @@ import path from "path"
 // A show is a folder:
 //   MyShow.dmxshow/
 //   ├── show.json
-//   └── audio/program_<id>.<ext>
+//   └── audio/track_<id>.<ext>
 
 export const SHOW_EXTENSION = '.dmxshow'
 const FORMAT = 'dmx-control-show'
-const VERSION = 1
+// 2: programs renamed to tracks (tracks, track_id, audio/track_<id>.<ext>)
+const VERSION = 2
 
 type ShowFile = ShowData & {
     format: typeof FORMAT
@@ -34,15 +35,16 @@ export const readShow = (dir: string): ShowData => {
 
     if (file.format != FORMAT) throw new ShowFileError('show.json is not a DMX Control show')
     if (file.version > VERSION) throw new ShowFileError('This show was made by a newer version of DMX Control')
-    if (!Array.isArray(file.programs) || !Array.isArray(file.dmx_buttons) || !Array.isArray(file.dmx_midis)) {
-        throw new ShowFileError('show.json is missing programs, dmx_buttons or dmx_midis')
+    if (file.version < VERSION) throw new ShowFileError('This show uses an older format (programs instead of tracks) that this version of DMX Control does not open')
+    if (!Array.isArray(file.tracks) || !Array.isArray(file.dmx_buttons) || !Array.isArray(file.dmx_midis)) {
+        throw new ShowFileError('show.json is missing tracks, dmx_buttons or dmx_midis')
     }
     if (file.dmx_scene !== undefined && !Array.isArray(file.dmx_scene?.led_bars)) {
         throw new ShowFileError('show.json has a dmx_scene without led_bars')
     }
 
     return {
-        programs: file.programs,
+        tracks: file.tracks,
         dmx_buttons: file.dmx_buttons,
         dmx_midis: file.dmx_midis,
         // Shows made before the scene was part of the show have none
@@ -50,10 +52,10 @@ export const readShow = (dir: string): ShowData => {
     }
 }
 
-const isProgramAudioFile = (filename: string) => /^program_\d+\.\w+$/.test(filename)
+const isTrackAudioFile = (filename: string) => /^track_\d+\.\w+$/.test(filename)
 
 const listAudioFiles = (dir: string) => fs.existsSync(audioDir(dir))
-    ? fs.readdirSync(audioDir(dir)).filter(isProgramAudioFile)
+    ? fs.readdirSync(audioDir(dir)).filter(isTrackAudioFile)
     : []
 
 // Writes the show into `dir`. When `fromDir` is another show (Save As), its audio is copied along.

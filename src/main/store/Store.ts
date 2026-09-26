@@ -4,7 +4,7 @@ import { InvalidParamError, NotFoundError } from "../controllers/application.con
 
 export const STORE_EVENTS = {
     CHANGED: 'changed',
-    PROGRAM_RENAMED: 'programRenamed',
+    TRACK_RENAMED: 'trackRenamed',
     LOADED: 'loaded',
 }
 
@@ -13,7 +13,7 @@ export const STORE_EVENTS = {
 export class Store extends EventEmitter {
     private static instance: Store
 
-    private programs: Program[] = []
+    private tracks: Track[] = []
     private dmxButtons: DmxButton[] = []
     private dmxMidis: DmxMidiRecord[] = []
     private dmxScene: DmxScene = { led_bars: [] }
@@ -30,7 +30,7 @@ export class Store extends EventEmitter {
     // Whole data set, used to open and save shows
 
     load = (data: ShowData): void => {
-        this.programs = structuredClone(data.programs)
+        this.tracks = structuredClone(data.tracks)
         this.dmxButtons = structuredClone(data.dmx_buttons)
         this.dmxMidis = structuredClone(data.dmx_midis)
         this.dmxScene = structuredClone(data.dmx_scene)
@@ -38,7 +38,7 @@ export class Store extends EventEmitter {
     }
 
     toData = (): ShowData => structuredClone({
-        programs: this.programs,
+        tracks: this.tracks,
         dmx_buttons: this.dmxButtons,
         dmx_midis: this.dmxMidis,
         dmx_scene: this.dmxScene,
@@ -52,72 +52,72 @@ export class Store extends EventEmitter {
         return structuredClone(this.dmxScene)
     }
 
-    // Programs
+    // Tracks
 
-    listPrograms = (): Program[] =>
-        structuredClone([...this.programs].sort((a, b) => a.id - b.id))
+    listTracks = (): Track[] =>
+        structuredClone([...this.tracks].sort((a, b) => a.id - b.id))
 
-    findProgram = (id: number | undefined): Program | undefined => {
-        const program = this.programs.find(p => p.id == id)
-        return program && structuredClone(program)
+    findTrack = (id: number | undefined): Track | undefined => {
+        const track = this.tracks.find(p => p.id == id)
+        return track && structuredClone(track)
     }
 
-    getProgram = (id: number): Program => {
-        const program = this.findProgram(id)
-        if (!program) throw new NotFoundError("Program not found")
-        return program
+    getTrack = (id: number): Track => {
+        const track = this.findTrack(id)
+        if (!track) throw new NotFoundError("Track not found")
+        return track
     }
 
-    createProgram = (params: ProgramCreationParams): Program => {
-        const program: Program = {
-            id: Math.max(0, ...this.programs.map(p => p.id)) + 1,
+    createTrack = (params: TrackCreationParams): Track => {
+        const track: Track = {
+            id: Math.max(0, ...this.tracks.map(p => p.id)) + 1,
             name: params.name,
             bpm: params.bpm ?? 85,
             audio_filename: null,
         }
-        this.programs.push(program)
-        this.dmxMidis.push({ program_id: program.id, midi_patterns: [] })
+        this.tracks.push(track)
+        this.dmxMidis.push({ track_id: track.id, midi_patterns: [] })
         this.changed()
-        return structuredClone(program)
+        return structuredClone(track)
     }
 
-    updateProgram = (id: number, params: ProgramUpdateParams & { audio_filename?: string | null }): Program => {
-        const program = this.programs.find(p => p.id == id)
-        if (!program) throw new NotFoundError("Program not found")
+    updateTrack = (id: number, params: TrackUpdateParams & { audio_filename?: string | null }): Track => {
+        const track = this.tracks.find(p => p.id == id)
+        if (!track) throw new NotFoundError("Track not found")
 
-        const newId = params.id ?? program.id
-        if (newId != program.id) {
-            if (this.programs.some(p => p.id == newId)) {
-                throw new InvalidParamError("Program id already used")
+        const newId = params.id ?? track.id
+        if (newId != track.id) {
+            if (this.tracks.some(p => p.id == newId)) {
+                throw new InvalidParamError("Track id already used")
             }
-            this.dmxButtons.filter(b => b.program_id == id).forEach(b => b.program_id = newId)
-            this.dmxMidis.filter(m => m.program_id == id).forEach(m => m.program_id = newId)
-            program.id = newId
+            this.dmxButtons.filter(b => b.track_id == id).forEach(b => b.track_id = newId)
+            this.dmxMidis.filter(m => m.track_id == id).forEach(m => m.track_id = newId)
+            track.id = newId
         }
 
-        program.name = params.name ?? program.name
-        program.bpm = params.bpm ?? program.bpm
-        if ('audio_filename' in params) program.audio_filename = params.audio_filename ?? null
+        track.name = params.name ?? track.name
+        track.bpm = params.bpm ?? track.bpm
+        if ('audio_filename' in params) track.audio_filename = params.audio_filename ?? null
 
-        if (newId != id) this.emit(STORE_EVENTS.PROGRAM_RENAMED, id, newId)
+        if (newId != id) this.emit(STORE_EVENTS.TRACK_RENAMED, id, newId)
         this.changed()
-        return structuredClone(program)
+        return structuredClone(track)
     }
 
-    destroyProgram = (id: number): void => {
-        this.getProgram(id)
-        this.programs = this.programs.filter(p => p.id != id)
-        this.dmxButtons = this.dmxButtons.filter(b => b.program_id != id)
-        this.dmxMidis = this.dmxMidis.filter(m => m.program_id != id)
+    destroyTrack = (id: number): void => {
+        this.getTrack(id)
+        this.tracks = this.tracks.filter(p => p.id != id)
+        this.dmxButtons = this.dmxButtons.filter(b => b.track_id != id)
+        this.dmxMidis = this.dmxMidis.filter(m => m.track_id != id)
         this.changed()
     }
 
     // DmxButtons
 
-    // The program's own buttons first, then the global ones (program_id null), each in creation order
-    listButtons = (programId: number | undefined): DmxButton[] => structuredClone([
-        ...this.dmxButtons.filter(b => b.program_id != null && b.program_id == programId),
-        ...this.dmxButtons.filter(b => b.program_id == null),
+    // The track's own buttons first, then the global ones (track_id null), each in creation order
+    listButtons = (trackId: number | undefined): DmxButton[] => structuredClone([
+        ...this.dmxButtons.filter(b => b.track_id != null && b.track_id == trackId),
+        ...this.dmxButtons.filter(b => b.track_id == null),
     ])
 
     getButton = (id: string): DmxButton => {
@@ -129,7 +129,7 @@ export class Store extends EventEmitter {
     createButton = (params: DmxButtonCreationParams): DmxButton => {
         const button: DmxButton = {
             id: randomUUID(),
-            program_id: params.program_id,
+            track_id: params.track_id,
             color: params.color ?? "#fffff",
             duration_ms: params.duration_ms ?? 100,
             red_channels: params.red_channels ?? [],
@@ -145,7 +145,7 @@ export class Store extends EventEmitter {
         const button = this.dmxButtons.find(b => b.id == id)
         if (!button) throw new NotFoundError("DmxButton not found")
 
-        button.program_id = 'program_id' in params ? params.program_id ?? null : button.program_id
+        button.track_id = 'track_id' in params ? params.track_id ?? null : button.track_id
         button.color = params.color ?? button.color
         button.duration_ms = params.duration_ms ?? button.duration_ms
         button.red_channels = params.red_channels ?? button.red_channels
@@ -166,20 +166,20 @@ export class Store extends EventEmitter {
 
     // DmxMidis
 
-    // Lazily creates the program's DmxMidi; this is not considered a change
-    getOrInitDmxMidi = (programId: number): DmxMidi => {
-        this.getProgram(programId)
-        let dmxMidi = this.dmxMidis.find(m => m.program_id == programId)
+    // Lazily creates the track's DmxMidi; this is not considered a change
+    getOrInitDmxMidi = (trackId: number): DmxMidi => {
+        this.getTrack(trackId)
+        let dmxMidi = this.dmxMidis.find(m => m.track_id == trackId)
         if (!dmxMidi) {
-            dmxMidi = { program_id: programId, midi_patterns: [] }
+            dmxMidi = { track_id: trackId, midi_patterns: [] }
             this.dmxMidis.push(dmxMidi)
         }
         return structuredClone(dmxMidi)
     }
 
-    updateDmxMidi = (programId: number, midi_patterns: MidiPattern[]): DmxMidi => {
-        this.getOrInitDmxMidi(programId)
-        const dmxMidi = this.dmxMidis.find(m => m.program_id == programId)!
+    updateDmxMidi = (trackId: number, midi_patterns: MidiPattern[]): DmxMidi => {
+        this.getOrInitDmxMidi(trackId)
+        const dmxMidi = this.dmxMidis.find(m => m.track_id == trackId)!
         dmxMidi.midi_patterns = structuredClone(midi_patterns)
         this.changed()
         return structuredClone(dmxMidi)

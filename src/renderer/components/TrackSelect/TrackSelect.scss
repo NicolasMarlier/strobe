@@ -1,10 +1,10 @@
-.program-item {
+.track-item {
     &.selected {
         background-color: #fff;
         color: #000;
     }
 }
-.current-program {
+.current-track {
     border: 2px solid #444;
     border-radius: 5px;
     box-shadow: 5px 5px 0px #111;  
@@ -19,7 +19,7 @@
         box-shadow: 4px 4px 0px #000000;  
     }
 }
-.current-program-placeholder {
+.current-track-placeholder {
     border: 2px solid #333;
     border-radius: 5px;
     box-shadow: 5px 5px 0px #111 inset;
@@ -122,7 +122,7 @@
                 line-height: 30px;
             }
             
-            &.new-program {
+            &.new-track {
                 margin-top: 50px;
                 border-top: 1px solid #444;
             }

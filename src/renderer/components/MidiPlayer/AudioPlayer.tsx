@@ -6,7 +6,7 @@ import { tickToTime, timeToTick } from "./utils"
 import { useRealTimeContext } from "../../contexts/RealTimeContext"
 
 const AudioPlayer = () => {
-    const { program, audioUrl } = useDmxButtonsContext()
+    const { track, audioUrl } = useDmxButtonsContext()
     const { midiCurrentTickRef, sendCurrentTickToServer } = useRealTimeContext()
     const [isPlaying, setIsPlaying] = useState(false)
 
@@ -28,8 +28,8 @@ const AudioPlayer = () => {
     const play = () => {
         if(!audioRef.current) return
 
-        if(program) {
-            audioRef.current.currentTime = tickToTime(midiCurrentTickRef.current, program.bpm)
+        if(track) {
+            audioRef.current.currentTime = tickToTime(midiCurrentTickRef.current, track.bpm)
         }
         audioRef.current.play()
         setIsPlaying(true)
@@ -43,10 +43,10 @@ const AudioPlayer = () => {
     }
 
     useEffect(() => {
-        if(isPlaying && program) {
+        if(isPlaying && track) {
             const audioInterval = setInterval(() => {
                 if(audioRef.current) {
-                    sendCurrentTickToServer(timeToTick(audioRef.current.currentTime, program.bpm))
+                    sendCurrentTickToServer(timeToTick(audioRef.current.currentTime, track.bpm))
                 }
             }, 30)
             return () => clearInterval(audioInterval)

@@ -2,7 +2,7 @@ export interface ApiReverseContract {
   'dmx': {
     params: DmxSignalParams
   }
-  'program:change': {
+  'track:change': {
     params: number
   }
   'midi:note_on': {

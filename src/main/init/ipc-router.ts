@@ -1,7 +1,7 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import type { ApiContract, Channel } from '../../shared/ipc-contract';
-import { ProgramsController } from '../controllers/programs.controller';
-import { ProgramsAudioController } from '../controllers/programs_audio.controller';
+import { TracksController } from '../controllers/tracks.controller';
+import { TracksAudioController } from '../controllers/tracks_audio.controller';
 import { DmxMidiController } from '../controllers/dmx_midi.controller';
 import { DmxButtonController } from '../controllers/dmx_buttons.controller';
 import { MainLoopController } from '../controllers/main_loop.controller';
@@ -32,18 +32,18 @@ function handleWithWindow<C extends Channel>(
 }
 
 // L'équivalent de app.get / app.post
-handle('programs:list',   ProgramsController.list);
-handle('programs:create', ProgramsController.create)
-handle('programs:update', ProgramsController.update)
-handle('programs:destroy', ProgramsController.destroy)
-handle('programs:select',   ProgramsController.select)
+handle('tracks:list',   TracksController.list);
+handle('tracks:create', TracksController.create)
+handle('tracks:update', TracksController.update)
+handle('tracks:destroy', TracksController.destroy)
+handle('tracks:select',   TracksController.select)
 
-handle('programs:audio:upload', ProgramsAudioController.upload)
-handle('programs:audio:reset', ProgramsAudioController.reset)
-handle('programs:audio:get', ProgramsAudioController.getAudio)
+handle('tracks:audio:upload', TracksAudioController.upload)
+handle('tracks:audio:reset', TracksAudioController.reset)
+handle('tracks:audio:get', TracksAudioController.getAudio)
 
-handle('programs:dmx_midi:get', DmxMidiController.get)
-handle('programs:dmx_midi:update', DmxMidiController.update)
+handle('tracks:dmx_midi:get', DmxMidiController.get)
+handle('tracks:dmx_midi:update', DmxMidiController.update)
 
 handle('dmx_buttons:list', DmxButtonController.list)
 handle('dmx_buttons:create', DmxButtonController.create)

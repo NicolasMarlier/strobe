@@ -1,49 +1,49 @@
 export interface ApiContract {
-  'programs:list':   {
+  'tracks:list':   {
       args: []
-      result: Program[]
+      result: Track[]
   }
-  'programs:create': {
-    args: [params: ProgramCreationParams]
-    result: Program
+  'tracks:create': {
+    args: [params: TrackCreationParams]
+    result: Track
   }
-  'programs:update': {
-    args: [id: number, params: ProgramUpdateParams]
-    result: Program
+  'tracks:update': {
+    args: [id: number, params: TrackUpdateParams]
+    result: Track
   }
-  'programs:destroy':{
+  'tracks:destroy':{
     args: [id: number]
     result: void
   }
-  'programs:select': {
+  'tracks:select': {
     args: [id: number]
-    result: Program
+    result: Track
   }
   
-  'programs:audio:upload': {
-    args: [program_id: number, file: File]
+  'tracks:audio:upload': {
+    args: [track_id: number, file: File]
     result: string
   }
-  'programs:audio:reset': {
-    args: [program_id: number]
+  'tracks:audio:reset': {
+    args: [track_id: number]
     result: void
   }
-  'programs:audio:get': {
-    args: [program_id: number]
+  'tracks:audio:get': {
+    args: [track_id: number]
     result: string
   }
 
-  'programs:dmx_midi:get': {
+  'tracks:dmx_midi:get': {
     args: [id: number]
     result: DmxMidi
   }
-  'programs:dmx_midi:update': {
+  'tracks:dmx_midi:update': {
     args: [id: number, params: DmxMidiUpdateParams]
     result: DmxMidi
   }
   
   'dmx_buttons:list': {
-    args: [program_id: number]
+    args: [track_id: number]
     result: DmxButton[]
   }
   'dmx_buttons:get': {

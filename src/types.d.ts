@@ -4,7 +4,7 @@ type MidiKey = number
 
 type DmxButton = {
     id: string
-    program_id: number | null
+    track_id: number | null
     color: string
     duration_ms: number
     red_channels: number[]
@@ -13,7 +13,7 @@ type DmxButton = {
 }
 
 type DmxButtonCreationParams = {
-    program_id: number
+    track_id: number
     color?: string
     duration_ms?: number
     red_channels?: number[]
@@ -27,26 +27,26 @@ type DmxButtonUpdateParams = {
     red_channels?: number[]
     nature?: DmxEffectNature
     triggering_midi_key?: MidiKey | null
-    program_id?: number | null
+    track_id?: number | null
 }
 
 type DmxHexSignal = string
 
 type DmxEffectNature = 'Boom' | 'Set' | 'Run' | 'InverseRun' | 'Toggle'
 
-type Program = {
+type Track = {
     name: string
     id: number
     bpm: number
     audio_filename: string | null
 }
 
-type ProgramCreationParams = {
+type TrackCreationParams = {
     name: string
     bpm?: number
 }
 
-type ProgramUpdateParams = {
+type TrackUpdateParams = {
     name?: string
     id?: number
     bpm?: number
@@ -71,7 +71,7 @@ type DmxMidi = {
 }
 
 type DmxMidiRecord = {
-    program_id: number
+    track_id: number
     midi_patterns: MidiPattern[]
 }
 
@@ -87,7 +87,7 @@ type ShowState = {
 }
 
 type ShowData = {
-    programs: Program[]
+    tracks: Track[]
     dmx_buttons: DmxButton[]
     dmx_midis: DmxMidiRecord[]
     dmx_scene: DmxScene

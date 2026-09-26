@@ -1,9 +1,9 @@
-import { getProgramAudio } from '../../ApiClient'
+import { getTrackAudio } from '../../ApiClient'
 import { computeWave } from './utils_audio'
 import { PPQ } from './utils'
 
 // Waveforms take ~100-250 ms to compute: they are computed once per audio file and BPM,
-// in the background for every program of the show, so switching programs doesn't wait for them.
+// in the background for every track of the show, so switching tracks doesn't wait for them.
 // The audio URL changes when its file does, so a new file gets a new waveform.
 const waves = new Map<string, Promise<Uint8Array>>()
 
@@ -19,14 +19,14 @@ export const getWave = (audioUrl: string, bpm: number) => {
     return wave
 }
 
-// Computes the programs' waveforms one after the other
-export const precomputeWaves = async(programs: Program[], isCancelled: () => boolean) => {
-    for(const program of programs) {
+// Computes the tracks' waveforms one after the other
+export const precomputeWaves = async(tracks: Track[], isCancelled: () => boolean) => {
+    for(const track of tracks) {
         if(isCancelled()) return
-        if(!program.audio_filename) continue
+        if(!track.audio_filename) continue
 
-        const audioUrl = await getProgramAudio(program.id)
+        const audioUrl = await getTrackAudio(track.id)
         if(typeof audioUrl != 'string') continue
-        await getWave(audioUrl, program.bpm).catch((e) => console.warn(`Could not compute the waveform of ${program.name}`, e))
+        await getWave(audioUrl, track.bpm).catch((e) => console.warn(`Could not compute the waveform of ${track.name}`, e))
     }
 }

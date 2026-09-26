@@ -32,7 +32,7 @@ export const useRealTimeContext = () => {
 
 
 export const RealTimeContextProvider = ({ children }: {children: React.ReactNode}) => {
-    const { setCurrentProgramId, syncPrograms, programs } = useDmxButtonsContext()
+    const { setCurrentTrackId, syncTracks, tracks } = useDmxButtonsContext()
 
     const midiCurrentTickRef = useRef(0)
     const [lastReceivedMidiKey, setLastReceivedMidiKey] = useState(
@@ -58,9 +58,9 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
       }
     }, [lastReceivedMidiKey])
 
-    // Keep the latest syncPrograms for the listener below, which is registered only once
-    const syncProgramsRef = useRef(syncPrograms)
-    syncProgramsRef.current = syncPrograms
+    // Keep the latest syncTracks for the listener below, which is registered only once
+    const syncTracksRef = useRef(syncTracks)
+    syncTracksRef.current = syncTracks
 
     // Subscribe once: subscribing on every render would pile up listeners,
     // each of them running on every 'dmx' message (50 per second)
@@ -79,9 +79,9 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
           midiCurrentTickRef.current = midiCurrentTick
         }),
 
-        window.dmxControl.api.onMessage('program:change', programId => {
-          setCurrentProgramId(programId)
-          syncProgramsRef.current()
+        window.dmxControl.api.onMessage('track:change', trackId => {
+          setCurrentTrackId(trackId)
+          syncTracksRef.current()
         }),
 
         window.dmxControl.api.onMessage('midi:note_on', params => {

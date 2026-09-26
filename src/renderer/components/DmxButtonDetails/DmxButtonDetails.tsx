@@ -6,7 +6,7 @@ import DmxEffectNaturePicker from './DmxEffectNaturePicker'
 import TriggeringMidiKeySelect from './TriggeringMidiKeySelect'
 
 const DmxButtonDetails = () => {
-    const { dmxButtons, selectedDmxButtonId, updateDmxButtonAndSync, deleteDmxButtonAndSync, currentProgramId } = useDmxButtonsContext()
+    const { dmxButtons, selectedDmxButtonId, updateDmxButtonAndSync, deleteDmxButtonAndSync, currentTrackId } = useDmxButtonsContext()
     
     const dmxButton = dmxButtons.find(({id}) => id == selectedDmxButtonId)
     if(!dmxButton) return <DmxButtonDetailsPlaceholder/>
@@ -15,14 +15,14 @@ const DmxButtonDetails = () => {
     const [durationMs, setDurationMs] = useState(dmxButton.duration_ms)
     const [color, setColor] = useState(dmxButton.color)
     const [triggeringMidiKey, setTriggeringMidiKey] = useState(dmxButton.triggering_midi_key)
-    const [programId, setProgramId] = useState(dmxButton.program_id)
+    const [trackId, setTrackId] = useState(dmxButton.track_id)
 
     useEffect(() => {
         setNature(dmxButton.nature)
         setDurationMs(dmxButton.duration_ms)
         setColor(dmxButton.color)
         setTriggeringMidiKey(dmxButton.triggering_midi_key)
-        setProgramId(dmxButton.program_id)
+        setTrackId(dmxButton.track_id)
     }, [dmxButton])
 
     useEffect(() => {
@@ -31,9 +31,9 @@ const DmxButtonDetails = () => {
             duration_ms: durationMs,
             nature,
             triggering_midi_key: triggeringMidiKey,
-            program_id: programId,
+            track_id: trackId,
         })
-    }, [color, durationMs, nature, triggeringMidiKey, programId])
+    }, [color, durationMs, nature, triggeringMidiKey, trackId])
 
     return <div className="dmx-button-details">
         <div>
@@ -65,8 +65,8 @@ const DmxButtonDetails = () => {
             <input
                 name="global"
                 type="checkbox"
-                checked={programId == null}
-                onChange={(e: any) => { setProgramId(e.target.checked ? null : (currentProgramId || null)) }}/>
+                checked={trackId == null}
+                onChange={(e: any) => { setTrackId(e.target.checked ? null : (currentTrackId || null)) }}/>
         </div>
 
         <div className="">

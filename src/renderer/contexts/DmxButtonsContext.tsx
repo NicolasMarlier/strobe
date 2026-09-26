@@ -1,24 +1,24 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 import { precomputeWaves } from "../components/MidiPlayer/waves";
-import { createDmxButton, deleteDmxButton, getProgramAudio, listDmxButtons, listPrograms, selectProgram, updateDmxButton, uploadProgramAudio } from "../ApiClient";
+import { createDmxButton, deleteDmxButton, getTrackAudio, listDmxButtons, listTracks, selectTrack, updateDmxButton, uploadTrackAudio } from "../ApiClient";
 
 interface DmxButtonsContextType {
   dmxButtons: DmxButton[]
-  programs: Program[]
-  fetchPrograms: () => void
-  program: Program | undefined
+  tracks: Track[]
+  fetchTracks: () => void
+  track: Track | undefined
   
   selectedDmxButtonId: string | undefined
   setSelectedDmxButtonId: (id: string | undefined) => void
   
-  currentProgramId: number | undefined,
-  setCurrentProgramId: (programId: number | undefined) => void,
+  currentTrackId: number | undefined,
+  setCurrentTrackId: (trackId: number | undefined) => void,
   
-  syncPrograms: () => void
+  syncTracks: () => void
 
   audioUrl: string | undefined
-  uploadProgramAudioAndSync: (file: File) => void
+  uploadTrackAudioAndSync: (file: File) => void
 
 
   createDmxButtonAndSync: () => void
@@ -46,48 +46,48 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
   // Use State to keep the values
   const [dmxButtons, setDmxButtons] = useState([] as DmxButton[])
 
-  const [programs, setPrograms] = useState([] as Program[])
-  const [program, setProgram] = useState(undefined as Program | undefined)
+  const [tracks, setTracks] = useState([] as Track[])
+  const [track, setTrack] = useState(undefined as Track | undefined)
 
-  const [currentProgramId, setCurrentProgramId] = useState(undefined as number | undefined)
+  const [currentTrackId, setCurrentTrackId] = useState(undefined as number | undefined)
 
   
 
 
-  const fetchDmxButtons = () => program && listDmxButtons(program.id).then((dmxButtons) => setDmxButtons(dmxButtons))
+  const fetchDmxButtons = () => track && listDmxButtons(track.id).then((dmxButtons) => setDmxButtons(dmxButtons))
 
-  const syncPrograms = () => listPrograms().then(setPrograms)
+  const syncTracks = () => listTracks().then(setTracks)
 
   useEffect(() => {
     fetchDmxButtons()
-  }, [program])
+  }, [track])
 
   const [audioUrl, setAudioUrl] = useState(undefined as string | undefined)
 
-  const syncProgramAudio = () => {
-    if(!program) {
+  const syncTrackAudio = () => {
+    if(!track) {
       setAudioUrl(undefined)
       return
     }
     // Without audio, the main process answers with an error object instead of a URL
-    getProgramAudio(program.id).then((audioUrl) => setAudioUrl(typeof audioUrl == 'string' ? audioUrl : undefined))
+    getTrackAudio(track.id).then((audioUrl) => setAudioUrl(typeof audioUrl == 'string' ? audioUrl : undefined))
   }
 
-  useEffect(syncProgramAudio, [program?.id])
+  useEffect(syncTrackAudio, [track?.id])
 
 
-  const uploadProgramAudioAndSync = (file: File) => {
-    program && uploadProgramAudio(program.id, file).then(syncProgramAudio)
+  const uploadTrackAudioAndSync = (file: File) => {
+    track && uploadTrackAudio(track.id, file).then(syncTrackAudio)
   }
 
   useEffect(() => {
-    if(currentProgramId) {
-      setProgram(programs.find((p) => p.id == currentProgramId))  
+    if(currentTrackId) {
+      setTrack(tracks.find((p) => p.id == currentTrackId))  
     }
-    else if(programs.length > 0) {
-      selectProgram(programs[0].id)
+    else if(tracks.length > 0) {
+      selectTrack(tracks[0].id)
     }
-  }, [programs, currentProgramId])
+  }, [tracks, currentTrackId])
 
   const availableTriggeringMidiKeys = () => [
     36,
@@ -105,8 +105,8 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
   ].filter(s => !dmxButtons.map(d => d.triggering_midi_key).includes(s))[0]
 
   const createDmxButtonAndSync = () => {
-    program && createDmxButton({
-      program_id: program.id,
+    track && createDmxButton({
+      track_id: track.id,
       color: "#ffffff",
       duration_ms: 500,
       red_channels: [1,4,7,10,13,16,19,22],
@@ -122,14 +122,14 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
   }
 
 
-  useEffect(() => { syncPrograms() }, []) 
+  useEffect(() => { syncTracks() }, []) 
 
-  // Prepare every program's waveform in the background, so switching programs is instant
+  // Prepare every track's waveform in the background, so switching tracks is instant
   useEffect(() => {
     let cancelled = false
-    precomputeWaves(programs, () => cancelled)
+    precomputeWaves(tracks, () => cancelled)
     return () => { cancelled = true }
-  }, [programs])
+  }, [tracks])
 
   
 
@@ -140,13 +140,13 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
   return (
     <DmxButtonsContext.Provider value={ {
         dmxButtons, selectedDmxButtonId, setSelectedDmxButtonId,
-        program, programs, fetchPrograms: syncPrograms,
+        track, tracks, fetchTracks: syncTracks,
 
-        syncPrograms,
+        syncTracks,
 
-        audioUrl, uploadProgramAudioAndSync,
+        audioUrl, uploadTrackAudioAndSync,
 
-        currentProgramId, setCurrentProgramId,
+        currentTrackId, setCurrentTrackId,
 
         createDmxButtonAndSync, updateDmxButtonAndSync, deleteDmxButtonAndSync,
         } }>

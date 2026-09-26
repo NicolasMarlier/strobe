@@ -2,7 +2,7 @@ import { protocol } from "electron"
 import fs from "fs"
 import path from "path"
 import { Readable } from "stream"
-import { AUDIO_SCHEME, existingAudioPath } from "../controllers/programs_audio.controller"
+import { AUDIO_SCHEME, existingAudioPath } from "../controllers/tracks_audio.controller"
 
 const MIME_TYPES: { [ext: string]: string } = {
     '.wav': 'audio/wav',
@@ -13,7 +13,7 @@ const MIME_TYPES: { [ext: string]: string } = {
     '.m4a': 'audio/mp4',
 }
 
-// Serves the open show's audio files to the renderer as show-audio://program/<id>,
+// Serves the open show's audio files to the renderer as show-audio://track/<id>,
 // so it can stream them instead of receiving whole files as base64 over IPC.
 // Must run before the app is ready
 export const registerAudioScheme = () => protocol.registerSchemesAsPrivileged([{
@@ -26,8 +26,8 @@ const fileStream = (filePath: string, start: number, end: number) =>
 
 export const initAudioProtocol = () => protocol.handle(AUDIO_SCHEME, (request) => {
     const url = new URL(request.url)
-    const programId = Number(url.pathname.replace(/^\//, ''))
-    const filePath = url.hostname == 'program' && Number.isInteger(programId) ? existingAudioPath(programId) : null
+    const trackId = Number(url.pathname.replace(/^\//, ''))
+    const filePath = url.hostname == 'track' && Number.isInteger(trackId) ? existingAudioPath(trackId) : null
     if (!filePath) return new Response('Not found', { status: 404 })
 
     const size = fs.statSync(filePath).size

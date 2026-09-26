@@ -7,12 +7,12 @@ import { readShow, ShowFileError, writeShow } from './show_file'
 let tmp: string
 
 const data: ShowData = {
-    programs: [{ id: 31, name: 'INTRO', bpm: 70, audio_filename: 'intro.mp3' }],
+    tracks: [{ id: 31, name: 'INTRO', bpm: 70, audio_filename: 'intro.mp3' }],
     dmx_buttons: [{
-        id: 'b1', program_id: null, color: '#ff0000', duration_ms: 500,
+        id: 'b1', track_id: null, color: '#ff0000', duration_ms: 500,
         red_channels: [1, 4], nature: 'Boom', triggering_midi_key: 36,
     }],
-    dmx_midis: [{ program_id: 31, midi_patterns: [{ ticks: 0, midi_notes: [], durationTicks: 960 }] }],
+    dmx_midis: [{ track_id: 31, midi_patterns: [{ ticks: 0, midi_notes: [], durationTicks: 960 }] }],
     dmx_scene: { led_bars: [{ channel: 1, rgb_dots_count: 8, style: { transform: 'rotateY(110deg) rotateZ(11deg)', left: '-30%', bottom: '20%' } }] },
 }
 
@@ -37,34 +37,34 @@ describe('show files', () => {
         const dir = path.join(tmp, 'Old.dmxshow')
         fs.mkdirSync(dir)
         const { dmx_scene, ...withoutScene } = data
-        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 1, ...withoutScene }))
+        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 2, ...withoutScene }))
         expect(dmx_scene.led_bars).not.toEqual([])
         expect(readShow(dir).dmx_scene).toEqual({ led_bars: [] })
 
-        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 1, ...withoutScene, dmx_scene: {} }))
+        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 2, ...withoutScene, dmx_scene: {} }))
         expect(() => readShow(dir)).toThrow(/led_bars/)
     })
 
     it('saving in place keeps the audio', () => {
         const dir = path.join(tmp, 'A.dmxshow')
         writeShow(dir, data, null)
-        writeAudio(dir, 'program_31.mp3', 'intro')
+        writeAudio(dir, 'track_31.mp3', 'intro')
         writeShow(dir, data, dir)
-        expect(fs.readFileSync(path.join(dir, 'audio', 'program_31.mp3'), 'utf8')).toBe('intro')
+        expect(fs.readFileSync(path.join(dir, 'audio', 'track_31.mp3'), 'utf8')).toBe('intro')
     })
 
     it('save as copies the audio and replaces the audio of an overwritten show', () => {
         const from = path.join(tmp, 'A.dmxshow')
         writeShow(from, data, null)
-        writeAudio(from, 'program_31.mp3', 'intro')
+        writeAudio(from, 'track_31.mp3', 'intro')
 
         const to = path.join(tmp, 'B.dmxshow')
         writeShow(to, data, null)
-        writeAudio(to, 'program_2.wav', 'old show audio')
+        writeAudio(to, 'track_2.wav', 'old show audio')
 
         writeShow(to, data, from)
-        expect(fs.readdirSync(path.join(to, 'audio'))).toEqual(['program_31.mp3'])
-        expect(fs.readdirSync(path.join(from, 'audio'))).toEqual(['program_31.mp3'])
+        expect(fs.readdirSync(path.join(to, 'audio'))).toEqual(['track_31.mp3'])
+        expect(fs.readdirSync(path.join(from, 'audio'))).toEqual(['track_31.mp3'])
     })
 
     it('refuses to write into a folder that is not a show', () => {
@@ -81,10 +81,13 @@ describe('show files', () => {
         fs.writeFileSync(path.join(tmp, 'show.json'), '{ nope')
         expect(() => readShow(tmp)).toThrow(/not valid JSON/)
 
-        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ ...data, format: 'dmx-control-show', version: 2 }))
+        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ ...data, format: 'dmx-control-show', version: 3 }))
         expect(() => readShow(tmp)).toThrow(/newer version/)
 
-        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 1 }))
+        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ programs: [], dmx_buttons: [], dmx_midis: [], format: 'dmx-control-show', version: 1 }))
+        expect(() => readShow(tmp)).toThrow(/older format/)
+
+        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ format: 'dmx-control-show', version: 2 }))
         expect(() => readShow(tmp)).toThrow(/missing/)
     })
 })

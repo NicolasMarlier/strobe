@@ -22,7 +22,7 @@ const DMX_EFFECTS = {
 
 export const DMX_LOOP_EVENTS = {
     TICK: 'tick',
-    PROGRAM_CHANGE: 'programchange',
+    TRACK_CHANGE: 'trackchange',
     MIDI_NOTES_UPDATED: 'midinotesupdated',
     MOCK_MIDI_INPUT: 'mockmidiinput'
 }
@@ -33,16 +33,16 @@ export class DmxLoop extends EventEmitter {
     onLoop: ((now: number) => void) | undefined
     dmxButtons: DmxButton[]
     dmx_buttons_triggered: { [dmx_button_id: string]: DmxButtonTrigger}
-    current_program_id: number | undefined
+    current_track_id: number | undefined
     dmx_hex_signal = emptyDmxHexString()
     dmxMidiHandler: DmxMidiHandler
 
   
-    private constructor(current_program_id: number | undefined, dmxButtons: DmxButton[]) {
+    private constructor(current_track_id: number | undefined, dmxButtons: DmxButton[]) {
         super()
         this.dmxButtons = dmxButtons
         this.dmx_buttons_triggered = {}
-        this.current_program_id = current_program_id
+        this.current_track_id = current_track_id
         this.dmxMidiHandler = new DmxMidiHandler({
             onMidiKey: (midiKey) => {
                 this.triggerDmxButtonsByMidiKey(midiKey, {mock_midi_signal: true}) 
@@ -57,22 +57,22 @@ export class DmxLoop extends EventEmitter {
         Store.getInstance().on(STORE_EVENTS.LOADED, () => {
             this.dmx_buttons_triggered = {}
             this.dmxMidiHandler.stop({reset: true})
-            this.current_program_id = undefined
+            this.current_track_id = undefined
             this.resyncDmxButtons()
             this.reloadMidi()
-            this.switchToFirstProgram()
+            this.switchToFirstTrack()
         })
-        Store.getInstance().on(STORE_EVENTS.PROGRAM_RENAMED, (oldId: number, newId: number) => {
-            if(this.current_program_id == oldId) this.switchProgram(newId)
+        Store.getInstance().on(STORE_EVENTS.TRACK_RENAMED, (oldId: number, newId: number) => {
+            if(this.current_track_id == oldId) this.switchTrack(newId)
         })
 
-        this.switchToFirstProgram()
+        this.switchToFirstTrack()
     }
 
-    switchToFirstProgram = async() => {
-        const program = Store.getInstance().listPrograms()[0]
+    switchToFirstTrack = async() => {
+        const track = Store.getInstance().listTracks()[0]
 
-        program && this.switchProgram(program.id)
+        track && this.switchTrack(track.id)
     }
 
     static getInstance(): DmxLoop {
@@ -83,7 +83,7 @@ export class DmxLoop extends EventEmitter {
     }
 
     resyncDmxButtons = async() => {
-        this.dmxButtons = Store.getInstance().listButtons(this.current_program_id)
+        this.dmxButtons = Store.getInstance().listButtons(this.current_track_id)
     }    
 
     areDmxButtonChannelsBlack = (dmxButton: DmxButton) => dmxButton.red_channels.every((redChannel) => (
@@ -131,17 +131,17 @@ export class DmxLoop extends EventEmitter {
         delete this.dmx_buttons_triggered[dmxButtonId]
     }
 
-    switchProgram = async(program_id: number) => {
-        const program = Store.getInstance().findProgram(program_id)
-        this.current_program_id = program?.id
+    switchTrack = async(track_id: number) => {
+        const track = Store.getInstance().findTrack(track_id)
+        this.current_track_id = track?.id
         this.resyncDmxButtons()
         this.reloadMidi()
-        this.emit(DMX_LOOP_EVENTS.PROGRAM_CHANGE, this.current_program_id)
+        this.emit(DMX_LOOP_EVENTS.TRACK_CHANGE, this.current_track_id)
     }
 
     reloadMidi = async() => {
-        const dmxMidi = this.current_program_id
-            ? Store.getInstance().getOrInitDmxMidi(this.current_program_id)
+        const dmxMidi = this.current_track_id
+            ? Store.getInstance().getOrInitDmxMidi(this.current_track_id)
             : undefined
         this.dmxMidiHandler.setMidiPatterns(dmxMidi?.midi_patterns || [])
     }

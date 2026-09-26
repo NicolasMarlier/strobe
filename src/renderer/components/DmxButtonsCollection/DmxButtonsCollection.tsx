@@ -5,7 +5,7 @@ import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext"
 import { playDmxButton } from "../../ApiClient"
 
 const DmxButtonsCollection = () => {
-    const { program, dmxButtons, setSelectedDmxButtonId, selectedDmxButtonId, createDmxButtonAndSync } = useDmxButtonsContext()
+    const { track, dmxButtons, setSelectedDmxButtonId, selectedDmxButtonId, createDmxButtonAndSync } = useDmxButtonsContext()
 
     const selectAndPlayDmxButton = (dmxButtonId: string) => {
         setSelectedDmxButtonId(dmxButtonId)
@@ -24,8 +24,8 @@ const DmxButtonsCollection = () => {
             dmxButton={dmxButton}/>
             ))}
 
-            { program && dmxButtons.length < 12 && <div className='empty-btn' onClick={createDmxButtonAndSync}>NEW DMX BUTTON</div>}
-            { !program && <div className='empty-btn'></div>}
+            { track && dmxButtons.length < 12 && <div className='empty-btn' onClick={createDmxButtonAndSync}>NEW DMX BUTTON</div>}
+            { !track && <div className='empty-btn'></div>}
     </div>
 }
 
