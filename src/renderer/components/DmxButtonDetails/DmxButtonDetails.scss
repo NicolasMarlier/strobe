@@ -76,9 +76,19 @@
         width: 100%;
     }
 
-    input[type=checkbox] {
-        width: auto;
-        margin: 4px 0 0;
+    // Track / Global, sharing the panel's width
+    .segmented-control.scope {
+        .segmented-control-option {
+            flex: 1;
+            text-align: center;
+        }
+    }
+
+    // What the scope means for the button
+    .hint {
+        margin-top: 4px;
+        font-size: 11px;
+        color: #666;
     }
 
     .signal-container {

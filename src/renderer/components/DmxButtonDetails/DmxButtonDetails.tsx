@@ -4,6 +4,7 @@ import { useDmxButtonsContext } from '../../contexts/DmxButtonsContext'
 import DmxButtonDetailsPlaceholder from './DmxButtonDetailsPlaceholder'
 import DmxEffectNaturePicker from './DmxEffectNaturePicker'
 import TriggeringMidiKeySelect from './TriggeringMidiKeySelect'
+import SegmentedControl from '../DesignSystem/SegmentedControl/SegmentedControl'
 
 const DmxButtonDetails = () => {
     const { dmxButtons, selectedDmxButtonId, updateDmxButtonAndSync, deleteDmxButtonAndSync, currentTrackId } = useDmxButtonsContext()
@@ -61,12 +62,14 @@ const DmxButtonDetails = () => {
         </div>
         
         <div className="">
-            <label>Global</label>
-            <input
-                name="global"
-                type="checkbox"
-                checked={trackId == null}
-                onChange={(e: any) => { setTrackId(e.target.checked ? null : (currentTrackId || null)) }}/>
+            <label>Scope</label>
+            <SegmentedControl
+                className="scope"
+                options={[{ value: false, label: 'Track' }, { value: true, label: 'Global' }]}
+                value={trackId == null}
+                onChange={(global) => { setTrackId(global ? null : (currentTrackId || null)) }}/>
+            {/* Same wording as the groups' labels in the buttons collection */}
+            <div className="hint">{ trackId == null ? 'On every track' : 'This track only' }</div>
         </div>
 
         <div className="">

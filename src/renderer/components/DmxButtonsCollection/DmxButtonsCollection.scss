@@ -1,7 +1,30 @@
-.dmx-buttons {
-  // Takes the section's width left by the details column, as many columns as fit
+// Global buttons first, then the current track's ones
+.dmx-buttons-collection {
+  // Takes the section's width left by the details column
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dmx-buttons-group-label {
+  text-transform: uppercase;
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 600;
+  color: #666;
+  text-align: left;
+  margin-bottom: 10px;
+
+  // The explanation, quieter than the group's name
+  span {
+    color: #444;
+  }
+}
+
+.dmx-buttons {
+  // As many columns as fit: both groups get the same columns, so their buttons line up
   align-content: start;
   display: grid;
   grid-template-columns: repeat(auto-fill, 84px);

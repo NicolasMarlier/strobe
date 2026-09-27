@@ -2,6 +2,7 @@ import './DmxScene.scss'
 import { useState } from 'react';
 import LedBar from "./LedBar";
 import DmxSceneEditor from './DmxSceneEditor';
+import SegmentedControl from '../DesignSystem/SegmentedControl/SegmentedControl';
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext";
 import { useRealTimeContext } from "../../contexts/RealTimeContext";
 import { useDmxSceneContext } from "../../contexts/DmxSceneContext";
@@ -31,13 +32,11 @@ const DmxScene = () => {
     }
 
     return <div className='dmx-scene'>
-      <div className='dmx-scene-modes'>
-        { (['display', 'edit'] as Mode[]).map(m => (
-          <div key={m} className={`dmx-scene-mode ${mode == m ? 'active' : ''}`} onClick={() => setMode(m)}>
-            { m == 'display' ? 'Display' : 'Edit' }
-          </div>
-        ))}
-      </div>
+      <SegmentedControl
+        className='dmx-scene-modes'
+        options={[{ value: 'display', label: 'Display' }, { value: 'edit', label: 'Edit' }]}
+        value={mode}
+        onChange={setMode}/>
 
       { mode == 'edit'
         ? <DmxSceneEditor dmxHexSignal={dmxHexSignal}/>

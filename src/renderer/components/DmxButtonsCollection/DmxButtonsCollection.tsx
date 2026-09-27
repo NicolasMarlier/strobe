@@ -14,9 +14,11 @@ const DmxButtonsCollection = () => {
         playDmxButton(dmxButtonId)
     }
 
-    return <div className='dmx-buttons'>
-        { dmxButtons.map((dmxButton: DmxButton) => (
-            <DmxButton
+    const globalDmxButtons = dmxButtons.filter(({ track_id }) => track_id == null)
+    const trackDmxButtons = dmxButtons.filter(({ track_id }) => track_id != null)
+
+    const renderDmxButton = (dmxButton: DmxButton) => (
+        <DmxButton
             key={dmxButton.id}
             onTap={() => {
                 selectAndPlayDmxButton(dmxButton.id)
@@ -24,10 +26,29 @@ const DmxButtonsCollection = () => {
             selected={selectedDmxButtonId == dmxButton.id}
             isPlaying={activeDmxButtonIds.includes(dmxButton.id)}
             dmxButton={dmxButton}/>
-            ))}
+    )
 
-            { track && dmxButtons.length < 12 && <div className='empty-btn' onClick={createDmxButtonAndSync}>NEW DMX BUTTON</div>}
-            { !track && <div className='empty-btn'></div>}
+    // Without global buttons there's a single group: no need to label it
+    const hasGlobalDmxButtons = globalDmxButtons.length > 0
+
+    return <div className='dmx-buttons-collection'>
+        { hasGlobalDmxButtons && <div className='dmx-buttons-group'>
+            <div className='dmx-buttons-group-label'>Global <span>· on every track</span></div>
+            <div className='dmx-buttons'>
+                { globalDmxButtons.map(renderDmxButton) }
+            </div>
+        </div> }
+
+        <div className='dmx-buttons-group'>
+            { hasGlobalDmxButtons && track &&
+                <div className='dmx-buttons-group-label'>{ track.name } <span>· this track only</span></div> }
+            <div className='dmx-buttons'>
+                { trackDmxButtons.map(renderDmxButton) }
+
+                { track && dmxButtons.length < 12 && <div className='empty-btn' onClick={createDmxButtonAndSync}>NEW DMX BUTTON</div>}
+                { !track && <div className='empty-btn'></div>}
+            </div>
+        </div>
     </div>
 }
 

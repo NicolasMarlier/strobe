@@ -1,0 +1,27 @@
+.segmented-control {
+    display: flex;
+    border: 2px solid #444;
+    border-radius: 5px;
+    overflow: hidden;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    user-select: none;
+
+    .segmented-control-option {
+        padding: 2px 10px;
+        color: #666;
+        cursor: pointer;
+        white-space: nowrap;
+
+        &:hover {
+            color: #999;
+        }
+
+        &.active {
+            background-color: #444;
+            color: #fff;
+            cursor: default;
+        }
+    }
+}
