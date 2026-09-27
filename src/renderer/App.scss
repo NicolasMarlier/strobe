@@ -162,7 +162,24 @@ h1 {
   background-color: #222;
   cursor: pointer;
   padding: 0 10px;
-  transition: border-color 0.1s ease;
+  transition: border-color 0.1s ease, background-color 0.1s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  
+
+  &.empty {
+    font-size: 9px;
+    background-color: #444;
+    color: #222;
+    text-transform: uppercase;
+    font-weight: 600;
+    
+    &:hover {
+      background-color: #666;
+    }
+  }
 
   &:hover {
     border: 2px solid #666;
@@ -170,25 +187,5 @@ h1 {
 
   &.active {
     border: 2px solid #999;
-  }
-}
-
-.empty-btn {
-  border-radius: 5px;
-  box-shadow: 3px 3px 0px #111 inset, 2px 2px 0px #333;
-  
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-  text-transform: uppercase;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0 10px;
-  text-align: center;
-
-  &:hover {
-      color: #999;
   }
 }

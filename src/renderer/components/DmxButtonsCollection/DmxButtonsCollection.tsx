@@ -45,8 +45,8 @@ const DmxButtonsCollection = () => {
             <div className='dmx-buttons'>
                 { trackDmxButtons.map(renderDmxButton) }
 
-                { track && dmxButtons.length < 12 && <div className='empty-btn' onClick={createDmxButtonAndSync}>NEW DMX BUTTON</div>}
-                { !track && <div className='empty-btn'></div>}
+                { track && dmxButtons.length < 12 && <div className='btn empty' onClick={createDmxButtonAndSync}>+ Add a button</div>}
+                { !track && <div className='btn empty'></div>}
             </div>
         </div>
     </div>

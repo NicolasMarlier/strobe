@@ -69,7 +69,7 @@ const DmxSceneDetails = () => {
                     </div>
                 ))}
             </div>
-            <div className='empty-btn add-element' onClick={addLedBar}>+ Add an element</div>
+            <div className='btn empty add-element' onClick={addLedBar}>+ Add an element</div>
         </div>
     }
 
