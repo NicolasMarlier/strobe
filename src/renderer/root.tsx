@@ -20,8 +20,7 @@ getShowState().then(({ isOpen, recentShows }) => root.render(
         <DmxButtonsContextProvider>
           <DmxMidiContextProvider>
             <RealTimeContextProvider>
-              <App /> 
-              YO 
+              <App />
             </RealTimeContextProvider>
           </DmxMidiContextProvider>
         </DmxButtonsContextProvider>

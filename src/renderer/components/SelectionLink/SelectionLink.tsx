@@ -38,7 +38,7 @@ const SelectionLink = () => {
         }
 
         const measure = () => {
-            const button = section.querySelector('.dmx-button.selected')
+            const button = section.querySelector('.dmx-button.active')
             const panel = section.querySelector('.dmx-button-details')
             if (!button || !panel) return setLink(null)
 

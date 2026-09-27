@@ -5,7 +5,6 @@
     border-radius: 20px;
     position: relative;
     transition: background-color 0.4s;
-    box-shadow: 0 0 8px #000000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,7 +13,6 @@
     svg {
         fill: #00000044;
         height: 24px;
-        filter: drop-shadow(2px 2px 2px #000);
     }
 
 
@@ -23,6 +21,7 @@
 
         svg {
             fill: #ffffff66;
+            filter: drop-shadow(2px 2px 2px #000);
         }
 
         &.active {
@@ -55,11 +54,7 @@
 
     .small-button {
         border-radius: 0;
-        box-shadow: none;
 
-        &.active {
-            box-shadow: none;
-        }
         &:first-child {
             border-radius: 20px 0 0 20px;
         }

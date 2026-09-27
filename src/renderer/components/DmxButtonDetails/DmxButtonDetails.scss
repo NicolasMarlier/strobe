@@ -1,6 +1,6 @@
 .dmx-button-details {
     border-radius: 5px;
-    box-shadow: 3px 3px 0px #111 inset, 2px 2px 0px #333;
+    background-color: #161616;
     // Vertical column on the right of the buttons, fields stacked.
     // Fixed width: a flex item otherwise grows to fit its widest control (select, "Attach" button),
     // so the panel was wider with a button selected than with the placeholder
@@ -21,9 +21,10 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-        font-size: 12px;
+        font-size: 11px;
+        padding: 80px;
         font-weight: 600;
-        color: #333;
+        color: #ffffff22;
         text-transform: uppercase;
         cursor: default;
         user-select: none;
@@ -39,6 +40,7 @@
         padding: 0;
         display: block;
         white-space: nowrap;
+        color: #ffffff22;
     }
 
     // One height for every control, so their top edges align and not just the

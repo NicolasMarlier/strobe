@@ -69,7 +69,7 @@ const TrackSelect = () => {
     }, [track, tracks, currentTrackId])
     return <>
             { track && <div
-                className="current-track"
+                className="btn"
                 onClick={() => setShowPicker(true)}>{track.id} | {track.name}
             </div> }
             { !track && <div

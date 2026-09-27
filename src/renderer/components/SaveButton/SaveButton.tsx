@@ -1,4 +1,3 @@
-import './SaveButton.scss'
 import { useEffect, useState } from 'react'
 import SmallButton from '../DesignSystem/SmallButton/SmallButton'
 import { SaveIcon } from '../DesignSystem/Icons'
@@ -13,7 +12,7 @@ const SaveButton = () => {
         return window.strobe.api.onMessage('show:dirty', setIsDirty)
     }, [])
 
-    return <SmallButton className='save-button' disabled={!isDirty} onClick={saveShow}>
+    return <SmallButton disabled={!isDirty} onClick={saveShow}>
         <SaveIcon/>
     </SmallButton>
 }

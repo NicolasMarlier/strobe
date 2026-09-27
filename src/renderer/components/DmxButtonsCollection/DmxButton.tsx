@@ -24,7 +24,7 @@ const DmxButton = (props: Props) => {
     )
     const global = dmxButton.track_id == null
 
-    return <div className={`dmx-button ${isPlaying ? 'playing': ''} ${selected ? 'selected' : ''} ${global ? 'global' : ''}`}
+    return <div className={`dmx-button btn ${isPlaying ? 'playing': ''} ${selected ? 'active' : ''} ${global ? 'global' : ''}`}
         onClick={onTap}>
             <div className="playing-light"/>
             { dmxButton.triggering_midi_key && <div className="triggering-midi-key">

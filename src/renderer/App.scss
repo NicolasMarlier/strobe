@@ -34,7 +34,7 @@ h1 {
 
   .section {
     border-radius: 5px;
-    box-shadow: 3px 3px 0px #111 inset, 2px 2px 0px #333;
+    border: 2px solid #161616;
     overflow: hidden;
     padding: 3px 0 0 3px;
     
@@ -107,24 +107,18 @@ h1 {
 .btn {
   border: 2px solid #444;
   border-radius: 5px;
-  box-shadow: 5px 5px 0px #111;
   position: relative;
   background-color: #222;
   cursor: pointer;
   padding: 0 10px;
+  transition: border-color 0.1s ease;
 
   &:hover {
-    top: 1px;
-    left: 1px;
-    box-shadow: 4px 4px 0px #000000;
+    border: 2px solid #666;
   }
 
   &.active {
-    top: 4px;
-    left: 4px;
-    box-shadow: none;
     border: 2px solid #999;
-    box-shadow: 0 0 10px #ffffff44;
   }
 }
 
@@ -141,6 +135,7 @@ h1 {
   justify-content: center;
   cursor: pointer;
   padding: 0 10px;
+  text-align: center;
 
   &:hover {
       color: #999;
