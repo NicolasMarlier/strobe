@@ -24,6 +24,8 @@ const createWindow = (): void => {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
+    minWidth: 550,
+    minHeight: 600,
     // Same color as the app: shown in the area the page hasn't painted yet
     // when the window is resized quickly (white by default)
     backgroundColor: '#222',
