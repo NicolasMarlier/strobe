@@ -1,0 +1,73 @@
+// Column on the right of a section, editing what's selected in it (Buttons and Scene sections)
+.details-panel {
+    border-radius: 5px;
+    background-color: #161616;
+    // Fixed width: a flex item otherwise grows to fit its widest control (select, "Attach" button),
+    // so the panel was wider with something selected than with the placeholder
+    flex: none;
+    width: 160px;
+    min-width: 160px;
+    max-width: 160px;
+    // Above what the section shows under it (e.g. LED bars placed past the scene's edge)
+    position: relative;
+    z-index: 1;
+    // Scrolls when its fields don't fit the section's height
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    text-align: left;
+    gap: 10px;
+    box-sizing: border-box;
+    padding: 20px;
+
+    &.placeholder {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 11px;
+        padding: 80px;
+        font-weight: 600;
+        color: #ffffff22;
+        text-transform: uppercase;
+        cursor: default;
+        user-select: none;
+    }
+
+    label {
+        text-transform: uppercase;
+        font-size: 10px;
+        line-height: 12px;
+        text-align: left;
+        font-weight: 600;
+        padding: 0;
+        display: block;
+        white-space: nowrap;
+        color: #ffffff22;
+    }
+
+    // One height for every control, so the fields line up
+    select,
+    input,
+    .delete-btn {
+        height: 22px;
+        box-sizing: border-box;
+    }
+
+    select,
+    input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    // Pinned to the bottom of the column, away from the fields
+    .delete-btn {
+        flex: none;
+        margin-top: auto;
+        padding: 2px 0;
+        line-height: 14px;
+        text-align: center;
+        font-size: 12px;
+    }
+}

@@ -23,5 +23,11 @@
     }
   }
 
+  // Being edited in the scene's details panel
+  &.editing {
+    outline: 1px dashed #ffffff88;
+    outline-offset: 4px;
+  }
+
   
 }

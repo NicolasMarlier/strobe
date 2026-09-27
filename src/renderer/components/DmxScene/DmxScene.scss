@@ -1,14 +1,6 @@
 .dmx-scene {
     position: relative;
-    // Fills its grid section (see .section.scene in App.scss)
+    // Takes the section's width left by the details panel (see .section.scene in App.scss)
     flex: 1;
-    min-height: 0;
-
-    // Floats over the scene, so the LED bars are placed in the whole scene as before
-    .dmx-scene-modes {
-        position: absolute;
-        top: 0;
-        right: 0;
-        z-index: 1;
-    }
+    min-width: 0;
 }

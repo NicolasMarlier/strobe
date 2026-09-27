@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import '../DesignSystem/DetailsPanel/DetailsPanel.scss'
 import './DmxButtonDetails.scss' 
 import { useDmxButtonsContext } from '../../contexts/DmxButtonsContext'
 import DmxButtonDetailsPlaceholder from './DmxButtonDetailsPlaceholder'
@@ -36,7 +37,7 @@ const DmxButtonDetails = () => {
         })
     }, [color, durationMs, nature, triggeringMidiKey, trackId])
 
-    return <div className="dmx-button-details">
+    return <div className="details-panel dmx-button-details">
         <div>
             <label>Function</label>
             <DmxEffectNaturePicker

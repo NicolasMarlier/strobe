@@ -4,6 +4,9 @@ import { getDmxScene, updateDmxScene as saveDmxScene } from "../ApiClient";
 interface DmxSceneContextType {
   dmxScene: DmxScene
   updateDmxScene: (dmxScene: DmxScene) => void
+  // LED bar edited in the scene's details panel, highlighted in the scene
+  selectedLedBarIndex: number | undefined
+  setSelectedLedBarIndex: (index: number | undefined) => void
 }
 
 const DmxSceneContext = createContext<DmxSceneContextType | null>(null);
@@ -23,6 +26,7 @@ export const useDmxSceneContext = () => {
 // Loaded once: opening another show reloads the window.
 export const DmxSceneContextProvider = ({ children }: {children: React.ReactNode}) => {
   const [dmxScene, setDmxScene] = useState<DmxScene>({ led_bars: [] })
+  const [selectedLedBarIndex, setSelectedLedBarIndex] = useState<number | undefined>(undefined)
 
   useEffect(() => { getDmxScene().then(setDmxScene) }, [])
 
@@ -33,7 +37,7 @@ export const DmxSceneContextProvider = ({ children }: {children: React.ReactNode
   }
 
   return (
-    <DmxSceneContext.Provider value={ { dmxScene, updateDmxScene } }>
+    <DmxSceneContext.Provider value={ { dmxScene, updateDmxScene, selectedLedBarIndex, setSelectedLedBarIndex } }>
       {children}
     </DmxSceneContext.Provider>
   )

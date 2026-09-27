@@ -1,5 +1,7 @@
 import './App.scss'
 import DmxScene from './components/DmxScene/DmxScene';
+import DmxSceneDetails from './components/DmxScene/DmxSceneDetails';
+import { useDmxSceneContext } from './contexts/DmxSceneContext';
 import DmxButtonDetails from './components/DmxButtonDetails/DmxButtonDetails';
 import TrackSelect from './components/TrackSelect/TrackSelect';
 import DmxButtonsCollection from './components/DmxButtonsCollection/DmxButtonsCollection';
@@ -26,6 +28,14 @@ function App() {
   const onButtonsSectionClick = (e: React.MouseEvent) => {
     if ((e.target as Element).closest('.dmx-button, .empty-btn, .dmx-button-details')) return
     setSelectedDmxButtonId(undefined)
+  }
+
+  const { setSelectedLedBarIndex } = useDmxSceneContext()
+
+  // Same for the scene: a click outside the LED bars and the details panel closes the edited bar
+  const onSceneSectionClick = (e: React.MouseEvent) => {
+    if ((e.target as Element).closest('.led-bar, .dmx-scene-details')) return
+    setSelectedLedBarIndex(undefined)
   }
   const { selectedMidiPatterns, isRecording, setIsRecording } = useDmxMidiContext()
   const { debug } = useRealTimeContext()
@@ -71,8 +81,10 @@ function App() {
         </div>
         <div className="section scene">
           <div className="section-title">Scene</div>
-          <div className="section-body">
+          <div className="section-body" onClick={onSceneSectionClick}>
             <DmxScene/>
+
+            <DmxSceneDetails/>
           </div>
         </div>
 

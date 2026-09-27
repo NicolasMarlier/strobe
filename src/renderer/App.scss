@@ -98,6 +98,8 @@ h1 {
 
       .section-body {
         padding: 20px;
+        // The scene on the left, the LED bars' details on the right (like the buttons)
+        flex-direction: row;
       }
     }
 
