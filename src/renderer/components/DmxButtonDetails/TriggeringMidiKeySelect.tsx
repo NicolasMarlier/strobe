@@ -9,7 +9,9 @@ interface Props {
 // Same frame as the SegmentedControl: the bound key shows as the active segment, "×" as an option next to it
 const TriggeringMidiKeySelect = (props: Props) => {
     const { value, onChange } = props
-    const { lastReceivedMidiKey } = useRealTimeContext()
+    const { lastReceivedMidiKey: lastReceived } = useRealTimeContext()
+    // Only a key played on a MIDI device is worth attaching: a clicked button already has its own key
+    const lastReceivedMidiKey = lastReceived && !lastReceived.mock ? lastReceived : undefined
 
     return <div className="midi-key-select">
         { !value && !lastReceivedMidiKey && <div className="midi-key-select-option empty">

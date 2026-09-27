@@ -12,13 +12,11 @@ export const initMidiRouter = () => {
     })
     midi_router.on('noteon', (e) => {
         const midiKey = e.data1
-        const data: WSMidiNoteOnMessage = {
-            midi: midiKey
-        }
         DmxLoop.getInstance().triggerDmxButtonsByMidiKey(midiKey)
-        
+
         sendToAllWindows('midi:note_on', {
-            midi: midiKey
+            midi: midiKey,
+            mock: false
         })
     })
     

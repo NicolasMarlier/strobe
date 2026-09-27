@@ -91,10 +91,12 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
 
         window.strobe.api.onMessage('midi:note_on', params => {
           const {
-            midi
+            midi,
+            mock
           } = params
           setLastReceivedMidiKey({
             midi: midi,
+            mock: mock,
             at: Date.now()
           })
         }),

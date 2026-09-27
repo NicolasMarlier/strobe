@@ -101,12 +101,15 @@ type DmxMidiUpdateParams = {
 
 type ReceivedMidiKey = {
     midi: MidiKey,
+    // True when it comes from a button clicked in the app, not from a MIDI device
+    mock: boolean,
     at: number
 }
 
 
 type WSMidiNoteOnMessage = {
     midi: MidiKey
+    mock: boolean
 }
 
 type DmxMidiControlClientToServerWsPayload = {

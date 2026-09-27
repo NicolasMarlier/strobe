@@ -23,7 +23,8 @@ export const initDmxLoop = () => {
 
     DmxLoop.getInstance().on(DMX_LOOP_EVENTS.MOCK_MIDI_INPUT, (midi_note_midi: MidiKey) => {
         sendToAllWindows('midi:note_on', {
-            midi: midi_note_midi
+            midi: midi_note_midi,
+            mock: true
         })
     })
 
