@@ -1,16 +1,11 @@
 // Frame and form basics come from .details-panel (DesignSystem/DetailsPanel)
 .dmx-button-details {
-    label.color,
-    .bound-signal {
-        height: 22px;
-        box-sizing: border-box;
-    }
-
     input[name=color] {
         visibility: hidden;
     }
     label.color {
         height: 19px;
+        box-sizing: border-box;
         display: block;
         width: 100%;
         border: 1px solid #858585;
@@ -32,89 +27,4 @@
         font-size: 11px;
         color: #666;
     }
-
-    .signal-container {
-        width: 60px;
-        height: 60px;
-        flex: 0 0 60px;
-
-        .no-signal {
-            border: 2px dashed #ffffff44;
-            font-size: 8px;
-            text-transform: uppercase;
-            height: 60px;
-            box-sizing: border-box;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            border-radius: 5px;
-        }
-
-        .attaching-signal {
-            border: 2px dashed #00ff0044;
-            font-size: 12px;
-            text-transform: uppercase;
-            height: 60px;
-            box-sizing: border-box;
-            text-align: center;
-            display: flex;
-            align-items: center;
-            border-radius: 5px;
-            color: #00ff0044;
-            font-weight: 600;
-            cursor: pointer;
-        }
-    }
-
-    // NB: the `.attaching-signal` rule inside `.signal-container` above is dead
-    // (nothing renders `.signal-container`); this is the one that applies.
-    // Keeps the "Attach C1" target inside the panel's width instead of widening it.
-    .attaching-signal {
-        width: 100%;
-
-        .btn {
-            display: block;
-            box-sizing: border-box;
-            width: 100%;
-            padding: 0 2px;
-            font-size: 10px;
-            font-weight: 600;
-            line-height: 19px;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-    }
-
-    .bound-signal {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        width: 100%;
-
-        input {
-            flex: 1 1 auto;
-            width: auto;
-            min-width: 0;
-        }
-
-        .unbind-btn {
-            flex: 0 0 14px;
-            font-size: 14px;
-            line-height: 14px;
-            width: 14px;
-            height: 14px;
-            text-align: center;
-            border-radius: 2px;
-            color: #858585;
-            cursor: pointer;
-            user-select: none;
-
-            &:hover {
-                color: #ff6b6b;
-            }
-        }
-    }
-
 }
