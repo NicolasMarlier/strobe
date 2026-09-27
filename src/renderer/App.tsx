@@ -51,20 +51,29 @@ function App() {
         </div>
 
         <div className="section midi">
-          { track ? <MidiPlayer track={track}/> : <></>}
+          <div className="section-title">Track automation</div>
+          <div className="section-body">
+            { track ? <MidiPlayer track={track}/> : <></>}
 
-          {selectedMidiPatterns.length == 1 && <NoteEditor pattern={ selectedMidiPatterns[0]}/>}
+            {selectedMidiPatterns.length == 1 && <NoteEditor pattern={ selectedMidiPatterns[0]}/>}
+          </div>
         </div>
 
-        <div className="section buttons" onClick={onButtonsSectionClick}>
-          <DmxButtonsCollection/>
+        <div className="section buttons">
+          <div className="section-title">Buttons</div>
+          <div className="section-body" onClick={onButtonsSectionClick}>
+            <DmxButtonsCollection/>
 
-          <DmxButtonDetails/>
+            <DmxButtonDetails/>
 
-          <SelectionLink/>
+            <SelectionLink/>
+          </div>
         </div>
         <div className="section scene">
-          <DmxScene/>
+          <div className="section-title">Scene</div>
+          <div className="section-body">
+            <DmxScene/>
+          </div>
         </div>
 
       </div>

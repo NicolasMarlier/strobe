@@ -14,7 +14,7 @@ export function handle<C extends Channel>(
   fn: (...args: ApiContract[C]['args']) => Promise<ApiContract[C]['result']>,
 ) {
   ipcMain.handle(channel, async (event, ...args) => {
-    // Middleware possible ici : log, vérification de event.senderFrame.url, etc.
+    // Middleware could go here: logging, checking event.senderFrame.url, etc.
     return fn(...(args as ApiContract[C]['args']));
   });
 }
@@ -31,7 +31,7 @@ function handleWithWindow<C extends Channel>(
   });
 }
 
-// L'équivalent de app.get / app.post
+// The equivalent of app.get / app.post
 handle('tracks:list',   TracksController.list);
 handle('tracks:create', TracksController.create)
 handle('tracks:update', TracksController.update)

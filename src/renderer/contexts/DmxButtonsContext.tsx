@@ -112,7 +112,11 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
       red_channels: [1,4,7,10,13,16,19,22],
       nature: 'Boom',
       triggering_midi_key: availableTriggeringMidiKeys()
-    }).then(fetchDmxButtons)
+    }).then(async (dmxButton) => {
+      await fetchDmxButtons()
+      // Selected once it's in the list, so the details panel can show it right away
+      setSelectedDmxButtonId(dmxButton.id)
+    })
   }
   const updateDmxButtonAndSync = (id: string, params: DmxButtonUpdateParams) => {
     updateDmxButton(id, params).then(fetchDmxButtons)

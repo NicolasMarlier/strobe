@@ -22,7 +22,7 @@ const linkColor = (color: string | undefined) => {
 }
 
 // Glowing line from the selected DMX button to the details panel.
-// Rendered inside the buttons section, which it measures (the section must be `position: relative`)
+// Rendered inside the buttons section body, which it measures (the body must be `position: relative`)
 const SelectionLink = () => {
     const { dmxButtons, selectedDmxButtonId } = useDmxButtonsContext()
     const svgRef = useRef<SVGSVGElement>(null)

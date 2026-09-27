@@ -16,7 +16,7 @@ const TrackSelect = () => {
     const [editingTrackId, setEditingTrackId] = useState(undefined as number | undefined)
 
     const createTrackAndSync = async(name?: string) => {
-        const newTrack = await createTrack({name: name || 'Nouveau'})
+        const newTrack = await createTrack({name: name || 'New track'})
         await syncTracks()
         selectTrack(newTrack.id)
     }
@@ -85,7 +85,7 @@ const TrackSelect = () => {
                     track={p}
                     isEditing={editingTrackId == p.id}
                     setEditingTrackId={setEditingTrackId}/>)}        
-                <div className='picker-option new-track' onClick={() => createTrackAndSync()}>Nouvelle piste</div>
+                <div className='picker-option new-track' onClick={() => createTrackAndSync()}>New track</div>
                 
                 </div>
                 <div className='picker-bottom-shadow'/>

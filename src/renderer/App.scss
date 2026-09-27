@@ -41,29 +41,64 @@ h1 {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    position: relative;
 
     &.midi {
       grid-area: midi;
-      justify-content: space-between;
+
+      .section-body {
+        // Below the title, which overlaps the top border
+        padding: 20px 0 0 3px;
+        justify-content: space-between;
+      }
+    }
+
+    // A titled section doesn't clip, so its title can sit on the border:
+    // its .section-body clips the content instead
+    &:has(> .section-title) {
+      overflow: visible;
+      padding: 0;
+      // Without clipping, a grid item grows to fit its content: keep the grid's sizes
+      min-width: 0;
+      min-height: 0;
+    }
+
+    // Same layout as an untitled section; each section overrides what it needs
+    .section-body {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      // Clips inside the section's rounded border
+      border-radius: 3px;
+
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
 
     &.buttons {
       grid-area: buttons;
-      padding: 20px;
-      // Buttons on the left, the selected button's details on the right
-      flex-direction: row;
-      // The SelectionLink between them is positioned in the section
-      position: relative;
       // Keeps the row at half height: many buttons scroll instead of stretching it
       min-height: 0;
-      overflow-y: auto;
+
+      .section-body {
+        padding: 20px;
+        // Buttons on the left, the selected button's details on the right
+        flex-direction: row;
+        // The SelectionLink between them is positioned in the body
+        position: relative;
+        overflow-y: auto;
+      }
     }
 
     &.scene {
       grid-area: scene;
-      padding: 20px;
       // Lets the scene shrink to the row's height instead of overflowing the window
       min-height: 0;
+
+      .section-body {
+        padding: 20px;
+      }
     }
 
     &.commands-bar {
@@ -75,7 +110,21 @@ h1 {
       box-shadow: 0 0 6px #000000;
       justify-content: center;
     }   
+    .section-title {
+      text-transform: uppercase;
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      line-height: 14px;
+      font-size: 10px;
+      background-color: #161616;
+      color: #666;
+      padding: 2px 10px;
+      border-radius: 5px;
+      font-weight: 600;
+    }
   }
+
 }
 
 .commands-bar {
