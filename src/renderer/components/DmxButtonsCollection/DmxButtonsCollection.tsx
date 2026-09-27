@@ -3,9 +3,11 @@ import './DmxButtonsCollection.scss'
 import DmxButton from "./DmxButton"
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext"
 import { playDmxButton } from "../../ApiClient"
+import { useRealTimeContext } from "../../contexts/RealTimeContext"
 
 const DmxButtonsCollection = () => {
     const { track, dmxButtons, setSelectedDmxButtonId, selectedDmxButtonId, createDmxButtonAndSync } = useDmxButtonsContext()
+    const { activeDmxButtonIds } = useRealTimeContext()
 
     const selectAndPlayDmxButton = (dmxButtonId: string) => {
         setSelectedDmxButtonId(dmxButtonId)
@@ -20,7 +22,7 @@ const DmxButtonsCollection = () => {
                 selectAndPlayDmxButton(dmxButton.id)
             }}
             selected={selectedDmxButtonId == dmxButton.id}
-            isPlaying={false}
+            isPlaying={activeDmxButtonIds.includes(dmxButton.id)}
             dmxButton={dmxButton}/>
             ))}
 

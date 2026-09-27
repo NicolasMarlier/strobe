@@ -167,4 +167,6 @@ type DmxSignalParams = {
     },
     dmxHexSignal: DmxHexSignal,
     midiCurrentTick: number
+    // Buttons whose effect is running, i.e. currently changing the DMX signal
+    activeDmxButtonIds: string[]
 }

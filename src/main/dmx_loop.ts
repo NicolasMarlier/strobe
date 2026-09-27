@@ -127,6 +127,12 @@ export class DmxLoop extends EventEmitter {
         })
     }
 
+    // Buttons of the current track whose effect is running: they're changing the DMX signal right now.
+    // Only the current track's buttons are applied (and detriggered), so the others are left out
+    activeDmxButtonIds = () => this.dmxButtons
+        .filter((dmxButton) => this.dmx_buttons_triggered[dmxButton.id])
+        .map((dmxButton) => dmxButton.id)
+
     detriggerDmxButton = (dmxButtonId: string) => {
         delete this.dmx_buttons_triggered[dmxButtonId]
     }

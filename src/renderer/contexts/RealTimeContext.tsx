@@ -9,6 +9,7 @@ interface RealTimeContextType {
     sendCurrentTickToServer: (tick: number) => void  
 
     dmxHexSignal: DmxHexSignal
+    activeDmxButtonIds: string[]
     enttecOpenUSBState: USBDeviceState
 
     debug: boolean
@@ -41,6 +42,7 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
 
     const [enttecOpenUSBState, setEnttecOpenUSBState] = useState('Not connected' as USBDeviceState)
     const [dmxHexSignal, setDmxHexSignal] = useState("" as DmxHexSignal);
+    const [activeDmxButtonIds, setActiveDmxButtonIds] = useState<string[]>([])
 
     const [debugIncomingWsPayloads, setDebugIncomingWsPayloads] = useState<IncomingWsPayload[]>([])
     const [debugOutgoingWsPayloads, setDebugOutgoingWsPayloads] = useState<OutgoingWsPayload[]>([])
@@ -72,10 +74,13 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
                   state: state
                 },
                 dmxHexSignal: dmxHexSignal,
-                midiCurrentTick: midiCurrentTick
+                midiCurrentTick: midiCurrentTick,
+                activeDmxButtonIds: activeDmxButtonIds
           } = data
           setEnttecOpenUSBState(state)
           setDmxHexSignal(dmxHexSignal)
+          // A new array comes 50 times per second: keep the previous one while the ids are the same
+          setActiveDmxButtonIds(previous => previous.join() == activeDmxButtonIds.join() ? previous : activeDmxButtonIds)
           midiCurrentTickRef.current = midiCurrentTick
         }),
 
@@ -111,6 +116,7 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
             sendCurrentTickToServer,
 
             dmxHexSignal,
+            activeDmxButtonIds,
             enttecOpenUSBState,
             
             debug,
