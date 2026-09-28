@@ -1,6 +1,7 @@
 import EventEmitter from "events"
 import { randomUUID } from "crypto"
 import { InvalidParamError, NotFoundError } from "../controllers/application.controller"
+import { migrateDmxScene } from "../../shared/led_bar"
 
 export const STORE_EVENTS = {
     CHANGED: 'changed',
@@ -33,7 +34,7 @@ export class Store extends EventEmitter {
         this.tracks = structuredClone(data.tracks)
         this.dmxButtons = structuredClone(data.dmx_buttons)
         this.dmxMidis = structuredClone(data.dmx_midis)
-        this.dmxScene = structuredClone(data.dmx_scene)
+        this.dmxScene = migrateDmxScene(structuredClone(data.dmx_scene))
         this.emit(STORE_EVENTS.LOADED)
     }
 

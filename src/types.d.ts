@@ -139,19 +139,15 @@ type MouseSelection = {
 type LedBarConfig = {
     channel: number,
     rgb_dots_count: number,
-    style?: LedBarStyle
+    // Center of the bar in the 3D scene, in meters (Y up, origin at the front-center of the stage floor)
+    position?: Vector3Tuple,
+    // Euler angles in degrees (XYZ order)
+    rotation?: Vector3Tuple
 }
 
-// Where a LED bar is drawn in the scene (CSS values)
-type LedBarStyle = {
-    transform?: string,
-    left?: string,
-    right?: string,
-    top?: string,
-    bottom?: string
-}
+type Vector3Tuple = [number, number, number]
 
-// How the lights are laid out on screen
+// How the lights are laid out in the 3D scene
 type DmxScene = {
     led_bars: LedBarConfig[]
 }

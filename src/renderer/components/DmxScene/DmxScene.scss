@@ -1,6 +1,101 @@
 .dmx-scene {
-    position: relative;
-    // Takes the section's width left by the details panel (see .section.scene in App.scss)
-    flex: 1;
-    min-width: 0;
+    // Fills the whole section, under the details panel (see .section.scene in App.scss):
+    // the camera frames the part the panel leaves free
+    position: absolute;
+    inset: 0;
+}
+
+
+// Discreet, over the scene's bottom-right corner
+.zoom-slider {
+    position: absolute;
+    // Left of the details panel (160px wide, 20px from the section's edge and 20px from the scene)
+    right: 212px;
+    bottom: 12px;
+    width: 80px;
+    margin: 0;
+    appearance: none;
+    background: transparent;
+    opacity: 0.3;
+    cursor: pointer;
+    transition: opacity 0.2s;
+
+    &:hover, &:active {
+        opacity: 0.9;
+    }
+
+    &::-webkit-slider-runnable-track {
+        height: 2px;
+        border-radius: 1px;
+        background: #ffffff66;
+    }
+
+    &::-webkit-slider-thumb {
+        appearance: none;
+        width: 10px;
+        height: 10px;
+        margin-top: -4px;
+        border-radius: 50%;
+        background: #fff;
+    }
+}
+
+// Over the scene's top-left corner, discreet until used
+.scene-settings {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 11px;
+    color: #ccc;
+    user-select: none;
+
+    // Dark, like the details panel
+    .scene-settings-button {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        background-color: #161616;
+        color: #999;
+        cursor: pointer;
+
+        &:hover {
+            color: #fff;
+        }
+    }
+
+    &.open .scene-settings-button {
+        color: #fff;
+    }
+
+    .scene-settings-menu {
+        margin-top: 4px;
+        padding: 6px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        border-radius: 4px;
+        background-color: #000000aa;
+        border: 1px solid #ffffff1a;
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+
+            &:hover {
+                color: #fff;
+            }
+        }
+
+        input {
+            margin: 0;
+            accent-color: #aaa;
+            cursor: pointer;
+        }
+    }
 }

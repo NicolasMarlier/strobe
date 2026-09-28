@@ -1,6 +1,7 @@
 import '../DesignSystem/DetailsPanel/DetailsPanel.scss'
 import './DmxSceneDetails.scss'
 import { useDmxSceneContext } from '../../contexts/DmxSceneContext'
+import { defaultLedBarPosition } from '../../../shared/led_bar'
 
 const DMX_CHANNELS = 512
 const NEW_LED_BAR_DOTS = 8
@@ -14,15 +15,6 @@ interface Field {
 const FIELDS: Field[] = [
     { key: 'channel', label: 'Channel', max: DMX_CHANNELS },
     { key: 'rgb_dots_count', label: 'Dots', max: Math.floor(DMX_CHANNELS / 3) },
-]
-
-// Where the bar is drawn in the scene, as CSS values (e.g. 'rotateY(110deg) rotateZ(11deg)', '-30%')
-const STYLE_FIELDS: { key: keyof LedBarStyle, label: string }[] = [
-    { key: 'transform', label: 'Transform' },
-    { key: 'left', label: 'Left' },
-    { key: 'right', label: 'Right' },
-    { key: 'top', label: 'Top' },
-    { key: 'bottom', label: 'Bottom' },
 ]
 
 // First channel after the last LED bar, so a new bar doesn't overlap the others
@@ -48,6 +40,9 @@ const DmxSceneDetails = () => {
             {
                 channel: Math.min(nextFreeChannel(ledBars), DMX_CHANNELS - NEW_LED_BAR_DOTS * 3 + 1),
                 rgb_dots_count: NEW_LED_BAR_DOTS,
+                // Moved and rotated by dragging it in the scene
+                position: defaultLedBarPosition(ledBars.length),
+                rotation: [0, 0, 0],
             },
         ]})
         setSelectedLedBarIndex(ledBars.length)
@@ -80,17 +75,6 @@ const DmxSceneDetails = () => {
         updateLedBar(selectedLedBarIndex, { ...selectedLedBar, [field.key]: Math.min(field.max, Math.max(1, number)) })
     }
 
-    // An empty field removes the value, and a bar without any keeps no style at all
-    const onStyleFieldChange = (key: keyof LedBarStyle, value: string) => {
-        const style: LedBarStyle = { ...selectedLedBar.style }
-        if (value.trim()) style[key] = value.trim()
-        else delete style[key]
-
-        const ledBar: LedBarConfig = { ...selectedLedBar, style }
-        if (Object.keys(style).length == 0) delete ledBar.style
-        updateLedBar(selectedLedBarIndex, ledBar)
-    }
-
     // The inputs keep what's typed: rebuild them for another bar, or when the bars move around,
     // so they never show the values of the bar that was selected before
     return <div key={`${selectedLedBarIndex}-${ledBars.length}`} className='details-panel dmx-scene-details'>
@@ -111,17 +95,6 @@ const DmxSceneDetails = () => {
                     onChange={(e) => onFieldChange(field, e.target.value)}
                     // Show the value actually kept (bounded, rounded) once done typing
                     onBlur={(e) => { e.target.value = String(selectedLedBar[field.key]) }}/>
-            </div>
-        ))}
-
-        { STYLE_FIELDS.map(({ key, label }) => (
-            <div key={key}>
-                <label>{label}</label>
-                <input
-                    type='text'
-                    spellCheck={false}
-                    defaultValue={selectedLedBar.style?.[key] ?? ''}
-                    onChange={(e) => onStyleFieldChange(key, e.target.value)}/>
             </div>
         ))}
 

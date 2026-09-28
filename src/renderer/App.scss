@@ -98,8 +98,11 @@ h1 {
 
       .section-body {
         padding: 20px;
-        // The scene on the left, the LED bars' details on the right (like the buttons)
+        // The 3D scene fills the whole body (positioned under it),
+        // the LED bars' details stay on the right (like the buttons)
         flex-direction: row;
+        justify-content: flex-end;
+        position: relative;
       }
     }
 
@@ -115,6 +118,8 @@ h1 {
     .section-title {
       text-transform: uppercase;
       position: absolute;
+      // Over the section's body, which can be positioned too (the scene's)
+      z-index: 2;
       top: -10px;
       left: 20px;
       line-height: 14px;
