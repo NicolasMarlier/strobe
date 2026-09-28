@@ -51,6 +51,10 @@ export class DmxLoop extends EventEmitter {
         })
 
         Store.getInstance().on(STORE_EVENTS.CHANGED, () => {
+            // The current track is gone (e.g. its creation was undone): back to the first one
+            if (this.current_track_id != undefined && !Store.getInstance().findTrack(this.current_track_id)) {
+                this.switchToFirstTrack()
+            }
             this.resyncDmxButtons()
             this.reloadMidi()
         })

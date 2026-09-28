@@ -1,6 +1,7 @@
 import { BaseWindow, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron"
 import { newShow, openRecentShow, openShow, saveShow, saveShowAs } from "../show/document"
 import { clearRecentShows, describeRecentShow, listRecentShows, onRecentShowsChange } from "../show/recent_shows"
+import { sendToAllWindows } from "./ipc-router"
 
 // Menu callbacks receive the focused window, which is always our BrowserWindow
 const onWindow = (action: (win: BrowserWindow) => void) =>
@@ -39,7 +40,20 @@ const buildMenu = () => {
                 { role: 'close' },
             ],
         },
-        { role: 'editMenu' },
+        {
+            // The standard Edit menu, but Undo and Redo go to the renderer: they undo a text field's typing,
+            // or else the show's last change (see useEditMenu)
+            label: 'Edit',
+            submenu: [
+                { label: 'Undo', accelerator: 'CmdOrCtrl+Z', click: () => sendToAllWindows('edit:undo', null) },
+                { label: 'Redo', accelerator: 'Shift+CmdOrCtrl+Z', click: () => sendToAllWindows('edit:redo', null) },
+                { type: 'separator' },
+                { role: 'cut' },
+                { role: 'copy' },
+                { role: 'paste' },
+                { role: 'selectAll' },
+            ],
+        },
         { role: 'viewMenu' },
         { role: 'windowMenu' },
     ]

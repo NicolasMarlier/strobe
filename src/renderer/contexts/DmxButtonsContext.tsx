@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import { precomputeWaves } from "../components/MidiPlayer/waves";
 import { createDmxButton, deleteDmxButton, getTrackAudio, listDmxButtons, listTracks, selectTrack, updateDmxButton, uploadTrackAudio } from "../ApiClient";
@@ -127,6 +127,16 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
 
 
   useEffect(() => { syncTracks() }, []) 
+
+  // Undo or redo brought back another state of the show: everything is reloaded.
+  // The listener is registered once, and calls the latest reload (it depends on the current track)
+  const reloadRef = useRef<() => void>(syncTracks)
+  reloadRef.current = () => {
+    syncTracks()
+    fetchDmxButtons()
+    syncTrackAudio()
+  }
+  useEffect(() => window.strobe.api.onMessage('show:restored', () => reloadRef.current()), [])
 
   // Prepare every track's waveform in the background, so switching tracks is instant
   useEffect(() => {

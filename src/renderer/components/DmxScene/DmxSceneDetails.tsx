@@ -33,7 +33,7 @@ const channelRange = ({ channel, rgb_dots_count }: LedBarConfig) => `${channel}â
 
 // Panel on the right of the scene: the LED bars list, or the selected bar's settings
 const DmxSceneDetails = () => {
-    const { dmxScene, updateDmxScene, selectedLedBarIndex, setSelectedLedBarIndex } = useDmxSceneContext()
+    const { dmxScene, updateDmxScene, placeLedBar, selectedLedBarIndex, setSelectedLedBarIndex } = useDmxSceneContext()
     // DELETE asks first
     const [confirmingDelete, setConfirmingDelete] = useState(false)
     const ledBars = dmxScene.led_bars
@@ -112,7 +112,7 @@ const DmxSceneDetails = () => {
         {/* Back to the middle of the stage, facing the audience */}
         <div
             className='reset-btn btn'
-            onClick={() => updateLedBar(selectedLedBarIndex, { ...selectedLedBar, position: LED_BAR_CENTER_POSITION, rotation: [0, 0, 0] })}>
+            onClick={() => placeLedBar(selectedLedBarIndex, { position: LED_BAR_CENTER_POSITION, rotation: [0, 0, 0] })}>
             RESET POSITION
         </div>
 

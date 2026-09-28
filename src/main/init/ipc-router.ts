@@ -7,7 +7,8 @@ import { DmxButtonController } from '../controllers/dmx_buttons.controller';
 import { MainLoopController } from '../controllers/main_loop.controller';
 import { ApiReverseContract, ReverseChannel } from '../../shared/ipc-reverse-contract';
 import { forgetRecentShow, newShow, openRecentShow, openShow, saveShow, showState } from '../show/document';
-import { Store } from '../store/Store';
+import { Store, STORE_EVENTS } from '../store/Store';
+import { ShowHistory } from '../store/ShowHistory';
 
 export function handle<C extends Channel>(
   channel: C,
@@ -64,6 +65,11 @@ handleWithWindow('show:open', openShow)
 handleWithWindow('show:open_recent', openRecentShow)
 handle('show:remove_recent', async (dir) => forgetRecentShow(dir))
 handleWithWindow('show:save', saveShow)
+// Created now, so it records the show's changes from the start
+ShowHistory.getInstance()
+handle('show:undo', async () => ShowHistory.getInstance().undo())
+handle('show:redo', async () => ShowHistory.getInstance().redo())
+Store.getInstance().on(STORE_EVENTS.RESTORED, () => sendToAllWindows('show:restored', null))
 
 
 export function sendToAllWindows<C extends ReverseChannel>(

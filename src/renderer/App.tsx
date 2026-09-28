@@ -17,10 +17,12 @@ import { RecordIcon } from './components/DesignSystem/Icons';
 import AudioPlayer from './components/MidiPlayer/AudioPlayer';
 import SaveButton from './components/SaveButton/SaveButton';
 import SelectionLink from './components/SelectionLink/SelectionLink';
+import { useEditMenu } from './useEditMenu';
 
 
 
 function App() {
+  useEditMenu()
   const { track, setSelectedDmxButtonId } = useDmxButtonsContext()
 
   // A click on the section's empty space deselects the button; clicks on a button,

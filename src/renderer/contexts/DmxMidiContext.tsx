@@ -70,6 +70,10 @@ export const DmxMidiContextProvider = ({ children }: {children: React.ReactNode}
         
 
     useEffect(fetchDmxMidi, [currentTrackId])
+    // Undo or redo brought back another state of the show. Registered once, calls the latest fetch
+    const fetchDmxMidiRef = useRef(fetchDmxMidi)
+    fetchDmxMidiRef.current = fetchDmxMidi
+    useEffect(() => window.strobe.api.onMessage('show:restored', () => fetchDmxMidiRef.current()), [])
     useEffect(() => setIsRecording(false), [currentTrackId])
 
     return (

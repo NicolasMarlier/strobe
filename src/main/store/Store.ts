@@ -7,6 +7,8 @@ export const STORE_EVENTS = {
     CHANGED: 'changed',
     TRACK_RENAMED: 'trackRenamed',
     LOADED: 'loaded',
+    // Undo or redo brought back a previous state (see ShowHistory): the UI reloads it
+    RESTORED: 'restored',
 }
 
 // In-memory replacement for the former SQLite database.
@@ -31,11 +33,22 @@ export class Store extends EventEmitter {
     // Whole data set, used to open and save shows
 
     load = (data: ShowData): void => {
+        this.setData(data)
+        this.emit(STORE_EVENTS.LOADED)
+    }
+
+    // Back to a previous state of the open show (undo, redo): a change like any other
+    restore = (data: ShowData): void => {
+        this.setData(data)
+        this.changed()
+        this.emit(STORE_EVENTS.RESTORED)
+    }
+
+    private setData = (data: ShowData) => {
         this.tracks = structuredClone(data.tracks)
         this.dmxButtons = structuredClone(data.dmx_buttons)
         this.dmxMidis = structuredClone(data.dmx_midis)
         this.dmxScene = migrateDmxScene(structuredClone(data.dmx_scene))
-        this.emit(STORE_EVENTS.LOADED)
     }
 
     toData = (): ShowData => structuredClone({

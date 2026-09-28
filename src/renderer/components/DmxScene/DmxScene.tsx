@@ -89,7 +89,7 @@ const FixedCamera = ({ zoom }: { zoom: number }) => {
 
 const DmxScene = () => {
     const { dmxButtons, selectedDmxButtonId } = useDmxButtonsContext()
-    const { dmxScene, updateDmxScene, selectedLedBarIndex, setSelectedLedBarIndex } = useDmxSceneContext()
+    const { dmxScene, updateDmxScene, placeLedBar, selectedLedBarIndex, setSelectedLedBarIndex } = useDmxSceneContext()
     const { dmxHexSignal } = useRealTimeContext()
 
     const { updateDmxButtonAndSync } = useDmxButtonsContext()
@@ -141,9 +141,6 @@ const DmxScene = () => {
       }
     }
 
-    const updateLedBar = (index: number, changes: Partial<LedBarConfig>) =>
-      updateDmxScene({ led_bars: dmxScene.led_bars.map((ledBar, i) => i == index ? { ...ledBar, ...changes } : ledBar) })
-
     // A click in the void closes the edited bar, but not a click on its rotation rings
     const onPointerMissed = () => {
       if (isPointerOverGizmo(gizmoRef.current)) return
@@ -181,8 +178,8 @@ const DmxScene = () => {
             selectedRedChannels={selectedRedChannels}
             onSelectRedChannels={onSelectRedChannels}
             onSelect={() => setSelectedLedBarIndex(index)}
-            onMove={(position) => updateLedBar(index, { position })}
-            onRotate={(rotation) => updateLedBar(index, { rotation })}
+            onMove={(position) => placeLedBar(index, { position })}
+            onRotate={(rotation) => placeLedBar(index, { rotation })}
             gizmoRef={gizmoRef}
             showBeams={display.show_beams}
             rotating={alt}/>

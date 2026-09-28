@@ -106,6 +106,15 @@ export interface ApiContract {
     args: []
     result: boolean
   }
+  // Undo or redo the show's last change; returns whether there was one
+  'show:undo': {
+    args: []
+    result: boolean
+  }
+  'show:redo': {
+    args: []
+    result: boolean
+  }
 
 }
 
