@@ -1,0 +1,80 @@
+.confirm-modal-background {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #00000066;
+    animation: confirm-modal-fade 0.15s ease-out both;
+}
+
+.confirm-modal {
+    width: 280px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-radius: 5px;
+    border: 2px solid #161616;
+    background-color: #222;
+    box-shadow: 0 10px 30px #000000aa;
+    animation: confirm-modal-pop 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+    .confirm-modal-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #eee;
+    }
+
+    .confirm-modal-message {
+        font-size: 12px;
+        color: #999;
+    }
+
+    .confirm-modal-buttons {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+
+        .btn {
+            height: 26px;
+            padding: 0 14px;
+            font-size: 12px;
+            user-select: none;
+        }
+
+        // The destructive action
+        .danger {
+            border-color: #a33;
+            color: #fff;
+            background-color: #6a1d1d;
+
+            &:hover {
+                border-color: #d44;
+                background-color: #822323;
+            }
+        }
+    }
+}
+
+@keyframes confirm-modal-fade {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes confirm-modal-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(6px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confirm-modal-background,
+    .confirm-modal {
+        animation: none;
+    }
+}

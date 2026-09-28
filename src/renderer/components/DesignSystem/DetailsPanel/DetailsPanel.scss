@@ -49,8 +49,7 @@
 
     // One height for every control, so the fields line up
     select,
-    input,
-    .delete-btn {
+    input {
         height: 22px;
         box-sizing: border-box;
     }
@@ -61,13 +60,77 @@
         min-width: 0;
     }
 
-    // Pinned to the bottom of the column, away from the fields
-    .delete-btn {
+    // Discreet trash bin pinned to the bottom right, away from the fields
+    .delete-icon-btn {
         flex: none;
         margin-top: auto;
-        padding: 2px 0;
-        line-height: 14px;
-        text-align: center;
-        font-size: 12px;
+        align-self: flex-end;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 5px;
+        color: #ffffff44;
+        cursor: pointer;
+        transition: color 0.1s ease, background-color 0.1s ease;
+
+        svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        &:hover {
+            color: #e05555;
+            background-color: #ffffff0d;
+        }
+    }
+}
+
+// Opening something in a panel (push) and going back (pop): the content slides in,
+// one element after the other. The panel itself stays still (see usePanelTransition)
+.details-panel {
+    // The content slides in from the sides: no horizontal scrollbar meanwhile
+    overflow-x: hidden;
+
+    &.push > *,
+    &.pop > * {
+        animation: 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    &.push > * {
+        animation-name: details-panel-push;
+    }
+
+    &.pop > * {
+        animation-name: details-panel-pop;
+    }
+
+    @for $i from 1 through 10 {
+        &.push > :nth-child(#{$i}),
+        &.pop > :nth-child(#{$i}) {
+            animation-delay: #{($i - 1) * 45}ms;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &.push > *,
+        &.pop > * {
+            animation: none;
+        }
+    }
+}
+
+@keyframes details-panel-push {
+    from {
+        opacity: 0;
+        transform: translateX(24px);
+    }
+}
+
+@keyframes details-panel-pop {
+    from {
+        opacity: 0;
+        transform: translateX(-24px);
     }
 }

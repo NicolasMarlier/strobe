@@ -6,12 +6,26 @@ import DmxButtonDetailsPlaceholder from './DmxButtonDetailsPlaceholder'
 import DmxEffectNaturePicker from './DmxEffectNaturePicker'
 import TriggeringMidiKeySelect from './TriggeringMidiKeySelect'
 import SegmentedControl from '../DesignSystem/SegmentedControl/SegmentedControl'
+import ConfirmModal from '../DesignSystem/ConfirmModal/ConfirmModal'
+import { TrashIcon } from '../DesignSystem/Icons'
+import { usePanelTransition } from '../DesignSystem/DetailsPanel/usePanelTransition'
 
+// The selected button's settings, or a placeholder. Selecting a button slides its settings in,
+// deselecting it slides the placeholder back
 const DmxButtonDetails = () => {
-    const { dmxButtons, selectedDmxButtonId, updateDmxButtonAndSync, deleteDmxButtonAndSync, currentTrackId } = useDmxButtonsContext()
-    
+    const { dmxButtons, selectedDmxButtonId } = useDmxButtonsContext()
     const dmxButton = dmxButtons.find(({id}) => id == selectedDmxButtonId)
-    if(!dmxButton) return <DmxButtonDetailsPlaceholder/>
+    const transition = usePanelTransition(!!dmxButton)
+
+    if(!dmxButton) return <DmxButtonDetailsPlaceholder className={transition}/>
+    // Rebuilt for another button: its settings slide in again
+    return <DmxButtonForm key={dmxButton.id} dmxButton={dmxButton} transition={transition}/>
+}
+
+const DmxButtonForm = ({ dmxButton, transition }: { dmxButton: DmxButton, transition: string }) => {
+    const { updateDmxButtonAndSync, deleteDmxButtonAndSync, currentTrackId } = useDmxButtonsContext()
+    // DELETE asks first
+    const [confirmingDelete, setConfirmingDelete] = useState(false)
 
     const [nature, setNature] = useState(dmxButton.nature)
     const [durationMs, setDurationMs] = useState(dmxButton.duration_ms)
@@ -37,7 +51,7 @@ const DmxButtonDetails = () => {
         })
     }, [color, durationMs, nature, triggeringMidiKey, trackId])
 
-    return <div className="details-panel dmx-button-details">
+    return <div className={`details-panel dmx-button-details ${transition}`}>
         <div>
             <label>Function</label>
             <DmxEffectNaturePicker
@@ -81,7 +95,13 @@ const DmxButtonDetails = () => {
                 />
         </div>
 
-        <div className="delete-btn btn" onClick={() => deleteDmxButtonAndSync(dmxButton.id)}>DELETE</div>
+        <div className="delete-icon-btn" title="Delete" onClick={() => setConfirmingDelete(true)}><TrashIcon/></div>
+
+        { confirmingDelete && <ConfirmModal
+            title='Delete this button?'
+            confirmLabel='Delete'
+            onConfirm={() => { setConfirmingDelete(false); deleteDmxButtonAndSync(dmxButton.id) }}
+            onCancel={() => setConfirmingDelete(false)}/> }
     </div>
 }
 

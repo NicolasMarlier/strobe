@@ -1,7 +1,11 @@
 import '../DesignSystem/DetailsPanel/DetailsPanel.scss'
 import './DmxSceneDetails.scss'
+import { useState } from 'react'
 import { useDmxSceneContext } from '../../contexts/DmxSceneContext'
 import { defaultLedBarPosition, LED_BAR_CENTER_POSITION } from '../../../shared/led_bar'
+import ConfirmModal from '../DesignSystem/ConfirmModal/ConfirmModal'
+import { TrashIcon } from '../DesignSystem/Icons'
+import { usePanelTransition } from '../DesignSystem/DetailsPanel/usePanelTransition'
 
 const DMX_CHANNELS = 512
 const NEW_LED_BAR_DOTS = 8
@@ -21,14 +25,22 @@ const FIELDS: Field[] = [
 const nextFreeChannel = (ledBars: LedBarConfig[]) =>
     Math.max(1, ...ledBars.map(({ channel, rgb_dots_count }) => channel + rgb_dots_count * 3))
 
+// The list shows elements, named after their type: all LED bars for now
+const ledBarName = (index: number) => `LED bar-${index + 1}`
+
 // DMX channels a bar uses, 3 per dot (red, green, blue)
 const channelRange = ({ channel, rgb_dots_count }: LedBarConfig) => `${channel}–${channel + rgb_dots_count * 3 - 1}`
 
 // Panel on the right of the scene: the LED bars list, or the selected bar's settings
 const DmxSceneDetails = () => {
     const { dmxScene, updateDmxScene, selectedLedBarIndex, setSelectedLedBarIndex } = useDmxSceneContext()
+    // DELETE asks first
+    const [confirmingDelete, setConfirmingDelete] = useState(false)
     const ledBars = dmxScene.led_bars
     const selectedLedBar = selectedLedBarIndex == undefined ? undefined : ledBars[selectedLedBarIndex]
+
+    // A bar's settings come in from the right, over the list; the list comes back from the left
+    const transition = usePanelTransition(!!selectedLedBar)
 
     const updateLedBar = (index: number, ledBar: LedBarConfig) =>
         updateDmxScene({ led_bars: ledBars.map((current, i) => i == index ? ledBar : current) })
@@ -54,12 +66,12 @@ const DmxSceneDetails = () => {
     }
 
     if (selectedLedBarIndex == undefined || !selectedLedBar) {
-        return <div className='details-panel dmx-scene-details'>
-            <label>LED bars</label>
+        return <div className={`details-panel dmx-scene-details ${transition}`}>
+            <label>Elements</label>
             <div className='led-bars-list'>
                 { ledBars.map((ledBar, index) => (
                     <div key={index} className='led-bars-list-item' onClick={() => setSelectedLedBarIndex(index)}>
-                        <span className='name'>LED bar #{index + 1}</span>
+                        <span className='name'>{ledBarName(index)}</span>
                         <span className='channels'>{ channelRange(ledBar) }</span>
                     </div>
                 ))}
@@ -77,11 +89,10 @@ const DmxSceneDetails = () => {
 
     // The inputs keep what's typed: rebuild them for another bar, or when the bars move around,
     // so they never show the values of the bar that was selected before
-    return <div key={`${selectedLedBarIndex}-${ledBars.length}`} className='details-panel dmx-scene-details'>
-        <div className='details-header'>
-            <span>LED bar #{selectedLedBarIndex + 1}</span>
-            <div className='close-btn' title='Close' onClick={() => setSelectedLedBarIndex(undefined)}>×</div>
-        </div>
+    return <div key={`${selectedLedBarIndex}-${ledBars.length}`} className={`details-panel dmx-scene-details ${transition}`}>
+        <div className='back-btn btn' onClick={() => setSelectedLedBarIndex(undefined)}>← All elements</div>
+
+        <div className='details-header'>{ledBarName(selectedLedBarIndex)}</div>
 
         { FIELDS.map(field => (
             <div key={field.key}>
@@ -105,7 +116,14 @@ const DmxSceneDetails = () => {
             RESET POSITION
         </div>
 
-        <div className='delete-btn btn' onClick={() => deleteLedBar(selectedLedBarIndex)}>DELETE</div>
+        <div className='delete-icon-btn' title='Delete' onClick={() => setConfirmingDelete(true)}><TrashIcon/></div>
+
+        { confirmingDelete && <ConfirmModal
+            title={`Delete ${ledBarName(selectedLedBarIndex)}?`}
+            message='It will be removed from the scene. The DMX buttons keep their channels.'
+            confirmLabel='Delete'
+            onConfirm={() => { setConfirmingDelete(false); deleteLedBar(selectedLedBarIndex) }}
+            onCancel={() => setConfirmingDelete(false)}/> }
     </div>
 }
 
