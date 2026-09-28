@@ -161,6 +161,9 @@ export class MidiRouter extends EventEmitter {
     this.emit("disconnected", name);
   }
 
+  // Names of the MIDI inputs currently open, in the order they were connected
+  inputNames = () => [...this.inputs.keys()]
+
   onMessage(handler: MidiHandler) {
     this.on("message", handler);
   }

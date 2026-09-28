@@ -106,6 +106,11 @@ export interface ApiContract {
     args: []
     result: boolean
   }
+  // Names of the MIDI inputs connected (see interfaces:midi_inputs_changed)
+  'interfaces:midi_inputs': {
+    args: []
+    result: string[]
+  }
   // Undo or redo the show's last change; returns whether there was one
   'show:undo': {
     args: []

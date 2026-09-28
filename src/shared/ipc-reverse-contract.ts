@@ -20,6 +20,14 @@ export interface ApiReverseContract {
   'edit:redo': {
     params: null
   }
+  // A MIDI input was plugged or unplugged: the names of those connected
+  'interfaces:midi_inputs_changed': {
+    params: string[]
+  }
+  // A MIDI input is sending (its name), at most every 400 ms
+  'interfaces:midi_activity': {
+    params: string
+  }
   // Undo or redo brought the show back to a previous state: the UI reloads it
   'show:restored': {
     params: null

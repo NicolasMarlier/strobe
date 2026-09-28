@@ -6,7 +6,6 @@ import DmxButtonDetails from './components/DmxButtonDetails/DmxButtonDetails';
 import TrackSelect from './components/TrackSelect/TrackSelect';
 import DmxButtonsCollection from './components/DmxButtonsCollection/DmxButtonsCollection';
 import MidiPlayer from './components/MidiPlayer/TrackEditor';
-import Statuses from './components/Statuses/Statuses';
 import { useDmxButtonsContext } from './contexts/DmxButtonsContext';
 import DebugConsole from './components/DebugConsole/DebugConsole';
 import { useRealTimeContext } from './contexts/RealTimeContext';
@@ -18,6 +17,7 @@ import AudioPlayer from './components/MidiPlayer/AudioPlayer';
 import SaveButton from './components/SaveButton/SaveButton';
 import SelectionLink from './components/SelectionLink/SelectionLink';
 import { useEditMenu } from './useEditMenu';
+import InterfacesSection from './components/Interfaces/InterfacesSection';
 
 
 
@@ -60,15 +60,19 @@ function App() {
             </SmallButton>
             <AudioPlayer/>
           </div>
-          <Statuses/>
         </div>
 
-        <div className="section midi">
-          <div className="section-title">Track automation</div>
-          <div className="section-body">
-            { track ? <MidiPlayer track={track}/> : <></>}
+        {/* The interfaces, then the track automation taking the rest of the column */}
+        <div className="left-column">
+          <InterfacesSection/>
 
-            {selectedMidiPatterns.length == 1 && <NoteEditor pattern={ selectedMidiPatterns[0]}/>}
+          <div className="section midi">
+            <div className="section-title">Track automation</div>
+            <div className="section-body">
+              { track ? <MidiPlayer track={track}/> : <></>}
+
+              {selectedMidiPatterns.length == 1 && <NoteEditor pattern={ selectedMidiPatterns[0]}/>}
+            </div>
           </div>
         </div>
 

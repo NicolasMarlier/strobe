@@ -32,6 +32,16 @@ h1 {
   box-sizing: border-box;
   background-color: #222;
 
+  // The Interfaces section over the Track automation one
+  .left-column {
+    grid-area: midi;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+    min-height: 0;
+  }
+
   .section {
     border-radius: 5px;
     border: 2px solid #161616;
@@ -43,8 +53,85 @@ h1 {
     gap: 20px;
     position: relative;
 
+    // A thin strip: MIDI in → Strobe → DMX out. Collapsed by clicking its title
+    &.interfaces-section {
+      flex: none;
+      transition: border-color 0.3s ease;
+
+      // Collapsed, only its title shows: no frame
+      &.collapsed {
+        border-color: transparent;
+      }
+
+      .section-title.collapsible {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
+        transition: color 0.15s ease;
+
+        // Shown on hover: the title can be clicked
+        .chevron {
+          opacity: 0;
+          transition: opacity 0.15s ease, transform 0.3s ease;
+        }
+
+        &:hover {
+          color: #bbb;
+
+          .chevron {
+            opacity: 1;
+          }
+        }
+      }
+
+      &.collapsed .chevron {
+        transform: rotate(-90deg);
+      }
+
+      // The body's height goes to 0 without knowing the content's: its grid row goes from 1fr to 0fr
+      .section-body {
+        padding: 0;
+      }
+
+      .collapsible-content {
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.25s ease;
+      }
+
+      .collapsible-inner {
+        min-height: 0;
+        overflow: hidden;
+        padding: 18px 20px 12px;
+        transition: padding 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      &.collapsed {
+        .collapsible-content {
+          grid-template-rows: 0fr;
+          opacity: 0;
+        }
+
+        // Just the border and the title left
+        .collapsible-inner {
+          padding-top: 6px;
+          padding-bottom: 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .collapsible-content,
+        .collapsible-inner,
+        .chevron {
+          transition: none;
+        }
+      }
+    }
+
     &.midi {
-      grid-area: midi;
+      flex: 1;
 
       .section-body {
         // Below the title, which overlaps the top border
