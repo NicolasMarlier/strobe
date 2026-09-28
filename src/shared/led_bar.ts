@@ -1,9 +1,15 @@
 const BARS_PER_ROW = 3
 
-// Where a bar without a position goes: rows of 3 bars, 1.5 m high, each row 1 m further upstage
+// Height of a bar's center when it rests on the floor: half its 10 cm housing
+export const LED_BAR_FLOOR_HEIGHT = 0.05
+
+// The middle of the stage, on the floor, where the camera looks: to bring back a bar lost out of view
+export const LED_BAR_CENTER_POSITION: Vector3Tuple = [0, LED_BAR_FLOOR_HEIGHT, 0]
+
+// Where a bar without a position goes: rows of 3 bars on the floor, each row 1 m further upstage
 export const defaultLedBarPosition = (index: number): Vector3Tuple => [
     ((index % BARS_PER_ROW) - 1) * 2.5,
-    1.5,
+    LED_BAR_FLOOR_HEIGHT,
     -1 - Math.floor(index / BARS_PER_ROW),
 ]
 

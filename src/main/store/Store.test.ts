@@ -140,7 +140,10 @@ describe('load and toData', () => {
             tracks: [{ id: 31, name: 'INTRO', bpm: 70, audio_filename: null }],
             dmx_buttons: [],
             dmx_midis: [{ track_id: 31, midi_patterns: [] }],
-            dmx_scene: { led_bars: [{ channel: 97, rgb_dots_count: 16, position: [2, 0.5, -3], rotation: [0, 45, 0] }] },
+            dmx_scene: {
+                led_bars: [{ channel: 97, rgb_dots_count: 16, position: [2, 0.5, -3], rotation: [0, 45, 0] }],
+                display: { show_grid: true, show_beams: false, zoom: 12 },
+            },
         }
         store.load(data)
 

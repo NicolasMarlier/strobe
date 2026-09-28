@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto"
+import { LED_BAR_CENTER_POSITION } from "../../shared/led_bar"
 
-const LED_BAR: LedBarConfig = { channel: 1, rgb_dots_count: 8, position: [0, 1.5, -1], rotation: [0, 0, 0] }
+const LED_BAR: LedBarConfig = { channel: 1, rgb_dots_count: 8, position: LED_BAR_CENTER_POSITION, rotation: [0, 0, 0] }
 
 // Red channel of each RGB dot of a LED bar
 const redChannels = ({ channel, rgb_dots_count }: LedBarConfig) =>

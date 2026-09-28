@@ -2,7 +2,7 @@ import { useRef, type RefObject } from 'react'
 import { useThree, type ThreeEvent } from '@react-three/fiber'
 import { Group, Plane, Vector3 } from 'three'
 
-// Moves snap to this step, in meters (hold Alt to move freely)
+// Moves snap to this step, in meters
 const SNAP = 0.05
 
 type DragMode = 'floor' | 'height'
@@ -16,9 +16,9 @@ interface Drag {
     moved: boolean
 }
 
-const snap = (value: number, free: boolean) =>
+const snap = (value: number) =>
     // Rounded to the millimeter, so saved positions don't carry float noise
-    Math.round((free ? value : Math.round(value / SNAP) * SNAP) * 1000) / 1000
+    Math.round(Math.round(value / SNAP) * SNAP * 1000) / 1000
 
 // Drags a LED bar in the 3D scene seen from a fixed camera:
 // a plain drag slides it on the floor (X/Z), Shift+drag moves it up and down (Y).
@@ -75,13 +75,12 @@ export const useBarDrag = (
         const hit = e.ray.intersectPlane(drag.plane, new Vector3())
         if (!hit) return
         const target = hit.add(drag.offset)
-        const free = e.altKey
 
         if (mode == 'floor') {
-            group.position.x = snap(target.x, free)
-            group.position.z = snap(target.z, free)
+            group.position.x = snap(target.x)
+            group.position.z = snap(target.z)
         } else {
-            group.position.y = Math.max(0, snap(target.y, free))
+            group.position.y = Math.max(0, snap(target.y))
         }
         drag.moved = true
         invalidate()

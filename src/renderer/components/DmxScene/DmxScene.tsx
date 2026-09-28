@@ -6,14 +6,18 @@ import { Grid } from '@react-three/drei'
 import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import type { TransformControls as TransformControlsImpl } from 'three-stdlib'
 import LedBar, { isPointerOverGizmo } from "./LedBar";
-import SceneSettings, { type SceneDisplay } from "./SceneSettings";
+import SceneSettings from "./SceneSettings";
+import MoveHint from "./MoveHint";
+import { useModifierKeys } from "./useModifierKeys";
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext";
 import { useRealTimeContext } from "../../contexts/RealTimeContext";
 import { useDmxSceneContext } from "../../contexts/DmxSceneContext";
+import { LED_BAR_CENTER_POSITION } from "../../../shared/led_bar";
 
-// Fixed camera: from the audience, a bit above head height, looking slightly down at the stage
+// Fixed camera: from the audience, a bit above head height, looking down at the middle of the stage
 const CAMERA_POSITION: Vector3Tuple = [0, 2.2, 5]
-const CAMERA_TARGET: Vector3Tuple = [0, 1.4, 0]
+// Aims at the middle of the stage, where a reset bar goes
+const CAMERA_TARGET: Vector3Tuple = LED_BAR_CENTER_POSITION
 // The camera frames this width of stage (in meters, at the target), whatever the panel's shape,
 // without its vertical angle going over the maximum on narrow panels
 const FRAMED_WIDTH = 8
@@ -30,10 +34,16 @@ const WIDE_ANGLE = 6
 // Zoom on the stage: 1 frames FRAMED_WIDTH, 2 half of it
 const ZOOM_DEFAULT = 4
 const ZOOM_MIN = 1.5
-const ZOOM_MAX = 10
+const ZOOM_MAX = 25
 // How fast the trackpad zooms: pinching sends small deltas, scrolling with two fingers bigger ones
 const PINCH_SPEED = 0.01
 const SCROLL_SPEED = 0.002
+
+// For shows saved without display options
+const DEFAULT_DISPLAY: DmxSceneDisplay = { show_grid: true, show_beams: true, zoom: ZOOM_DEFAULT }
+
+// A zoom is saved once it settles: pinching sends dozens of changes per second
+const ZOOM_SAVE_DELAY_MS = 500
 
 const clampZoom = (zoom: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom))
 
@@ -90,8 +100,20 @@ const DmxScene = () => {
     const gizmoRef = useRef<TransformControlsImpl>(null)
     const sceneRef = useRef<HTMLDivElement>(null)
 
-    const [zoom, setZoom] = useState(ZOOM_DEFAULT)
-    const [display, setDisplay] = useState<SceneDisplay>({ showBeams: true, showGrid: true })
+    // Display options, saved with the show
+    const display = { ...DEFAULT_DISPLAY, ...dmxScene.display }
+    const updateDisplay = (changes: Partial<DmxSceneDisplay>) =>
+      updateDmxScene(dmxScene => ({ display: { ...DEFAULT_DISPLAY, ...dmxScene.display, ...changes } }))
+
+    // Zoomed right away, saved once it settles
+    const [zoom, setZoom] = useState(display.zoom)
+    useEffect(() => setZoom(display.zoom), [display.zoom])
+    useEffect(() => {
+      if (zoom == display.zoom) return
+      const timeout = setTimeout(() => updateDisplay({ zoom: Math.round(zoom * 100) / 100 }), ZOOM_SAVE_DELAY_MS)
+      return () => clearTimeout(timeout)
+    }, [zoom])
+    const { shift, alt } = useModifierKeys()
 
     // Pinching the trackpad (a wheel event with ctrlKey) or scrolling with two fingers zooms.
     // Listened to natively: React's wheel listeners are passive, and can't keep the page from zooming
@@ -142,7 +164,7 @@ const DmxScene = () => {
         <color attach='background' args={[BACKGROUND]}/>
 
         <Grid
-          visible={display.showGrid}
+          visible={display.show_grid}
           position={[0, 0, (FLOOR_FRONT + FLOOR_BACK) / 2]}
           args={[FLOOR_WIDTH, FLOOR_FRONT - FLOOR_BACK]}
           cellSize={0.25}
@@ -166,7 +188,8 @@ const DmxScene = () => {
             onMove={(position) => updateLedBar(index, { position })}
             onRotate={(rotation) => updateLedBar(index, { rotation })}
             gizmoRef={gizmoRef}
-            showBeams={display.showBeams}/>
+            showBeams={display.show_beams}
+            rotating={alt}/>
         ))}
 
         <EffectComposer>
@@ -174,7 +197,10 @@ const DmxScene = () => {
         </EffectComposer>
       </Canvas>
 
-      <SceneSettings display={display} onChange={setDisplay}/>
+      <SceneSettings display={display} onChange={updateDisplay}/>
+
+      {/* The selected bar can be moved: bars can't be moved while assigning channels */}
+      { selectedLedBarIndex != undefined && !assignMode && <MoveHint shift={shift} alt={alt}/> }
 
       {/* On a log scale, so each step zooms as much */}
       <input

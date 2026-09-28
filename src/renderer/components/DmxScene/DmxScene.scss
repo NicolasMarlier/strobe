@@ -99,3 +99,48 @@
         }
     }
 }
+
+// Over the scene's bottom-left corner, while a LED bar is selected
+.move-hint {
+    position: absolute;
+    left: 20px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #ffffff77;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+
+    .separator {
+        color: #ffffff33;
+    }
+
+    .key {
+        padding: 1px 6px;
+        border-radius: 4px;
+        border: 1px solid #ffffff33;
+        background-color: #161616;
+        color: #ccc;
+        transition: background-color 0.1s, color 0.1s;
+
+        &.held {
+            background-color: #fff;
+            color: #161616;
+        }
+    }
+}
+
+// Height of the selected LED bar, next to its line down to the floor (FloorGuide)
+.floor-guide-height {
+    margin-left: 44px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background-color: #161616cc;
+    font-size: 10px;
+    color: #ccc;
+    white-space: nowrap;
+    user-select: none;
+}

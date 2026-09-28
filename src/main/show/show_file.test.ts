@@ -13,7 +13,10 @@ const data: ShowData = {
         red_channels: [1, 4], nature: 'Boom', triggering_midi_key: 36,
     }],
     dmx_midis: [{ track_id: 31, midi_patterns: [{ ticks: 0, midi_notes: [], durationTicks: 960 }] }],
-    dmx_scene: { led_bars: [{ channel: 1, rgb_dots_count: 8, position: [-1, 1.5, -2], rotation: [0, 90, 15] }] },
+    dmx_scene: {
+        led_bars: [{ channel: 1, rgb_dots_count: 8, position: [-1, 1.5, -2], rotation: [0, 90, 15] }],
+        display: { show_grid: false, show_beams: true, zoom: 6.5 },
+    },
 }
 
 const writeAudio = (dir: string, name: string, content: string) => {

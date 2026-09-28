@@ -1,16 +1,18 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useThree, type ThreeEvent } from '@react-three/fiber'
 import { Edges, TransformControls } from '@react-three/drei'
-import { AdditiveBlending, Color, CylinderGeometry, DoubleSide, Group, InstancedMesh, MathUtils, Matrix4, Object3D, ShaderMaterial, SRGBColorSpace } from 'three'
+import { AdditiveBlending, CatmullRomCurve3, Color, CylinderGeometry, DoubleSide, Group, InstancedMesh, Line, LineBasicMaterial, MathUtils, Matrix4, Mesh, MeshBasicMaterial, Object3D, ShaderMaterial, SRGBColorSpace, TubeGeometry, Vector3 } from 'three'
 import { useBarDrag } from './useBarDrag'
+import FloorGuide from './FloorGuide'
 import type { TransformControls as TransformControlsImpl } from 'three-stdlib'
 
 // Sizes in meters
 // Every bar has the same length, whatever its dot count
 const BAR_LENGTH = 1
-// Square lenses side by side, sharing the bar's length: joined in a continuous strip
-const LENS_HEIGHT = 0.08
 const HOUSING_HEIGHT = 0.1
+// Square lenses side by side, sharing the bar's length: joined in a continuous strip
+// covering the whole front face, so a lit bar's face is all its color
+const LENS_HEIGHT = HOUSING_HEIGHT
 const HOUSING_DEPTH = 0.06
 // The dots are lenses on the housing's front face (+Z), just over it
 const DOT_Z = HOUSING_DEPTH / 2 + 0.001
@@ -21,7 +23,12 @@ const ROTATION_SNAP = MathUtils.degToRad(15)
 // Dots are drawn brighter than their DMX value so lit dots go past the bloom threshold
 const DOT_BRIGHTNESS = 2
 // An unlit dot stays visible, below the bloom threshold
-const UNLIT_DOT = new Color(0.04, 0.04, 0.04)
+const UNLIT_DOT = new Color(0.13, 0.13, 0.13)
+// The housing is almost black, but for its lighter front face, around the lenses
+const HOUSING_COLOR = '#121212'
+const HOUSING_FRONT_COLOR = '#5a5a5a'
+const HOUSING_FACE_COLORS = [HOUSING_COLOR, HOUSING_COLOR, HOUSING_COLOR, HOUSING_COLOR, HOUSING_FRONT_COLOR, HOUSING_COLOR]
+
 // Seen side-on, a dot keeps this share of its brightness
 const SIDE_BRIGHTNESS = 0.05
 
@@ -57,8 +64,9 @@ const DOT_MATERIAL = new ShaderMaterial({
     uniforms: { sideBrightness: { value: SIDE_BRIGHTNESS } },
 })
 
+// The housing's outline only shows a state: none on an idle bar
 const EDGES_COLOR = {
-    idle: '#444',
+    idle: null,
     hovered: '#888',
     editing: '#bbb',
     assigned: '#fff',
@@ -78,6 +86,8 @@ interface Props {
     // Rotation rings of the bar being edited (a single one in the scene)
     gizmoRef: React.RefObject<TransformControlsImpl | null>
     showBeams: boolean
+    // Alt is held: the selected bar shows its rotation rings, and can't be moved
+    rotating: boolean
 }
 
 // Whether the pointer is over one of the rotation rings.
@@ -85,13 +95,47 @@ interface Props {
 export const isPointerOverGizmo = (gizmo: TransformControlsImpl | null) =>
     !!(gizmo as unknown as { axis: string | null } | null)?.axis
 
-// Keeps only the X/Y/Z rings, which snap: removes the free rotation handles (the outer ring,
-// and the invisible trackball sphere that would cover the bar and catch the presses meant to move it)
-const removeFreeRotationHandles = (gizmo: TransformControlsImpl) => {
-    const { gizmo: handles, picker } = (gizmo as unknown as { gizmo: Record<'gizmo' | 'picker', Record<string, Object3D>> }).gizmo
+// Thickness of the rotation rings (their radius is 1, scaled to the screen by the controls)
+const RING_THICKNESS = 0.035
+
+// The X/Y/Z rings are 1px lines (WebGL lines can't be thicker): replaces each with a tube along
+// the same points. Named and colored like the line, so the controls turn and highlight it the same way
+const thickenRing = (group: Object3D, line: Line) => {
+    const points = []
+    const position = line.geometry.getAttribute('position')
+    for (let i = 0; i < position.count; i++) points.push(new Vector3().fromBufferAttribute(position, i))
+
+    const lineMaterial = line.material as LineBasicMaterial
+    const tube = new Mesh(
+        new TubeGeometry(new CatmullRomCurve3(points), points.length, RING_THICKNESS, 6),
+        new MeshBasicMaterial({
+            color: lineMaterial.color,
+            opacity: lineMaterial.opacity,
+            transparent: lineMaterial.transparent,
+            depthTest: false,
+            depthWrite: false,
+            fog: false,
+            toneMapped: false,
+        }),
+    )
+    Object.assign(tube, { name: line.name, tag: (line as unknown as { tag?: string }).tag, renderOrder: line.renderOrder })
+    group.remove(line)
+    group.add(tube)
+}
+
+// Keeps only the X/Y/Z rings, which snap, and thickens them. Removes the free rotation handles
+// (the outer ring, and the invisible trackball sphere that would cover the bar and catch the presses
+// meant to move it), and the helper lines (an endless white line along the hovered ring's axis)
+const setupRotationHandles = (gizmo: TransformControlsImpl) => {
+    const { gizmo: handles, picker, helper } =
+        (gizmo as unknown as { gizmo: Record<'gizmo' | 'picker' | 'helper', Record<string, Object3D>> }).gizmo
     for (const group of [handles.rotate, picker.rotate]) {
         group.children.filter(({ name }) => name == 'E' || name == 'XYZE').forEach(handle => group.remove(handle))
     }
+    handles.rotate.children
+        .filter((handle): handle is Line => handle instanceof Line)
+        .forEach(line => thickenRing(handles.rotate, line))
+    helper.rotate.clear()
 }
 
 // Light beams: an open cone per dot, from its lens forward (+Z), widening to BEAM_END_RADIUS
@@ -159,7 +203,7 @@ const lensWidth = (count: number) => BAR_LENGTH / count
 const dotX = (index: number, count: number) => (index - (count - 1) / 2) * lensWidth(count)
 
 const LedBar = (props: Props) => {
-    const { config, dmxHexSignal, assignMode, editing, selectedRedChannels, onSelectRedChannels, onSelect, onMove, onRotate, gizmoRef, showBeams } = props
+    const { config, dmxHexSignal, assignMode, editing, selectedRedChannels, onSelectRedChannels, onSelect, onMove, onRotate, gizmoRef, showBeams, rotating } = props
     const { channel, rgb_dots_count: size } = config
     const position = config.position ?? [0, 0, 0]
     const rotation = config.rotation ?? [0, 0, 0]
@@ -170,11 +214,13 @@ const LedBar = (props: Props) => {
     const dotsRef = useRef<InstancedMesh>(null)
     const beamsRef = useRef<InstancedMesh>(null)
     const [hovered, setHovered] = useState(false)
+    // A ring is being dragged: the rings stay until it's released, even if Alt is released first
+    const [turning, setTurning] = useState(false)
 
     const redChannels = useMemo(() => Array.from(Array(size).keys()).map((i) => channel + i * 3), [channel, size])
     const selected = redChannels.every(redChannel => selectedRedChannels.includes(redChannel))
 
-    const drag = useBarDrag(groupRef, !assignMode, onMove)
+    const drag = useBarDrag(groupRef, !assignMode && !rotating, onMove)
 
     // Dots' positions along the bar
     useLayoutEffect(() => {
@@ -207,9 +253,9 @@ const LedBar = (props: Props) => {
         invalidate()
     }, [dmxHexSignal, redChannels])
 
-    const showGizmo = editing && !assignMode
+    const showGizmo = editing && !assignMode && (rotating || turning)
     useEffect(() => {
-        if (showGizmo && gizmoRef.current) removeFreeRotationHandles(gizmoRef.current)
+        if (showGizmo && gizmoRef.current) setupRotationHandles(gizmoRef.current)
     }, [showGizmo])
 
     const setCursor = (cursor: string) => { gl.domElement.style.cursor = cursor }
@@ -227,12 +273,12 @@ const LedBar = (props: Props) => {
         onSelectRedChannels([redChannel], !selectedRedChannels.includes(redChannel))
     }
 
-    // Moving the bar selects it, so its rotation rings show up
+    // Pressing a bar selects it, and moves it unless rotating (Alt held: its rings rotate it)
     const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
         // The rotation rings in front of a bar get the click
         if (assignMode || e.button != 0 || isPointerOverGizmo(gizmoRef.current)) return
         onSelect()
-        drag.onPointerDown(e)
+        if (!rotating) drag.onPointerDown(e)
     }
 
     const edgesColor = selected ? EDGES_COLOR.assigned
@@ -241,6 +287,7 @@ const LedBar = (props: Props) => {
         : EDGES_COLOR.idle
 
     const onRotationEnd = () => {
+        setTurning(false)
         const { x, y, z } = groupRef.current!.rotation
         onRotate([x, y, z].map(angle => Math.round(MathUtils.radToDeg(angle) * 100) / 100) as Vector3Tuple)
     }
@@ -250,7 +297,7 @@ const LedBar = (props: Props) => {
         ref={groupRef}
         position={position}
         rotation={rotation.map(MathUtils.degToRad) as Vector3Tuple}
-        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); setCursor(assignMode ? 'pointer' : 'grab') }}
+        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); setCursor(assignMode || rotating ? 'pointer' : 'grab') }}
         onPointerOut={() => { setHovered(false); setCursor('') }}
         onPointerDown={onPointerDown}
         onPointerMove={drag.onPointerMove}
@@ -259,8 +306,9 @@ const LedBar = (props: Props) => {
 
         <mesh onClick={onHousingClick}>
             <boxGeometry args={[BAR_LENGTH, HOUSING_HEIGHT, HOUSING_DEPTH]}/>
-            <meshBasicMaterial color='#151515'/>
-            <Edges color={edgesColor}/>
+            {/* Box faces: +X, -X, +Y, -Y, +Z (the lenses' face), -Z */}
+            { HOUSING_FACE_COLORS.map((color, i) => <meshBasicMaterial key={i} attach={`material-${i}`} color={color}/>) }
+            { edgesColor && <Edges color={edgesColor}/> }
         </mesh>
 
         {/* Remounted when the dot count changes: an InstancedMesh has a fixed capacity */}
@@ -281,6 +329,8 @@ const LedBar = (props: Props) => {
         ))}
     </group>
 
+    { editing && !assignMode && <FloorGuide barRef={groupRef} barLength={BAR_LENGTH} barThickness={HOUSING_HEIGHT}/> }
+
     { showGizmo &&
         <TransformControls
             ref={gizmoRef}
@@ -289,6 +339,7 @@ const LedBar = (props: Props) => {
             space='local'
             size={0.7}
             rotationSnap={ROTATION_SNAP}
+            onMouseDown={() => setTurning(true)}
             onMouseUp={onRotationEnd}/>
     }
     </>

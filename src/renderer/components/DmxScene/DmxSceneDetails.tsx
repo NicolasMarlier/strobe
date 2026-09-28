@@ -1,7 +1,7 @@
 import '../DesignSystem/DetailsPanel/DetailsPanel.scss'
 import './DmxSceneDetails.scss'
 import { useDmxSceneContext } from '../../contexts/DmxSceneContext'
-import { defaultLedBarPosition } from '../../../shared/led_bar'
+import { defaultLedBarPosition, LED_BAR_CENTER_POSITION } from '../../../shared/led_bar'
 
 const DMX_CHANNELS = 512
 const NEW_LED_BAR_DOTS = 8
@@ -97,6 +97,13 @@ const DmxSceneDetails = () => {
                     onBlur={(e) => { e.target.value = String(selectedLedBar[field.key]) }}/>
             </div>
         ))}
+
+        {/* Back to the middle of the stage, facing the audience */}
+        <div
+            className='reset-btn btn'
+            onClick={() => updateLedBar(selectedLedBarIndex, { ...selectedLedBar, position: LED_BAR_CENTER_POSITION, rotation: [0, 0, 0] })}>
+            RESET POSITION
+        </div>
 
         <div className='delete-btn btn' onClick={() => deleteLedBar(selectedLedBarIndex)}>DELETE</div>
     </div>

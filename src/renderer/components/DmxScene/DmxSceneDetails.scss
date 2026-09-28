@@ -33,6 +33,16 @@
         padding: 4px 10px;
     }
 
+    // Same size as the DELETE button (see DetailsPanel), but with the fields
+    .reset-btn {
+        height: 22px;
+        box-sizing: border-box;
+        padding: 2px 0;
+        line-height: 14px;
+        text-align: center;
+        font-size: 12px;
+    }
+
     // Selected bar's name, and the button back to the list
     .details-header {
         display: flex;

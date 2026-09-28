@@ -1,18 +1,13 @@
 import { useState } from 'react'
 
-export interface SceneDisplay {
-    showBeams: boolean
-    showGrid: boolean
-}
-
-const OPTIONS: { key: keyof SceneDisplay, label: string }[] = [
-    { key: 'showBeams', label: 'Show beams' },
-    { key: 'showGrid', label: 'Show grid' },
+const OPTIONS: { key: 'show_beams' | 'show_grid', label: string }[] = [
+    { key: 'show_beams', label: 'Show beams' },
+    { key: 'show_grid', label: 'Show grid' },
 ]
 
 interface Props {
-    display: SceneDisplay
-    onChange: (display: SceneDisplay) => void
+    display: DmxSceneDisplay
+    onChange: (changes: Partial<DmxSceneDisplay>) => void
 }
 
 // Small menu over the scene's top-left corner: what the scene shows
@@ -32,7 +27,7 @@ const SceneSettings = ({ display, onChange }: Props) => {
                     <input
                         type='checkbox'
                         checked={display[key]}
-                        onChange={(e) => onChange({ ...display, [key]: e.target.checked })}/>
+                        onChange={(e) => onChange({ [key]: e.target.checked })}/>
                     {label}
                 </label>
             ))}

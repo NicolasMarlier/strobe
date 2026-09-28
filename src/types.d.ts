@@ -147,9 +147,17 @@ type LedBarConfig = {
 
 type Vector3Tuple = [number, number, number]
 
+// How the 3D scene is shown, saved with the show (defaults in DmxScene.tsx)
+type DmxSceneDisplay = {
+    show_grid: boolean,
+    show_beams: boolean,
+    zoom: number
+}
+
 // How the lights are laid out in the 3D scene
 type DmxScene = {
-    led_bars: LedBarConfig[]
+    led_bars: LedBarConfig[],
+    display?: DmxSceneDisplay
 }
 
 type DmxTriggerState = 'up' | 'down'
