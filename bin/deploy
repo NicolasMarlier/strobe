@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#
+# Builds Strobe (yarn make) and installs the app in /Applications, replacing the one there.
+#
+# The new app is copied next to the installed one, then swapped in:
+# a failed build or copy leaves the installed app untouched.
+# Installs elsewhere with DEST=<folder>.
+
+set -euo pipefail
+
+APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+APP_NAME="Strobe"
+DEST="${DEST:-/Applications}"
+INSTALLED_APP="$DEST/$APP_NAME.app"
+
+# Electron Forge names its build folder after the architecture: arm64 or x64
+case "$(uname -m)" in
+  arm64) ARCH="arm64" ;;
+  x86_64) ARCH="x64" ;;
+  *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+esac
+BUILT_APP="$APP_DIR/out/$APP_NAME-darwin-$ARCH/$APP_NAME.app"
+
+# A running app would keep its old files: fail fast, before the build
+if pgrep -f "$INSTALLED_APP/Contents/MacOS/" >/dev/null; then
+  echo "$APP_NAME is running from $INSTALLED_APP: quit it, then retry." >&2
+  exit 1
+fi
+
+cd "$APP_DIR"
+yarn make
+
+[ -d "$BUILT_APP" ] || { echo "No app was built at $BUILT_APP" >&2; exit 1; }
+
+TMP_APP="$DEST/.$APP_NAME.app.installing"
+rm -rf "$TMP_APP"
+trap 'rm -rf "$TMP_APP"' EXIT
+ditto "$BUILT_APP" "$TMP_APP"
+
+rm -rf "$INSTALLED_APP"
+mv "$TMP_APP" "$INSTALLED_APP"
+
+echo "Installed $INSTALLED_APP"
