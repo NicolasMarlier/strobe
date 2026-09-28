@@ -60,7 +60,7 @@ const FloorGuide = ({ barRef, barLength, barThickness }: Props) => {
         </mesh>
 
         <group ref={labelRef}>
-            <Html center zIndexRange={[1, 0]} style={{ pointerEvents: 'none' }}>
+            <Html center zIndexRange={[0, 0]} style={{ pointerEvents: 'none' }}>
                 <div ref={heightRef} className='floor-guide-height'/>
             </Html>
         </group>

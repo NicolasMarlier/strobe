@@ -4,6 +4,8 @@ import { Edges, TransformControls } from '@react-three/drei'
 import { AdditiveBlending, CatmullRomCurve3, Color, CylinderGeometry, DoubleSide, Group, InstancedMesh, Line, LineBasicMaterial, MathUtils, Matrix4, Mesh, MeshBasicMaterial, Object3D, ShaderMaterial, SRGBColorSpace, TubeGeometry, Vector3 } from 'three'
 import { useBarDrag } from './useBarDrag'
 import FloorGuide from './FloorGuide'
+import SelectionMarquee, { LensHoverPreview } from './SelectionMarquee'
+import ToggleAllButton from './ToggleAllButton'
 import type { TransformControls as TransformControlsImpl } from 'three-stdlib'
 
 // Sizes in meters
@@ -64,12 +66,12 @@ const DOT_MATERIAL = new ShaderMaterial({
     uniforms: { sideBrightness: { value: SIDE_BRIGHTNESS } },
 })
 
-// The housing's outline only shows a state: none on an idle bar
+// The housing's outline only shows a state: none on an idle bar.
+// The lenses selected for a DMX button have their own dashed marquee (SelectionMarquee)
 const EDGES_COLOR = {
     idle: null,
     hovered: '#888',
     editing: '#bbb',
-    assigned: '#fff',
 }
 
 interface Props {
@@ -214,6 +216,8 @@ const LedBar = (props: Props) => {
     const dotsRef = useRef<InstancedMesh>(null)
     const beamsRef = useRef<InstancedMesh>(null)
     const [hovered, setHovered] = useState(false)
+    // The lens under the pointer while assigning, to preview what a click does
+    const [hoveredDot, setHoveredDot] = useState<number | undefined>(undefined)
     // A ring is being dragged: the rings stay until it's released, even if Alt is released first
     const [turning, setTurning] = useState(false)
 
@@ -281,8 +285,7 @@ const LedBar = (props: Props) => {
         if (!rotating) drag.onPointerDown(e)
     }
 
-    const edgesColor = selected ? EDGES_COLOR.assigned
-        : editing ? EDGES_COLOR.editing
+    const edgesColor = editing ? EDGES_COLOR.editing
         : hovered ? EDGES_COLOR.hovered
         : EDGES_COLOR.idle
 
@@ -312,24 +315,46 @@ const LedBar = (props: Props) => {
         </mesh>
 
         {/* Remounted when the dot count changes: an InstancedMesh has a fixed capacity */}
-        <instancedMesh key={size} ref={dotsRef} args={[undefined, undefined, size]} onClick={onDotClick}>
+        <instancedMesh
+            key={size}
+            ref={dotsRef}
+            args={[undefined, undefined, size]}
+            onClick={onDotClick}
+            onPointerMove={(e) => { if (assignMode && e.instanceId != hoveredDot) setHoveredDot(e.instanceId) }}
+            onPointerOut={() => setHoveredDot(undefined)}>
             <planeGeometry args={[lensWidth(size), LENS_HEIGHT]}/>
             <primitive object={DOT_MATERIAL} attach='material'/>
         </instancedMesh>
 
         <instancedMesh key={`beams-${size}`} ref={beamsRef} args={[BEAM_GEOMETRY, BEAM_MATERIAL, size]} visible={showBeams} raycast={() => null} dispose={null}/>
 
-        {/* Dots assigned one by one to the selected button, when the whole bar isn't */}
-        { !selected && redChannels.map((redChannel, i) => selectedRedChannels.includes(redChannel) && (
-            <mesh key={redChannel} position={[dotX(i, size), 0, DOT_Z + 0.001]} raycast={() => null}>
-                <planeGeometry args={[lensWidth(size) * 0.92, LENS_HEIGHT * 0.9]}/>
-                <meshBasicMaterial visible={false}/>
-                <Edges color='#fff'/>
-            </mesh>
-        ))}
+        {/* The lenses assigned to the selected DMX button */}
+        { assignMode && <SelectionMarquee
+            // The hovered lens is shown half-tinted instead (LensHoverPreview)
+            selected={redChannels.map((redChannel, i) => i != hoveredDot && selectedRedChannels.includes(redChannel))}
+            dotX={i => dotX(i, size)}
+            lensWidth={lensWidth(size)}
+            lensHeight={LENS_HEIGHT}
+            lensZ={DOT_Z}/> }
+
+        { assignMode && hoveredDot != undefined && <LensHoverPreview
+            index={hoveredDot}
+            dotX={i => dotX(i, size)}
+            lensWidth={lensWidth(size)}
+            lensHeight={LENS_HEIGHT}
+            lensZ={DOT_Z}/> }
     </group>
 
     { editing && !assignMode && <FloorGuide barRef={groupRef} barLength={BAR_LENGTH} barThickness={HOUSING_HEIGHT}/> }
+
+    {/* Selects or unselects all the bar's lenses for the selected DMX button */}
+    { assignMode &&
+        <ToggleAllButton
+            barRef={groupRef}
+            barSize={[BAR_LENGTH, HOUSING_HEIGHT, HOUSING_DEPTH]}
+            label={selected ? 'Unlink all' : 'Link all'}
+            onClick={() => onSelectRedChannels(redChannels, !selected)}/>
+    }
 
     { showGizmo &&
         <TransformControls

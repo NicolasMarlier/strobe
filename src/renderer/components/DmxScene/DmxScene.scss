@@ -144,3 +144,23 @@
     white-space: nowrap;
     user-select: none;
 }
+
+// Over each LED bar while a DMX button is selected: selects or unselects all its lenses (LedBar)
+.toggle-all {
+    padding: 3px 9px;
+    border-radius: 10px;
+    border: 1px solid #ffffff33;
+    background-color: #161616e6;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #ccc;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover {
+        color: #fff;
+        border-color: #ffffff99;
+    }
+}

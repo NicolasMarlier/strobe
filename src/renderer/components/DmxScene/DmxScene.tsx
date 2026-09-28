@@ -9,6 +9,7 @@ import LedBar, { isPointerOverGizmo } from "./LedBar";
 import SceneSettings from "./SceneSettings";
 import MoveHint from "./MoveHint";
 import { useModifierKeys } from "./useModifierKeys";
+import { framedArea } from "./framing";
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext";
 import { useRealTimeContext } from "../../contexts/RealTimeContext";
 import { useDmxSceneContext } from "../../contexts/DmxSceneContext";
@@ -50,10 +51,6 @@ const clampZoom = (zoom: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom))
 // Same as the app's background: the scene fills its section
 const BACKGROUND = '#222'
 
-// The scene is drawn under the whole section, but framed on the part the details panel leaves free:
-// the section's padding, and the panel on the right with the gap before it (see .section.scene in App.scss)
-const SECTION_PADDING = 20
-const DETAILS_PANEL_SPACE = 160 + 20
 
 // The camera sees WIDE_ANGLE times more than the framed stage, like a wide-angle lens:
 // strong perspective, and room around the stage
@@ -74,16 +71,15 @@ const FixedCamera = ({ zoom }: { zoom: number }) => {
     // The scene is only drawn on demand: redraw it with the new framing,
     // or it would keep showing the previous zoom while the pointer picks with the new one
     useLayoutEffect(() => {
-        const framedWidth = Math.max(1, width - 2 * SECTION_PADDING - DETAILS_PANEL_SPACE)
-        const framedHeight = Math.max(1, height - 2 * SECTION_PADDING)
+        const framed = framedArea(width, height)
 
         // The aspect is the framed part's, not the canvas': keep the canvas from resetting it
         camera.manual = true
         camera.position.set(...CAMERA_POSITION)
         camera.lookAt(...CAMERA_TARGET)
-        camera.aspect = framedWidth / framedHeight
+        camera.aspect = framed.width / framed.height
         camera.fov = verticalFov(camera.aspect, zoom)
-        camera.setViewOffset(framedWidth, framedHeight, -SECTION_PADDING, -SECTION_PADDING, width, height)
+        camera.setViewOffset(framed.width, framed.height, -framed.left, -framed.top, width, height)
         camera.updateProjectionMatrix()
         invalidate()
     }, [camera, width, height, zoom])
