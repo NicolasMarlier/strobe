@@ -2,12 +2,14 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useThree, type ThreeEvent } from '@react-three/fiber'
 import { Edges, TransformControls } from '@react-three/drei'
 import { AdditiveBlending, Color, CylinderGeometry, DoubleSide, Group, InstancedMesh, MathUtils, Matrix4, Object3D, ShaderMaterial, SRGBColorSpace } from 'three'
-import { LED_DOT_PITCH } from '../../../shared/led_bar'
 import { useBarDrag } from './useBarDrag'
 import type { TransformControls as TransformControlsImpl } from 'three-stdlib'
 
 // Sizes in meters
-const DOT_RADIUS = 0.04
+// Every bar has the same length, whatever its dot count
+const BAR_LENGTH = 1
+// Square lenses side by side, sharing the bar's length: joined in a continuous strip
+const LENS_HEIGHT = 0.08
 const HOUSING_HEIGHT = 0.1
 const HOUSING_DEPTH = 0.06
 // The dots are lenses on the housing's front face (+Z), just over it
@@ -97,7 +99,7 @@ const BEAM_LENGTH = 3
 const BEAM_END_RADIUS = 0.35
 const BEAM_INTENSITY = 0.03
 
-const BEAM_GEOMETRY = new CylinderGeometry(DOT_RADIUS, BEAM_END_RADIUS, BEAM_LENGTH, 24, 1, true)
+const BEAM_GEOMETRY = new CylinderGeometry(LENS_HEIGHT / 2, BEAM_END_RADIUS, BEAM_LENGTH, 24, 1, true)
     // The cylinder's top (narrow end) at the lens, its axis along +Z
     .rotateX(-Math.PI / 2)
     .translate(0, 0, BEAM_LENGTH / 2)
@@ -151,8 +153,10 @@ const dmxSignalAtChannel = (dmxHexSignal: DmxHexSignal, channel: number) => {
     return parseInt(dmxHexSignal.slice(2*channel, 2*channel + 2), 16) || 0
 }
 
+const lensWidth = (count: number) => BAR_LENGTH / count
+
 // X of each dot along the bar, the bar being centered on its position
-const dotX = (index: number, count: number) => (index - (count - 1) / 2) * LED_DOT_PITCH
+const dotX = (index: number, count: number) => (index - (count - 1) / 2) * lensWidth(count)
 
 const LedBar = (props: Props) => {
     const { config, dmxHexSignal, assignMode, editing, selectedRedChannels, onSelectRedChannels, onSelect, onMove, onRotate, gizmoRef, showBeams } = props
@@ -254,14 +258,14 @@ const LedBar = (props: Props) => {
         onPointerCancel={drag.onPointerCancel}>
 
         <mesh onClick={onHousingClick}>
-            <boxGeometry args={[size * LED_DOT_PITCH, HOUSING_HEIGHT, HOUSING_DEPTH]}/>
+            <boxGeometry args={[BAR_LENGTH, HOUSING_HEIGHT, HOUSING_DEPTH]}/>
             <meshBasicMaterial color='#151515'/>
             <Edges color={edgesColor}/>
         </mesh>
 
         {/* Remounted when the dot count changes: an InstancedMesh has a fixed capacity */}
         <instancedMesh key={size} ref={dotsRef} args={[undefined, undefined, size]} onClick={onDotClick}>
-            <circleGeometry args={[DOT_RADIUS, 24]}/>
+            <planeGeometry args={[lensWidth(size), LENS_HEIGHT]}/>
             <primitive object={DOT_MATERIAL} attach='material'/>
         </instancedMesh>
 
@@ -270,8 +274,9 @@ const LedBar = (props: Props) => {
         {/* Dots assigned one by one to the selected button, when the whole bar isn't */}
         { !selected && redChannels.map((redChannel, i) => selectedRedChannels.includes(redChannel) && (
             <mesh key={redChannel} position={[dotX(i, size), 0, DOT_Z + 0.001]} raycast={() => null}>
-                <torusGeometry args={[DOT_RADIUS * 1.35, 0.006, 8, 32]}/>
-                <meshBasicMaterial color='#fff' toneMapped={false}/>
+                <planeGeometry args={[lensWidth(size) * 0.92, LENS_HEIGHT * 0.9]}/>
+                <meshBasicMaterial visible={false}/>
+                <Edges color='#fff'/>
             </mesh>
         ))}
     </group>

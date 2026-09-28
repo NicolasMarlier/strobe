@@ -1,6 +1,3 @@
-// Distance between two RGB dots of a LED bar, in meters: a bar's length follows its dot count
-export const LED_DOT_PITCH = 0.125
-
 const BARS_PER_ROW = 3
 
 // Where a bar without a position goes: rows of 3 bars, 1.5 m high, each row 1 m further upstage
