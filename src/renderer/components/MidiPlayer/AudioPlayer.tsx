@@ -54,7 +54,8 @@ const AudioPlayer = () => {
     }, [isPlaying])
 
     const onKeyDown = (e: KeyboardEvent) => {
-        if(e.key == ' ') (isPlaying ? pause : play)()
+        // Holding Space repeats the key: only its first press toggles
+        if(e.key == ' ' && !e.repeat) (isPlaying ? pause : play)()
     }
 
     useEffect(() => {
