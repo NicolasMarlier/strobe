@@ -1,11 +1,12 @@
 import { app, BrowserWindow } from 'electron';
+import icon from '../../../assets/icon-256.png';
 
 // The splash stays at least this long, so it doesn't just flash when the app starts quickly
 const MIN_SPLASH_MS = 1000
 // The app didn't say it rendered (e.g. it failed to): show its window anyway rather than nothing
 const REVEAL_TIMEOUT_MS = 10000
 
-// The loader's look (src/index.html): the wordmark with a faint light sweeping across it
+// The app's icon over the loader's look (src/index.html): the wordmark with a faint light sweeping across it
 const splashHtml = (version: string) => `<!doctype html>
 <html>
   <head>
@@ -29,6 +30,12 @@ const splashHtml = (version: string) => `<!doctype html>
         justify-content: center;
         gap: 14px;
         font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+      }
+
+      .icon {
+        width: 96px;
+        height: 96px;
+        margin-bottom: 4px;
       }
 
       .wordmark {
@@ -69,6 +76,7 @@ const splashHtml = (version: string) => `<!doctype html>
   </head>
   <body>
     <div class="splash">
+      <img class="icon" src="${icon}" alt="" />
       <div class="wordmark">STROBE</div>
       <div class="version">${version}</div>
     </div>
@@ -78,11 +86,11 @@ const splashHtml = (version: string) => `<!doctype html>
 let splash: BrowserWindow | undefined
 let splashShownAt = 0
 
-// A small frameless window with the app's name, while the main window loads (hidden, see revealWindow)
+// A small frameless window with the app's icon and name, while the main window loads (hidden, see revealWindow)
 export const showSplash = () => {
     splash = new BrowserWindow({
         width: 360,
-        height: 220,
+        height: 300,
         frame: false,
         resizable: false,
         movable: true,

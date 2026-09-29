@@ -2,6 +2,7 @@ import './Welcome.scss'
 
 import { useState } from 'react'
 import { newShow, openRecentShow, openShow, removeRecentShow } from '../../ApiClient'
+import icon from '../../../../assets/icon-256.png'
 
 interface Props {
     recentShows: RecentShow[]
@@ -19,6 +20,7 @@ const Welcome = (props: Props) => {
 
     return <div className="welcome">
         <div className="welcome-panel">
+            <img className="welcome-icon" src={icon} alt=""/>
             <div className="welcome-title">STROBE</div>
 
             { recentShows.length > 0 && <>
