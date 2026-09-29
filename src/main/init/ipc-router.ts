@@ -9,6 +9,7 @@ import { ApiReverseContract, ReverseChannel } from '../../shared/ipc-reverse-con
 import { forgetRecentShow, newShow, openRecentShow, openShow, saveShow, showState } from '../show/document';
 import { Store, STORE_EVENTS } from '../store/Store';
 import { ShowHistory } from '../store/ShowHistory';
+import { revealWindow } from './splash';
 
 export function handle<C extends Channel>(
   channel: C,
@@ -60,6 +61,7 @@ handle('dmx_scene:get', async () => Store.getInstance().getDmxScene())
 handle('dmx_scene:update', async (dmxScene) => Store.getInstance().updateDmxScene(dmxScene))
 
 handle('show:state', async () => showState())
+handleWithWindow('app:rendered', revealWindow)
 handleWithWindow('show:new', newShow)
 handleWithWindow('show:open', openShow)
 handleWithWindow('show:open_recent', openRecentShow)

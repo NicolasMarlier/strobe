@@ -27,4 +27,7 @@ getShowState().then(({ isOpen, recentShows }) => root.render(
       </DmxSceneContextProvider>
     //</StrictMode>,
     : <Welcome recentShows={recentShows} />
-))
+)).then(() =>
+  // Once it's painted, the window can be shown (it's hidden until then, the splash showing meanwhile)
+  requestAnimationFrame(() => requestAnimationFrame(() => window.strobe.api.invoke('app:rendered')))
+)

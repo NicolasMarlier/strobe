@@ -81,6 +81,11 @@ export interface ApiContract {
     result: DmxScene
   }
 
+  // The app has rendered in the calling window: it can be shown
+  'app:rendered': {
+    args: []
+    result: void
+  }
   'show:state': {
     args: []
     result: ShowState
