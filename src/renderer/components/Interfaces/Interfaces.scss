@@ -39,6 +39,23 @@
             }
         }
 
+        // DMX going out to a device with some light in it: faint dashes flowing from Strobe along its wire.
+        // Fades rather than blinks, so a strobe effect doesn't flicker it
+        .wire-flow {
+            fill: none;
+            stroke: #c6f0ae;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-dasharray: 1 11;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            animation: interfaces-wire-flow 0.8s linear infinite;
+
+            &.sending {
+                opacity: 0.5;
+            }
+        }
+
     }
 
     // A MIDI signal travelling from a device to Strobe, along the device's wire
@@ -131,6 +148,28 @@
         &.off {
             color: #555;
         }
+
+        // Just text, dimmed, left-aligned under its side's label. Longer than a device's name, it wraps
+        // rather than being cut
+        &.placeholder {
+            padding-left: 0;
+            padding-right: 0;
+            background-color: transparent;
+            color: #444;
+            font-style: italic;
+            white-space: normal;
+            text-align: left;
+
+            // Waiting for the device: a faint light sweeps across the text, then rests
+            .name {
+                background: linear-gradient(90deg, #444 35%, #595959 50%, #444 65%) 0 0 / 250% 100% no-repeat;
+                background-color: #444;
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+                animation: interfaces-placeholder-sweep 4s ease-in-out infinite;
+            }
+        }
     }
 
     .interfaces-strobe {
@@ -171,6 +210,23 @@
     }
 }
 
+// One dash period forward, from Strobe towards the device (the direction the wire is drawn in)
+@keyframes interfaces-wire-flow {
+    to {
+        stroke-dashoffset: -12;
+    }
+}
+
+// From the text's left to its right (the gradient is 2.5 times wider: its light starts and ends outside the text)
+@keyframes interfaces-placeholder-sweep {
+    from {
+        background-position: 100% 0;
+    }
+    60%, to {
+        background-position: 0% 0;
+    }
+}
+
 @keyframes interfaces-dot-flash {
     from {
         background-color: #fff;
@@ -193,6 +249,15 @@
     }
 
     .interfaces .interface-device .status-dot.flash {
+        animation: none;
+    }
+
+    .interfaces .interface-device.placeholder .name {
+        animation: none;
+    }
+
+    // Still shown, but still
+    .interfaces .wire-flow {
         animation: none;
     }
 }
