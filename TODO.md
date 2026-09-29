@@ -9,3 +9,4 @@
 - [ ] Communicate with Enttec
 - [ ] Proper handling of show files on macOS
 - [ ] Test usb v3 on real lights (`usb-v3` branch)
+- [ ] Proper version and About
