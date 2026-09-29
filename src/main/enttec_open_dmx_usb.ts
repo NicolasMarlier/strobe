@@ -6,6 +6,9 @@ import { dmxHexToArrayBuffer, emptyDmxHexString } from './utils';
 interface Endpoint {
     direction: 'in' | 'out'
 }
+// The Enttec's vendor requests carry no payload, but usb 3 requires a data buffer on every control transfer
+const NO_DATA = new Uint8Array(0)
+
 const customWebUSB = new WebUSB({
     // Bypass checking for authorised devices
     allowAllDevices: true
@@ -77,7 +80,7 @@ export class EnttecOpenDMXUSB {
         }
         console.log("Connecting to Enttec...")
         this.initSequenceSent = false
-        this.device.open()
+        await this.device.open()
         if (this.device.configuration === null) {
             await this.device.selectConfiguration(1);
         }
@@ -137,7 +140,7 @@ export class EnttecOpenDMXUSB {
                 request: 4,
                 value: 0x5008,
                 index: 1,
-            })
+            }, NO_DATA)
 
             await this.device.controlTransferOut({
                 requestType: 'vendor',
@@ -145,7 +148,7 @@ export class EnttecOpenDMXUSB {
                 request: 4,
                 value: 0x1008,
                 index: 1,
-            })
+            }, NO_DATA)
             
             
             const arrayBuffer = dmxHexToArrayBuffer(this.dmxHexString)
@@ -175,7 +178,7 @@ export class EnttecOpenDMXUSB {
                 request: 0,
                 value: 0x0000,
                 index: 1,
-            })
+            }, NO_DATA)
             
             await this.device.controlTransferOut({
                 requestType: 'vendor',
@@ -183,7 +186,7 @@ export class EnttecOpenDMXUSB {
                 request: 3,
                 value: 0x4138,
                 index: 0,
-            })
+            }, NO_DATA)
 
             await this.device.controlTransferIn({
                 requestType: 'vendor',
@@ -199,7 +202,7 @@ export class EnttecOpenDMXUSB {
                 request: 0,
                 value: 0x0000,
                 index: 1,
-            })
+            }, NO_DATA)
 
             await this.device.controlTransferOut({
                 requestType: 'vendor',
@@ -207,7 +210,7 @@ export class EnttecOpenDMXUSB {
                 request: 4,
                 value: 0x1008,
                 index: 1,
-            })
+            }, NO_DATA)
 
             await this.device.controlTransferOut({
                 requestType: 'vendor',
@@ -215,7 +218,7 @@ export class EnttecOpenDMXUSB {
                 request: 2,
                 value: 0x0000,
                 index: 1,
-            })
+            }, NO_DATA)
 
             await this.device.controlTransferOut({
                 requestType: 'vendor',
@@ -223,7 +226,7 @@ export class EnttecOpenDMXUSB {
                 request: 3,
                 value: 0x000c,
                 index: 0,
-            })
+            }, NO_DATA)
 
             await this.device.controlTransferOut({
                 requestType: 'vendor',
@@ -231,7 +234,7 @@ export class EnttecOpenDMXUSB {
                 request: 0,
                 value: 0x0001,
                 index: 1,
-            })
+            }, NO_DATA)
 
             await this.device.controlTransferOut({
                 requestType: 'vendor',
@@ -239,7 +242,7 @@ export class EnttecOpenDMXUSB {
                 request: 0,
                 value: 0x0002,
                 index: 1,
-            })
+            }, NO_DATA)
 
             await this.device.controlTransferOut({
                 requestType: 'vendor',
@@ -247,7 +250,7 @@ export class EnttecOpenDMXUSB {
                 request: 1,
                 value: 0x0200,
                 index: 0x0001,
-            })
+            }, NO_DATA)
         }
         catch(error: any) {
             this.device = undefined
