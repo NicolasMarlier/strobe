@@ -4,8 +4,57 @@
     <meta charset="UTF-8" />
     <title>STROBE</title>
 
+    <!-- Shown until the app renders over it, before its stylesheets load: styled here -->
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        background-color: #222;
+      }
+
+      /* The Welcome screen's title, a faint light sweeping across it while Strobe starts */
+      .strobe-loader {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+        font-size: 28px;
+        letter-spacing: 10px;
+        /* The letter spacing also follows the last letter: offset it so the word itself is centered */
+        text-indent: 10px;
+        user-select: none;
+        cursor: default;
+      }
+
+      .strobe-loader span {
+        background: linear-gradient(90deg, #444 35%, #999 50%, #444 65%) 0 0 / 250% 100% no-repeat;
+        background-color: #444;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: strobe-loader-sweep 2s ease-in-out infinite;
+      }
+
+      /* From the word's left to its right (the gradient is 2.5 times wider: its light starts and ends outside) */
+      @keyframes strobe-loader-sweep {
+        from {
+          background-position: 100% 0;
+        }
+        70%, to {
+          background-position: 0% 0;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .strobe-loader span {
+          animation: none;
+          color: #888;
+        }
+      }
+    </style>
   </head>
   <body>
-    <p>Loading...</p>
+    <div class="strobe-loader" role="status" aria-label="Loading"><span>STROBE</span></div>
   </body>
 </html>
