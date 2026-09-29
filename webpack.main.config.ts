@@ -1,4 +1,5 @@
-import type { Configuration } from 'webpack';
+import path from 'path';
+import { NormalModuleReplacementPlugin, type Configuration } from 'webpack';
 
 import { rules } from './webpack.rules';
 import { plugins } from './webpack.plugins';
@@ -13,7 +14,14 @@ export const mainConfig: Configuration = {
   module: {
     rules,
   },
-  plugins,
+  plugins: [
+    ...plugins,
+    // Load usb's native binary with a plain require (see src/main/usb_bindings.js)
+    new NormalModuleReplacementPlugin(
+      /[/\\]usb[/\\]dist[/\\]usb[/\\]bindings\.js$/,
+      path.resolve(__dirname, 'src/main/usb_bindings.js'),
+    ),
+  ],
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
   },
