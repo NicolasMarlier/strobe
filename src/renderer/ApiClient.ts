@@ -12,6 +12,10 @@ export const deleteTrack = (id: number) =>
     i('tracks:destroy', id)
 export const selectTrack = (id: number) =>
     i('tracks:select', id)
+export const reorderTracks = (orderedIds: number[]) =>
+    i('tracks:reorder', orderedIds)
+export const duplicateTrack = (id: number) =>
+    i('tracks:duplicate', id)
 
 export const getTrackDmxMidi = (track_id: number) =>
     i('tracks:dmx_midi:get', track_id)

@@ -19,6 +19,15 @@ export interface ApiContract {
     args: [id: number]
     result: Track
   }
+  // The tracks' ids, in their new order: they're renumbered 1, 2, 3… (their MIDI programs) in that order
+  'tracks:reorder': {
+    args: [orderedIds: number[]]
+    result: Track[]
+  }
+  'tracks:duplicate': {
+    args: [id: number]
+    result: Track
+  }
   
   'tracks:audio:upload': {
     args: [track_id: number, file: File]

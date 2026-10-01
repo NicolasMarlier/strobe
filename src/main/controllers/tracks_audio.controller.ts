@@ -29,7 +29,8 @@ export const existingAudioPath = (trackId: number): string | null => {
   const dir = currentAudioDir()
   if (!dir || !fs.existsSync(dir)) return null
 
-  const candidates = fs.readdirSync(dir).filter(f => f.startsWith(`track_${trackId}.`))
+  const fileId = Store.getInstance().findTrack(trackId)?.audio_id ?? trackId
+  const candidates = fs.readdirSync(dir).filter(f => f.startsWith(`track_${fileId}.`))
   return candidates.length > 0 ? path.join(dir, candidates[0]!) : null
 }
 

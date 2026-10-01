@@ -3,7 +3,9 @@ import DmxScene from './components/DmxScene/DmxScene';
 import DmxSceneDetails from './components/DmxScene/DmxSceneDetails';
 import { useDmxSceneContext } from './contexts/DmxSceneContext';
 import DmxButtonDetails from './components/DmxButtonDetails/DmxButtonDetails';
-import TrackSelect from './components/TrackSelect/TrackSelect';
+import TrackSetlist from './components/TrackSetlist/TrackSetlist';
+import { useSetlistOpen } from './components/TrackSetlist/useSetlistOpen';
+import TrackSetlistCompact from './components/TrackSetlist/TrackSetlistCompact';
 import DmxButtonsCollection from './components/DmxButtonsCollection/DmxButtonsCollection';
 import MidiPlayer from './components/MidiPlayer/TrackEditor';
 import { useDmxButtonsContext } from './contexts/DmxButtonsContext';
@@ -42,14 +44,17 @@ function App() {
   }
   const { selectedMidiPatterns, isRecording, setIsRecording } = useDmxMidiContext()
   const { debug } = useRealTimeContext()
+  const setlist = useSetlistOpen()
   
   return (
-      <div id="app">
+      <div id="app" className={setlist.open ? 'with-setlist' : ''}>
         { debug && <DebugConsole/>}
         
         <div className='section commands-bar'>
-          <SaveButton/>
-          <TrackSelect/>
+          {/* On the left; the transport stays centered */}
+          <div className="save-slot">
+            <SaveButton/>
+          </div>
           
           <div className="small-buttons-bar">
             <SmallButton
@@ -62,9 +67,16 @@ function App() {
           </div>
         </div>
 
-        {/* The interfaces, then the track automation taking the rest of the column */}
+        {/* Open, the setlist is a column on the left of the window */}
+        { setlist.open && <TrackSetlist collapse={setlist.toggle}/> }
+
+        {/* The interfaces (after the collapsed setlist), then the track automation taking the rest of the column */}
         <div className="left-column">
-          <InterfacesSection/>
+          <div className="top-sections">
+            {/* Hidden while the column shows (see App.scss) */}
+            <TrackSetlistCompact expand={setlist.toggle}/>
+            <InterfacesSection/>
+          </div>
 
           <div className="section midi">
             <div className="section-title">Track automation</div>

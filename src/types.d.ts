@@ -39,6 +39,9 @@ type Track = {
     id: number
     bpm: number
     audio_filename: string | null
+    // The id the track's audio file is named after (audio/track_<audio_id>.<ext>), when not its own:
+    // the track changed id (MIDI program) or is a copy, and its file was left as it was
+    audio_id?: number
 }
 
 type TrackCreationParams = {

@@ -32,7 +32,16 @@ h1 {
   box-sizing: border-box;
   background-color: #222;
 
-  // The Interfaces section over the Track automation one
+  // The open setlist: a column on the left of the window (TrackSetlist), collapsed with Cmd+\
+  &.with-setlist {
+    grid-template-columns: 200px 1fr 1fr;
+    grid-template-areas:
+      "commands commands commands"
+      "setlist  midi     buttons"
+      "setlist  midi     scene";
+  }
+
+  // The collapsed setlist and the Interfaces section side by side, over the Track automation section
   .left-column {
     grid-area: midi;
     display: flex;
@@ -40,6 +49,18 @@ h1 {
     gap: 20px;
     min-width: 0;
     min-height: 0;
+  }
+
+  .top-sections {
+    display: flex;
+    gap: 20px;
+    min-width: 0;
+
+    // MIDI in → Strobe → DMX out takes what the collapsed setlist leaves
+    .section.interfaces-section {
+      flex: 1;
+      min-width: 0;
+    }
   }
 
   .section {
@@ -201,6 +222,13 @@ h1 {
       border-radius: 0;
       box-shadow: 0 0 6px #000000;
       justify-content: center;
+
+      .save-slot {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
     }   
     .section-title {
       text-transform: uppercase;
@@ -236,7 +264,16 @@ h1 {
 }
 
 @media (max-width: 800px) {
-  #app {
+  // No room for the setlist column: the collapsed one shows the current track instead
+  #app .section.setlist {
+    display: none;
+  }
+
+  #app.with-setlist .top-sections .section.setlist-compact {
+    display: flex;
+  }
+
+  #app, #app.with-setlist {
     grid-template-columns: 100%;
     grid-template-rows: 50px 100px 1fr 1fr;
     grid-template-areas:

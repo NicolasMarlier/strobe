@@ -69,6 +69,10 @@ export class DmxLoop extends EventEmitter {
         Store.getInstance().on(STORE_EVENTS.TRACK_RENAMED, (oldId: number, newId: number) => {
             if(this.current_track_id == oldId) this.switchTrack(newId)
         })
+        Store.getInstance().on(STORE_EVENTS.TRACKS_RENUMBERED, (mapping: Record<number, number>) => {
+            const newId = this.current_track_id != undefined ? mapping[this.current_track_id] : undefined
+            if(newId != undefined) this.switchTrack(newId)
+        })
 
         this.switchToFirstTrack()
     }

@@ -1,0 +1,280 @@
+// The open setlist: a column on the left of the window (see #app.with-setlist in App.scss)
+#app .section.setlist {
+    grid-area: setlist;
+
+    .section-body {
+        // Below the title, which overlaps the top border
+        padding: 20px 0 0;
+        gap: 0;
+    }
+}
+
+// Its title collapses it; the collapsed one's expands it (the chevron shows on hover)
+.setlist-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s ease;
+
+    .chevron {
+        opacity: 0;
+        transition: opacity 0.15s ease;
+    }
+
+    &:hover {
+        color: #bbb;
+
+        .chevron {
+            opacity: 1;
+        }
+    }
+}
+
+// The setlist column shows instead (except in a narrow window, see App.scss)
+#app.with-setlist .section.setlist-compact {
+    display: none;
+}
+
+// The collapsed setlist: the current track only, on the left of the interfaces
+#app .section.setlist-compact {
+    flex: none;
+    width: 170px;
+    cursor: pointer;
+
+    .chevron {
+        transform: rotate(-90deg);
+    }
+
+    .section-body {
+        padding: 20px 14px 12px;
+        justify-content: center;
+        gap: 4px;
+        text-align: left;
+        transition: background-color 0.1s ease;
+    }
+
+    &:hover .section-body {
+        background-color: #272727;
+    }
+
+    .setlist-compact-program {
+        font-size: 10px;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .setlist-compact-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .setlist-compact-bpm {
+        font-size: 11px;
+        color: #888;
+    }
+}
+
+.setlist-rows {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    text-align: left;
+
+    &.dragging .setlist-row {
+        cursor: grabbing;
+    }
+}
+
+.setlist-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px 0 10px;
+    border-bottom: 1px solid #2a2a2a;
+    position: relative;
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.1s ease;
+
+    &:hover {
+        background-color: #272727;
+    }
+
+    .program {
+        font-size: 10px;
+        color: #666;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .name {
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        color: #ccc;
+    }
+
+    .meta {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        color: #666;
+        font-variant-numeric: tabular-nums;
+
+        .audio {
+            width: 10px;
+            height: 10px;
+            fill: #888;
+        }
+    }
+
+    input {
+        font: inherit;
+        color: #fff;
+        background: #111;
+        border: 1px solid #ffffffaa;
+        border-radius: 4px;
+        padding: 3px 6px;
+        outline: none;
+        min-width: 0;
+
+        &.program, &.bpm {
+            font-size: 11px;
+            padding: 3px 2px;
+            width: 100%;
+            // No spinner arrows in so little space
+            -moz-appearance: textfield;
+            &::-webkit-inner-spin-button { -webkit-appearance: none; }
+        }
+
+        &.bpm {
+            width: 44px;
+            text-align: right;
+        }
+    }
+
+    // Lit like a playing DMX button
+    &.current {
+        background-color: #2c2c2c;
+
+        .name {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        &::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            top: 9px;
+            bottom: 9px;
+            width: 3px;
+            border-radius: 2px;
+            background-color: rgb(114, 203, 63);
+            box-shadow: 0 0 8px rgb(114, 203, 63);
+        }
+    }
+
+    &.dragged {
+        opacity: 0.35;
+    }
+
+    &.editing {
+        cursor: default;
+    }
+}
+
+.setlist-row-error {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 100%;
+    z-index: 5;
+    margin-top: 2px;
+    padding: 4px 8px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: 1px solid #a33;
+    background-color: #3a1d19;
+    color: #ffd8d2;
+    box-shadow: 0 6px 14px #00000099;
+}
+
+.setlist-drop-line {
+    height: 2px;
+    margin: -1px 8px;
+    position: relative;
+    z-index: 4;
+    border-radius: 2px;
+    background-color: rgb(114, 203, 63);
+}
+
+.setlist-empty {
+    padding: 20px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: center;
+    color: #ffffff22;
+}
+
+.setlist-new {
+    flex: none;
+    margin: 10px;
+    padding: 6px;
+    font-size: 12px;
+    color: #777;
+    text-align: center;
+    border: 2px dashed #333;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: color 0.1s ease, border-color 0.1s ease;
+
+    &:hover {
+        color: #ccc;
+        border-color: #555;
+    }
+}
+
+.setlist-menu {
+    position: fixed;
+    z-index: 20;
+    min-width: 190px;
+    padding: 5px;
+    text-align: left;
+    font-size: 12.5px;
+    border-radius: 7px;
+    border: 1px solid #555;
+    background-color: #2d2d2d;
+    box-shadow: 0 14px 30px #000000cc;
+
+    .setlist-menu-item {
+        padding: 5px 9px;
+        border-radius: 4px;
+        cursor: pointer;
+        white-space: nowrap;
+
+        &:hover {
+            background-color: #3d3d3d;
+        }
+
+        &.danger {
+            color: #ff7b6b;
+        }
+    }
+
+    .setlist-menu-separator {
+        border-top: 1px solid #444;
+        margin: 4px 2px;
+    }
+}

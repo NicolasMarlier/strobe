@@ -39,6 +39,8 @@ handle('tracks:create', TracksController.create)
 handle('tracks:update', TracksController.update)
 handle('tracks:destroy', TracksController.destroy)
 handle('tracks:select',   TracksController.select)
+handle('tracks:reorder', TracksController.reorder)
+handle('tracks:duplicate', TracksController.duplicate)
 
 handle('tracks:audio:upload', TracksAudioController.upload)
 handle('tracks:audio:reset', TracksAudioController.reset)

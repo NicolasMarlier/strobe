@@ -29,7 +29,7 @@ describe('tracks', () => {
         store.updateTrack(1, { id: 10 })
         expect(store.listTracks()).toEqual([
             { id: 2, name: 'B', bpm: 85, audio_filename: null },
-            { id: 10, name: 'A', bpm: 120, audio_filename: null },
+            { id: 10, name: 'A', bpm: 120, audio_filename: null, audio_id: 1 },
         ])
     })
 
@@ -67,6 +67,69 @@ describe('tracks', () => {
         store.createTrack({ name: 'B' })
         expect(() => store.updateTrack(1, { id: 2 })).toThrow(InvalidParamError)
         expect(store.getTrack(1).name).toBe('A')
+    })
+
+    it('reordering renumbers the tracks 1, 2, 3… in the new order, moving their buttons and midi', () => {
+        store.createTrack({ name: 'A' })
+        store.createTrack({ name: 'B' })
+        store.createTrack({ name: 'C' })
+        store.updateTrack(3, { id: 10 })
+        store.createButton({ track_id: 10 })
+        createGlobalButton()
+        store.updateDmxMidi(1, [{ ticks: 0, midi_notes: [], durationTicks: 10 }])
+        const renumbered = vi.fn()
+        store.on(STORE_EVENTS.TRACKS_RENUMBERED, renumbered)
+
+        store.reorderTracks([10, 1, 2])
+
+        expect(store.listTracks().map(p => [p.id, p.name])).toEqual([[1, 'C'], [2, 'A'], [3, 'B']])
+        // Their audio files keep their names: C's is still the one of the track it was first (3)
+        expect(store.listTracks().map(p => p.audio_id)).toEqual([3, 1, 2])
+        expect(renumbered).toHaveBeenCalledWith({ 10: 1, 1: 2, 2: 3 })
+        expect(store.listButtons(1).map(b => b.track_id)).toEqual([1, null])
+        expect(store.listButtons(10).map(b => b.track_id)).toEqual([null])
+        expect(store.getOrInitDmxMidi(2).midi_patterns).toHaveLength(1)
+    })
+
+    it('rejects an order that does not list every track once, and ignores the same order', () => {
+        store.createTrack({ name: 'A' })
+        store.createTrack({ name: 'B' })
+        const changed = vi.fn()
+        store.on(STORE_EVENTS.CHANGED, changed)
+
+        expect(() => store.reorderTracks([1])).toThrow(InvalidParamError)
+        expect(() => store.reorderTracks([1, 1])).toThrow(InvalidParamError)
+        store.reorderTracks([1, 2])
+        expect(changed).not.toHaveBeenCalled()
+    })
+
+    it('reordering in the same order closes the gaps between programs', () => {
+        store.createTrack({ name: 'A' })
+        store.createTrack({ name: 'B' })
+        store.updateTrack(2, { id: 10 })
+
+        store.reorderTracks([1, 10])
+
+        expect(store.listTracks().map(p => [p.id, p.name])).toEqual([[1, 'A'], [2, 'B']])
+    })
+
+    it('duplicating copies the track, its buttons and midi as the last track', () => {
+        store.createTrack({ name: 'A', bpm: 120 })
+        store.createTrack({ name: 'B' })
+        const button = store.createButton({ track_id: 1, nature: 'Run' })
+        createGlobalButton()
+        store.updateDmxMidi(1, [{ ticks: 0, midi_notes: [], durationTicks: 10 }])
+
+        const copy = store.duplicateTrack(1)
+
+        // Plays the original's audio file
+        expect(copy).toEqual({ id: 3, name: 'A copy', bpm: 120, audio_filename: null, audio_id: 1 })
+        const copiedButtons = store.listButtons(3).filter(b => b.track_id == 3)
+        expect(copiedButtons).toHaveLength(1)
+        expect(copiedButtons[0]).toMatchObject({ nature: 'Run' })
+        expect(copiedButtons[0]!.id).not.toBe(button.id)
+        expect(store.getOrInitDmxMidi(3).midi_patterns).toHaveLength(1)
+        expect(store.listButtons(1).filter(b => b.track_id == 1)).toHaveLength(1)
     })
 
     it('destroying a track deletes its buttons and midi but keeps global buttons', () => {
