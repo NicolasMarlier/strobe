@@ -1,7 +1,7 @@
 {
   "name": "strobe",
   "productName": "Strobe",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Strobe: a DMX show runner on your Macbook",
   "main": ".webpack/main",
   "private": true,
@@ -21,6 +21,7 @@
   "devDependencies": {
     "@electron-forge/cli": "^7.11.2",
     "@electron-forge/maker-deb": "^7.11.2",
+    "@electron-forge/maker-dmg": "^7.11.2",
     "@electron-forge/maker-rpm": "^7.11.2",
     "@electron-forge/maker-squirrel": "^7.11.2",
     "@electron-forge/maker-zip": "^7.11.2",
