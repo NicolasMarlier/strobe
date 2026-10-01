@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] Better tracks management UX
+- [x] Better tracks management UX
 - [ ] Handle "plugins" for devices / scene elements
 - [ ] Scene element for the fog machine (machine à brouillard)
 - [ ] Installer
