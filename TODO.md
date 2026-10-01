@@ -7,7 +7,7 @@
 - [x] Feedback collection process
 - [x] Public website
 - [ ] Communicate with Enttec
-- [ ] Proper handling of show files on macOS
+- [x] Proper handling of show files on macOS
 - [ ] Test usb v3 on real lights (`usb-v3` branch)
 - [x] Proper version and About
 - [x] Code signing

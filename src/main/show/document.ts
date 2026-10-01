@@ -89,18 +89,32 @@ export const guardWindowClose = (win: BrowserWindow) => {
     })
 }
 
-const startShow = (win: BrowserWindow, data: ShowData, dir: string | null) => {
+// Without a window (the show to start with), the window is yet to load the show
+const startShow = (win: BrowserWindow | null, data: ShowData, dir: string | null) => {
     Store.getInstance().load(data)
     isShowOpen = true
     currentShowDir = dir
     if (dir) addRecentShow(dir)
     setDirty(false)
     // Start the UI from a clean state on the new show's data
-    win.webContents.reload()
+    win?.webContents.reload()
 }
 
-const loadShow = (win: BrowserWindow, dir: string) =>
+const loadShow = (win: BrowserWindow | null, dir: string) =>
     withErrorBox('Could not open show', () => startShow(win, readShow(dir), dir))
+
+// The show opened from the Finder that launched the app: loaded before the window is created
+export const loadShowAtLaunch = (dir: string) => loadShow(null, dir)
+
+// A show opened from the Finder (double-clicked, dropped on the Dock icon) while the app runs
+export const openShowFromFinder = async(win: BrowserWindow, dir: string) => {
+    // Still hidden behind the splash, it shows once loaded
+    if (win.isVisible()) win.focus()
+    if (currentShowDir && path.resolve(dir) == path.resolve(currentShowDir)) return
+    if (!await confirmDiscardChanges(win)) return
+
+    loadShow(win, dir)
+}
 
 export const showState = (): ShowState => ({
     isOpen: isShowOpen,

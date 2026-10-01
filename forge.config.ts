@@ -17,6 +17,8 @@ const release = !!process.env.STROBE_RELEASE;
 // Notarization credentials (App Store Connect API key), stored in the keychain once with:
 // xcrun notarytool store-credentials strobe-notary --key <AuthKey.p8> --key-id <Key ID> --issuer <Issuer ID>
 const NOTARY_PROFILE = 'strobe-notary';
+// The type of show files for macOS: never change it, the Finder knows shows by it
+const SHOW_TYPE = 'com.nicolasmarlier.strobe.show';
 
 const config: ForgeConfig = {
   packagerConfig: {
@@ -25,6 +27,29 @@ const config: ForgeConfig = {
     icon: './assets/icon',
     // Never change it: macOS ties the app's permissions to it
     appBundleId: 'com.nicolasmarlier.strobe',
+    // A show (MyShow.strobe/, see src/main/show/show_file.ts) is a document package: the Finder shows it
+    // as a single file with a Strobe icon, and opening it opens Strobe (see openShowFromFinder)
+    extendInfo: {
+      CFBundleDocumentTypes: [
+        {
+          CFBundleTypeName: 'Strobe Show',
+          CFBundleTypeRole: 'Editor',
+          LSHandlerRank: 'Owner',
+          LSItemContentTypes: [SHOW_TYPE],
+          LSTypeIsPackage: true,
+          // The document icon is made from the app's icon
+          CFBundleTypeIconSystemGenerated: true,
+        },
+      ],
+      UTExportedTypeDeclarations: [
+        {
+          UTTypeIdentifier: SHOW_TYPE,
+          UTTypeDescription: 'Strobe Show',
+          UTTypeConformsTo: ['com.apple.package', 'public.composite-content'],
+          UTTypeTagSpecification: { 'public.filename-extension': ['strobe'] },
+        },
+      ],
+    },
     // Releases only (bin/release): signed with the Developer ID certificate of the keychain, then notarized by Apple
     ...(release && {
       osxSign: {},
