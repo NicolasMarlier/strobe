@@ -12,19 +12,23 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
 
+// Set by bin/release
+const release = !!process.env.STROBE_RELEASE;
+// Notarization credentials (App Store Connect API key), stored in the keychain once with:
+// xcrun notarytool store-credentials strobe-notary --key <AuthKey.p8> --key-id <Key ID> --issuer <Issuer ID>
+const NOTARY_PROFILE = 'strobe-notary';
+
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     // Extension is resolved per platform: icon.icns (macOS), icon.ico (Windows)
     icon: './assets/icon',
-    // Only sign & notarize when Apple credentials are provided
-    ...(process.env.APPLE_ID && {
+    // Never change it: macOS ties the app's permissions to it
+    appBundleId: 'com.nicolasmarlier.strobe',
+    // Releases only (bin/release): signed with the Developer ID certificate of the keychain, then notarized by Apple
+    ...(release && {
       osxSign: {},
-      osxNotarize: {
-        appleId: process.env.APPLE_ID,
-        appleIdPassword: process.env.APPLE_PASSWORD,
-        teamId: process.env.APPLE_TEAM_ID,
-      },
+      osxNotarize: { keychainProfile: NOTARY_PROFILE },
     }),
   },
   rebuildConfig: {},
@@ -32,7 +36,11 @@ const config: ForgeConfig = {
     new MakerSquirrel({ setupIcon: './assets/icon.ico' }),
     new MakerZIP({}, ['darwin']),
     // macOS installer: a disk image with Strobe and a link to drag it into Applications
-    new MakerDMG({ icon: './assets/icon.icns', format: 'ULFO' }),
+    new MakerDMG({
+      icon: './assets/icon.icns',
+      format: 'ULFO',
+      ...(release && { additionalDMGOptions: { 'code-sign': { 'signing-identity': 'Developer ID Application' } } }),
+    }),
     new MakerRpm({ options: { icon: './assets/icon.png' } }),
     new MakerDeb({ options: { icon: './assets/icon.png' } }),
   ],
