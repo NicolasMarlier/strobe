@@ -2,7 +2,7 @@ import '../DesignSystem/DetailsPanel/DetailsPanel.scss'
 import './DmxSceneDetails.scss'
 import { useState } from 'react'
 import { useDmxSceneContext } from '../../contexts/DmxSceneContext'
-import { centerPosition, defaultPosition, DMX_CHANNELS, footprint, type FixtureLookup } from '../../../shared/fixtures'
+import { centerPosition, defaultPosition, DMX_CHANNELS, floorHeight, footprint, type FixtureLookup } from '../../../shared/fixtures'
 import ConfirmModal from '../DesignSystem/ConfirmModal/ConfirmModal'
 import { TrashIcon } from '../DesignSystem/Icons'
 import { usePanelTransition } from '../DesignSystem/DetailsPanel/usePanelTransition'
@@ -73,6 +73,24 @@ const DmxSceneDetails = () => {
         setSelectedElementIndex(elements.length)
     }
 
+    // Another type for the element: it keeps its place and channel, and its cell count if both types let it change.
+    // Resting on the floor, it stays on it, whatever its new height
+    const changeFixture = (index: number, fixture: FixtureProfile) => {
+        const element = elements[index]
+        const previous = fixtureOf(element.fixture)
+        const cells = fixture.resizable && previous.resizable ? element.cells : fixture.cells
+        const channels = cells * fixture.cell.length
+        const [x, y, z] = element.position
+        const onFloor = Math.abs(y - floorHeight(previous)) < 0.001
+        updateElement(index, {
+            ...element,
+            fixture: fixture.id,
+            cells,
+            channel: Math.min(element.channel, DMX_CHANNELS - channels + 1),
+            position: onFloor ? [x, floorHeight(fixture), z] : element.position,
+        })
+    }
+
     const deleteElement = (index: number) => {
         updateDmxScene({ elements: elements.filter((_, i) => i != index) })
         setSelectedElementIndex(undefined)
@@ -116,12 +134,24 @@ const DmxSceneDetails = () => {
 
     const name = elementName(elements, selectedElementIndex, fixtureOf)
 
-    // The inputs keep what's typed: rebuild them for another element, or when the elements move around,
-    // so they never show the values of the element that was selected before
-    return <div key={`${selectedElementIndex}-${elements.length}`} className={`details-panel dmx-scene-details ${transition}`}>
+    // The inputs keep what's typed: rebuild them for another element, when the elements move around,
+    // or when its type changes, so they never show values the element no longer has
+    return <div key={`${selectedElementIndex}-${elements.length}-${selectedElement.fixture}`} className={`details-panel dmx-scene-details ${transition}`}>
         <div className='back-btn btn' onClick={() => setSelectedElementIndex(undefined)}>← All elements</div>
 
         <div className='details-header'>{name}</div>
+
+        <div>
+            <label>Type</label>
+            <select
+                value={selectedElement.fixture}
+                onChange={(e) => changeFixture(selectedElementIndex, fixtureOf(e.target.value))}>
+                { fixtures.map(fixture => <option key={fixture.id} value={fixture.id}>{fixture.name}</option>) }
+                {/* A fixture this computer doesn't have stays shown, until another one is picked */}
+                { !fixtures.some(({ id }) => id == selectedElement.fixture) &&
+                    <option value={selectedElement.fixture}>{selectedFixture.name}</option> }
+            </select>
+        </div>
 
         { fieldsFor(selectedFixture).map(field => (
             <div key={field.key}>
