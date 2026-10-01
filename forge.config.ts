@@ -1,6 +1,7 @@
 import type { ForgeConfig } from '@electron-forge/shared-types';
 import { MakerSquirrel } from '@electron-forge/maker-squirrel';
 import { MakerZIP } from '@electron-forge/maker-zip';
+import { MakerDMG } from '@electron-forge/maker-dmg';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
 import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
@@ -30,6 +31,8 @@ const config: ForgeConfig = {
   makers: [
     new MakerSquirrel({ setupIcon: './assets/icon.ico' }),
     new MakerZIP({}, ['darwin']),
+    // macOS installer: a disk image with Strobe and a link to drag it into Applications
+    new MakerDMG({ icon: './assets/icon.icns', format: 'ULFO' }),
     new MakerRpm({ options: { icon: './assets/icon.png' } }),
     new MakerDeb({ options: { icon: './assets/icon.png' } }),
   ],
