@@ -25,6 +25,13 @@ xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null \
   || { echo "No notarization credentials: run the store-credentials command of forge.config.ts" >&2; exit 1; }
 
 cd "$APP_DIR"
+# A release is built from a commit, which bin/publish tags
+if [ -n "$(git status --porcelain)" ]; then
+  echo "Uncommitted changes: commit or stash them, then retry." >&2
+  git status --short >&2
+  exit 1
+fi
+COMMIT="$(git rev-parse HEAD)"
 VERSION="$(node -p "require('./package.json').version")"
 BUILT_APP="out/$APP_NAME-darwin-$ARCH/$APP_NAME.app"
 DMG="out/make/$APP_NAME-$VERSION-$ARCH.dmg"
@@ -41,4 +48,6 @@ spctl --assess --type execute --verbose "$BUILT_APP"
 spctl --assess --type open --context context:primary-signature --verbose "$DMG"
 xcrun stapler validate "$DMG"
 
-echo "Ready to share: $APP_DIR/$DMG"
+echo "$COMMIT" > "$DMG.commit"
+
+echo "Ready to share: $APP_DIR/$DMG (publish it with bin/publish)"

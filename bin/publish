@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+# Publishes the installer built by bin/release as a GitHub release (tag v<version>),
+# downloadable at a link that stays the same across versions:
+#   https://github.com/NicolasMarlier/strobe/releases/latest/download/Strobe.dmg
+#
+# The release is tagged on the commit the installer was built from, which must be on origin/main.
+# Needs: gh, logged in (brew install gh && gh auth login)
+
+set -euo pipefail
+
+APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+APP_NAME="Strobe"
+
+case "$(uname -m)" in
+  arm64) ARCH="arm64" ;;
+  x86_64) ARCH="x64" ;;
+  *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+esac
+
+cd "$APP_DIR"
+VERSION="$(node -p "require('./package.json').version")"
+TAG="v$VERSION"
+DMG="out/make/$APP_NAME-$VERSION-$ARCH.dmg"
+
+command -v gh >/dev/null || { echo "gh is missing: brew install gh && gh auth login" >&2; exit 1; }
+[ -f "$DMG" ] || { echo "No installer at $DMG: run bin/release first" >&2; exit 1; }
+xcrun stapler validate "$DMG" >/dev/null || { echo "$DMG is not notarized: run bin/release" >&2; exit 1; }
+
+# The commit bin/release built from (it refuses uncommitted changes)
+COMMIT="$(cat "$DMG.commit" 2>/dev/null)" || { echo "Unknown source commit for $DMG: run bin/release" >&2; exit 1; }
+git fetch --quiet origin main
+git merge-base --is-ancestor "$COMMIT" origin/main \
+  || { echo "$COMMIT is not on origin/main: merge and push it first" >&2; exit 1; }
+if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+  echo "$TAG is already released: bump the version in package.json" >&2
+  exit 1
+fi
+
+# Same file name for every version, for the public link
+UPLOAD_DIR="$(mktemp -d)"
+trap 'rm -rf "$UPLOAD_DIR"' EXIT
+cp "$DMG" "$UPLOAD_DIR/$APP_NAME.dmg"
+
+gh release create "$TAG" "$UPLOAD_DIR/$APP_NAME.dmg" \
+  --repo NicolasMarlier/strobe \
+  --target "$COMMIT" \
+  --title "$APP_NAME $VERSION" \
+  --notes "$APP_NAME $VERSION for Macs with Apple silicon (M1 and later). Open Strobe.dmg, then drag Strobe into Applications." \
+  --latest
+
+echo "Published: https://github.com/NicolasMarlier/strobe/releases/latest/download/$APP_NAME.dmg"
