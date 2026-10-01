@@ -11,6 +11,7 @@
 - [ ] Test usb v3 on real lights (`usb-v3` branch)
 - [x] Proper version and About
 - [x] Code signing
-- [ ] App Store
 - [x] Explain the MainStage integration
 - [ ] Example show file
+- [ ] Handle input devices to trigger a button
+- [ ] Better MIDI recording and MIDI editing
