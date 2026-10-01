@@ -4,6 +4,7 @@ import './main/init/ipc-router'
 import { initMidiRouter } from './main/init/midi_router';
 import { initDmxLoop } from './main/init/dmx_loop';
 import { initMenu } from './main/init/menu';
+import { initAboutPanel } from './main/init/about';
 import { initAudioProtocol, registerAudioScheme } from './main/init/audio_protocol';
 import { guardWindowClose, updateWindowTitle } from './main/show/document';
 import { revealWindowEventually, showSplash } from './main/init/splash';
@@ -63,6 +64,7 @@ app.on('ready', async() => {
     // Fixture files people add: ~/Library/Application Support/Strobe/Fixtures on macOS
     FixtureLibrary.getInstance().watch(path.join(app.getPath('userData'), 'Fixtures'))
     initMenu()
+    initAboutPanel()
     initAudioProtocol()
     showSplash()
     await createWindow()

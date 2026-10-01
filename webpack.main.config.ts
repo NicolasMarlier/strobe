@@ -1,8 +1,17 @@
+import { execSync } from 'child_process';
 import path from 'path';
-import { NormalModuleReplacementPlugin, type Configuration } from 'webpack';
+import { DefinePlugin, NormalModuleReplacementPlugin, type Configuration } from 'webpack';
 
 import { rules } from './webpack.rules';
 import { plugins } from './webpack.plugins';
+
+const currentCommit = () => {
+  try {
+    return execSync('git rev-parse --short HEAD', { cwd: __dirname }).toString().trim();
+  } catch {
+    return 'unknown';
+  }
+};
 
 export const mainConfig: Configuration = {
   /**
@@ -16,6 +25,8 @@ export const mainConfig: Configuration = {
   },
   plugins: [
     ...plugins,
+    // The commit shown in the About panel (see src/main/init/about.ts)
+    new DefinePlugin({ STROBE_COMMIT: JSON.stringify(currentCommit()) }),
     // Load usb's native binary with a plain require (see src/main/usb_bindings.js)
     new NormalModuleReplacementPlugin(
       /[/\\]usb[/\\]dist[/\\]usb[/\\]bindings\.js$/,
