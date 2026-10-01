@@ -115,28 +115,7 @@ yarn vitest run   # tests
 yarn lint
 ```
 
-Other scripts, in `bin/`:
-
-| Script | What it does |
-| --- | --- |
-| `bin/deploy` | Builds Strobe and installs it in `/Applications`, replacing the one there. |
-| `bin/release` | Builds the installer to share, `out/make/Strobe-<version>-<arch>.dmg`, signed and notarized by Apple. |
-| `bin/publish` | Publishes the installer built by `bin/release` as a GitHub release. |
-
-### Making a release
-
-1. Set the new version in `package.json`, then commit and push it on `main`.
-2. Run `bin/release`. It refuses to build with uncommitted changes, so that the release matches a commit.
-3. Run `bin/publish`. It tags the commit `v<version>` and uploads the installer. The [download link](https://github.com/NicolasMarlier/strobe/releases/latest/download/Strobe.dmg) then gives the new version.
-
-Signing needs, on the Mac that builds:
-
-- a **Developer ID Application** certificate in the keychain;
-- the notarization credentials, an App Store Connect API key, saved once with:
-  ```sh
-  xcrun notarytool store-credentials strobe-notary --key <AuthKey.p8> --key-id <Key ID> --issuer <Issuer ID>
-  ```
-- the GitHub CLI, logged in: `brew install gh && gh auth login`.
+To build Strobe and install it in `/Applications`, replacing the one there: `bin/deploy`.
 
 ## License
 
