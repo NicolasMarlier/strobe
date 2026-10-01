@@ -1,5 +1,6 @@
 
 import { useDmxSceneContext } from '../../contexts/DmxSceneContext'
+import { footprint } from '../../../shared/fixtures'
 import { humanizeMidiKey } from '../../utils'
 import './DmxButton.scss' 
 
@@ -17,11 +18,13 @@ const DmxButton = (props: Props) => {
         isPlaying,
         dmxButton: dmxButton
     } = props
-    const { dmxScene } = useDmxSceneContext()
+    const { dmxScene, fixtureOf } = useDmxSceneContext()
 
-    const isLighted = (dmxButton: DmxButton, ledBarConfig: LedBarConfig) => (
-        dmxButton.red_channels.some(c => c >= ledBarConfig.channel && c < ledBarConfig.channel + ledBarConfig.rgb_dots_count * 3)
-    )
+    // Whether the button lights some of the element's cells
+    const isLighted = (dmxButton: DmxButton, element: SceneElement) => {
+        const end = element.channel + footprint(element, fixtureOf(element.fixture))
+        return dmxButton.red_channels.some(c => c >= element.channel && c < end)
+    }
     const global = dmxButton.track_id == null
 
     return <div className={`dmx-button btn ${isPlaying ? 'playing': ''} ${selected ? 'active' : ''}`}
@@ -32,8 +35,8 @@ const DmxButton = (props: Props) => {
             </div> }
             
             <div className='color-symbols'>
-                { dmxScene.led_bars.map(ledBarConfig => (
-                    <div className='color-symbol' style={isLighted(dmxButton, ledBarConfig) ? {background: dmxButton.color} : {}}/>
+                { dmxScene.elements.map((element, index) => (
+                    <div key={index} className='color-symbol' style={isLighted(dmxButton, element) ? {background: dmxButton.color} : {}}/>
                 ))}
             </div>
         </div>

@@ -1,12 +1,12 @@
 // Frame and form basics come from .details-panel (DesignSystem/DetailsPanel)
 .dmx-scene-details {
-    .led-bars-list {
+    .elements-list, .fixture-picker {
         display: flex;
         flex-direction: column;
         gap: 4px;
     }
 
-    .led-bars-list-item {
+    .elements-list-item {
         display: flex;
         justify-content: space-between;
         align-items: baseline;
@@ -27,6 +27,19 @@
             background-color: #ffffff11;
             color: #fff;
         }
+    }
+
+    // The fixtures to pick from, set apart from the elements above
+    .fixture-picker {
+        padding-top: 6px;
+        border-top: 1px solid #ffffff14;
+    }
+
+    .fixture-problem {
+        padding: 2px 6px;
+        font-size: 10px;
+        color: #c97;
+        overflow-wrap: anywhere;
     }
 
     .add-element {

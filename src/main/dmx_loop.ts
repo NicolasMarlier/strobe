@@ -1,7 +1,6 @@
 import EventEmitter from "events"
 import { emptyDmxHexString } from "./utils"
 import DmxEffect from "./dmx/effects/DmxEffect"
-import { getDmxSignalAt } from "./dmx/effects/utils"
 import DmxSet from "./dmx/effects/DmxSet"
 import DmxBoom from "./dmx/effects/DmxBoom"
 import DmxRun from "./dmx/effects/DmxRun"
@@ -9,6 +8,8 @@ import DmxToggle from "./dmx/effects/DmxToggle"
 import { DmxMidiHandler } from "./dmx_midi_handler"
 import DmxInverseRun from "./dmx/effects/DmxInverseRun"
 import { Store, STORE_EVENTS } from "./store/Store"
+import { FixtureLibrary, FIXTURE_LIBRARY_EVENTS } from "./fixture_library"
+import { CellLayouts, cellLayouts, isCellBlack } from "../shared/fixtures"
 
 const LOOP_INTERVAL_MS = 20
 
@@ -36,6 +37,8 @@ export class DmxLoop extends EventEmitter {
     current_track_id: number | undefined
     dmx_hex_signal = emptyDmxHexString()
     dmxMidiHandler: DmxMidiHandler
+    // What each cell's channels do, from the scene's elements
+    cellLayouts: CellLayouts = () => []
 
   
     private constructor(current_track_id: number | undefined, dmxButtons: DmxButton[]) {
@@ -56,6 +59,7 @@ export class DmxLoop extends EventEmitter {
                 this.switchToFirstTrack()
             }
             this.resyncDmxButtons()
+            this.resyncCellLayouts()
             this.reloadMidi()
         })
         Store.getInstance().on(STORE_EVENTS.LOADED, () => {
@@ -63,6 +67,7 @@ export class DmxLoop extends EventEmitter {
             this.dmxMidiHandler.stop({reset: true})
             this.current_track_id = undefined
             this.resyncDmxButtons()
+            this.resyncCellLayouts()
             this.reloadMidi()
             this.switchToFirstTrack()
         })
@@ -70,6 +75,9 @@ export class DmxLoop extends EventEmitter {
             if(this.current_track_id == oldId) this.switchTrack(newId)
         })
 
+        FixtureLibrary.getInstance().on(FIXTURE_LIBRARY_EVENTS.CHANGED, this.resyncCellLayouts)
+
+        this.resyncCellLayouts()
         this.switchToFirstTrack()
     }
 
@@ -88,13 +96,15 @@ export class DmxLoop extends EventEmitter {
 
     resyncDmxButtons = async() => {
         this.dmxButtons = Store.getInstance().listButtons(this.current_track_id)
-    }    
+    }
 
-    areDmxButtonChannelsBlack = (dmxButton: DmxButton) => dmxButton.red_channels.every((redChannel) => (
-        getDmxSignalAt(this.dmx_hex_signal, redChannel + 0) == 0 &&
-        getDmxSignalAt(this.dmx_hex_signal, redChannel + 1) == 0 &&
-        getDmxSignalAt(this.dmx_hex_signal, redChannel + 2) == 0
-    ))
+    resyncCellLayouts = () => {
+        this.cellLayouts = cellLayouts(Store.getInstance().getDmxScene().elements, FixtureLibrary.getInstance().fixtureOf)
+    }
+
+    areDmxButtonChannelsBlack = (dmxButton: DmxButton) => dmxButton.red_channels.every((redChannel) =>
+        isCellBlack(this.dmx_hex_signal, redChannel, this.cellLayouts(redChannel))
+    )
 
     nextDmxButtonTrigger = (dmxButton: DmxButton | undefined): DmxButtonTrigger => {
         // Only toggles ever go down, all the other effects always run forward
@@ -168,7 +178,8 @@ export class DmxLoop extends EventEmitter {
             dmxHexSignal,
             completeness,
             dmxButton,
-            trigger
+            trigger,
+            this.cellLayouts
         )
         if(completeness >= 1) {
             this.detriggerDmxButton(dmxButton.id)

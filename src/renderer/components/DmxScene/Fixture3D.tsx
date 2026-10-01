@@ -6,18 +6,14 @@ import { useBarDrag } from './useBarDrag'
 import FloorGuide from './FloorGuide'
 import SelectionMarquee, { LensHoverPreview } from './SelectionMarquee'
 import ToggleAllButton from './ToggleAllButton'
+import FogCloud from './FogCloud'
 import type { TransformControls as TransformControlsImpl } from 'three-stdlib'
+import { cellChannels, cellFog, cellLight } from '../../../shared/fixtures'
 
-// Sizes in meters
-// Every bar has the same length, whatever its dot count
-const BAR_LENGTH = 1
-const HOUSING_HEIGHT = 0.1
-// Square lenses side by side, sharing the bar's length: joined in a continuous strip
-// covering the whole front face, so a lit bar's face is all its color
-const LENS_HEIGHT = HOUSING_HEIGHT
-const HOUSING_DEPTH = 0.06
-// The dots are lenses on the housing's front face (+Z), just over it
-const DOT_Z = HOUSING_DEPTH / 2 + 0.001
+// Sizes in meters, the housing's coming from the fixture.
+// A bar's lenses sit side by side, sharing its width: joined in a continuous strip covering the whole
+// front face, so a lit bar's face is all its color. A box's are smaller squares, this share of their room
+const BOX_LENS_SCALE = 0.6
 
 // Rotation rings snap to this step
 const ROTATION_SNAP = MathUtils.degToRad(15)
@@ -75,7 +71,8 @@ const EDGES_COLOR = {
 }
 
 interface Props {
-    config: LedBarConfig
+    element: SceneElement
+    fixture: FixtureProfile
     dmxHexSignal: string
     // A DMX button is selected: clicks assign channels to it instead of selecting and moving the bar
     assignMode: boolean
@@ -142,10 +139,11 @@ const setupRotationHandles = (gizmo: TransformControlsImpl) => {
 
 // Light beams: an open cone per dot, from its lens forward (+Z), widening to BEAM_END_RADIUS
 const BEAM_LENGTH = 3
+const BEAM_START_RADIUS = 0.05
 const BEAM_END_RADIUS = 0.35
 const BEAM_INTENSITY = 0.03
 
-const BEAM_GEOMETRY = new CylinderGeometry(LENS_HEIGHT / 2, BEAM_END_RADIUS, BEAM_LENGTH, 24, 1, true)
+const BEAM_GEOMETRY = new CylinderGeometry(BEAM_START_RADIUS, BEAM_END_RADIUS, BEAM_LENGTH, 24, 1, true)
     // The cylinder's top (narrow end) at the lens, its axis along +Z
     .rotateX(-Math.PI / 2)
     .translate(0, 0, BEAM_LENGTH / 2)
@@ -193,22 +191,29 @@ const BEAM_MATERIAL = new ShaderMaterial({
     side: DoubleSide,
 })
 
-// DMX Channels are setup on device, from 001 to 511
-// The DMX signal is composed on hexadecimal values
-const dmxSignalAtChannel = (dmxHexSignal: DmxHexSignal, channel: number) => {
-    return parseInt(dmxHexSignal.slice(2*channel, 2*channel + 2), 16) || 0
+// Each cell's lens (or nozzle) on the front face (+Z), spread along the housing's width
+const lensLayout = ({ shape, size: [width, height] }: FixtureProfile, count: number) => {
+    const pitch = width / count
+    const side = Math.min(pitch, height) * BOX_LENS_SCALE
+    return {
+        width: shape == 'bar' ? pitch : side,
+        height: shape == 'bar' ? height : side,
+        // X of each lens, the housing being centered on its position
+        x: (index: number) => (index - (count - 1) / 2) * pitch,
+    }
 }
 
-const lensWidth = (count: number) => BAR_LENGTH / count
-
-// X of each dot along the bar, the bar being centered on its position
-const dotX = (index: number, count: number) => (index - (count - 1) / 2) * lensWidth(count)
-
-const LedBar = (props: Props) => {
-    const { config, dmxHexSignal, assignMode, editing, selectedRedChannels, onSelectRedChannels, onSelect, onMove, onRotate, gizmoRef, showBeams, rotating } = props
-    const { channel, rgb_dots_count: size } = config
-    const position = config.position ?? [0, 0, 0]
-    const rotation = config.rotation ?? [0, 0, 0]
+// A scene element, drawn from its fixture: a housing with a lens per cell, lit by the live DMX signal.
+// Cells making fog have a nozzle instead, and a fog cloud in front of it
+const Fixture3D = (props: Props) => {
+    const { element, fixture, dmxHexSignal, assignMode, editing, selectedRedChannels, onSelectRedChannels, onSelect, onMove, onRotate, gizmoRef, showBeams, rotating } = props
+    const { cells: size, position, rotation } = element
+    const [housingWidth, housingHeight, housingDepth] = fixture.size
+    const lens = lensLayout(fixture, size)
+    const dotX = lens.x
+    // Lenses are just over the housing's front face
+    const dotZ = housingDepth / 2 + 0.001
+    const makesFog = fixture.cell.includes('fog')
 
     const invalidate = useThree(state => state.invalidate)
     const gl = useThree(state => state.gl)
@@ -221,21 +226,21 @@ const LedBar = (props: Props) => {
     // A ring is being dragged: the rings stay until it's released, even if Alt is released first
     const [turning, setTurning] = useState(false)
 
-    const redChannels = useMemo(() => Array.from(Array(size).keys()).map((i) => channel + i * 3), [channel, size])
+    const redChannels = useMemo(() => cellChannels(element, fixture), [element.channel, size, fixture])
     const selected = redChannels.every(redChannel => selectedRedChannels.includes(redChannel))
 
     const drag = useBarDrag(groupRef, !assignMode && !rotating, onMove)
 
-    // Dots' positions along the bar
+    // Dots' positions along the housing
     useLayoutEffect(() => {
         const matrix = new Matrix4()
         for (const mesh of [dotsRef.current!, beamsRef.current!]) {
-            redChannels.forEach((_, i) => mesh.setMatrixAt(i, matrix.makeTranslation(dotX(i, size), 0, DOT_Z)))
+            redChannels.forEach((_, i) => mesh.setMatrixAt(i, matrix.makeTranslation(dotX(i), 0, dotZ)))
             mesh.instanceMatrix.needsUpdate = true
             mesh.computeBoundingSphere()
         }
         invalidate()
-    }, [redChannels])
+    }, [redChannels, fixture])
 
     // Dots' and beams' colors follow the live DMX signal
     useLayoutEffect(() => {
@@ -244,18 +249,16 @@ const LedBar = (props: Props) => {
         const color = new Color()
         const black = new Color(0, 0, 0)
         redChannels.forEach((redChannel, i) => {
-            const red = dmxSignalAtChannel(dmxHexSignal, redChannel + 0)
-            const green = dmxSignalAtChannel(dmxHexSignal, redChannel + 1)
-            const blue = dmxSignalAtChannel(dmxHexSignal, redChannel + 2)
+            const [red, green, blue] = cellLight(dmxHexSignal, redChannel, fixture.cell)
             const unlit = red + green + blue == 0
-            color.setRGB(red / 255, green / 255, blue / 255, SRGBColorSpace)
+            color.setRGB(red, green, blue, SRGBColorSpace)
             beams.setColorAt(i, unlit ? black : color)
             dots.setColorAt(i, unlit ? UNLIT_DOT : color.multiplyScalar(DOT_BRIGHTNESS))
         })
         dots.instanceColor!.needsUpdate = true
         beams.instanceColor!.needsUpdate = true
         invalidate()
-    }, [dmxHexSignal, redChannels])
+    }, [dmxHexSignal, redChannels, fixture])
 
     const showGizmo = editing && !assignMode && (rotating || turning)
     useEffect(() => {
@@ -308,7 +311,7 @@ const LedBar = (props: Props) => {
         onPointerCancel={drag.onPointerCancel}>
 
         <mesh onClick={onHousingClick}>
-            <boxGeometry args={[BAR_LENGTH, HOUSING_HEIGHT, HOUSING_DEPTH]}/>
+            <boxGeometry args={fixture.size}/>
             {/* Box faces: +X, -X, +Y, -Y, +Z (the lenses' face), -Z */}
             { HOUSING_FACE_COLORS.map((color, i) => <meshBasicMaterial key={i} attach={`material-${i}`} color={color}/>) }
             { edgesColor && <Edges color={edgesColor}/> }
@@ -322,36 +325,40 @@ const LedBar = (props: Props) => {
             onClick={onDotClick}
             onPointerMove={(e) => { if (assignMode && e.instanceId != hoveredDot) setHoveredDot(e.instanceId) }}
             onPointerOut={() => setHoveredDot(undefined)}>
-            <planeGeometry args={[lensWidth(size), LENS_HEIGHT]}/>
+            <planeGeometry args={[lens.width, lens.height]}/>
             <primitive object={DOT_MATERIAL} attach='material'/>
         </instancedMesh>
 
         <instancedMesh key={`beams-${size}`} ref={beamsRef} args={[BEAM_GEOMETRY, BEAM_MATERIAL, size]} visible={showBeams} raycast={() => null} dispose={null}/>
 
+        { makesFog && redChannels.map((redChannel, i) => (
+            <FogCloud key={i} position={[dotX(i), 0, dotZ]} density={cellFog(dmxHexSignal, redChannel, fixture.cell)}/>
+        ))}
+
         {/* The lenses assigned to the selected DMX button */}
         { assignMode && <SelectionMarquee
             // The hovered lens is shown half-tinted instead (LensHoverPreview)
             selected={redChannels.map((redChannel, i) => i != hoveredDot && selectedRedChannels.includes(redChannel))}
-            dotX={i => dotX(i, size)}
-            lensWidth={lensWidth(size)}
-            lensHeight={LENS_HEIGHT}
-            lensZ={DOT_Z}/> }
+            dotX={dotX}
+            lensWidth={lens.width}
+            lensHeight={lens.height}
+            lensZ={dotZ}/> }
 
         { assignMode && hoveredDot != undefined && <LensHoverPreview
             index={hoveredDot}
-            dotX={i => dotX(i, size)}
-            lensWidth={lensWidth(size)}
-            lensHeight={LENS_HEIGHT}
-            lensZ={DOT_Z}/> }
+            dotX={dotX}
+            lensWidth={lens.width}
+            lensHeight={lens.height}
+            lensZ={dotZ}/> }
     </group>
 
-    { editing && !assignMode && <FloorGuide barRef={groupRef} barLength={BAR_LENGTH} barThickness={HOUSING_HEIGHT}/> }
+    { editing && !assignMode && <FloorGuide barRef={groupRef} barLength={housingWidth} barThickness={Math.max(housingHeight, housingDepth)}/> }
 
     {/* Selects or unselects all the bar's lenses for the selected DMX button */}
     { assignMode &&
         <ToggleAllButton
             barRef={groupRef}
-            barSize={[BAR_LENGTH, HOUSING_HEIGHT, HOUSING_DEPTH]}
+            barSize={fixture.size}
             label={selected ? 'Unlink all' : 'Link all'}
             onClick={() => onSelectRedChannels(redChannels, !selected)}/>
     }
@@ -370,4 +377,4 @@ const LedBar = (props: Props) => {
     </>
 }
 
-export default LedBar
+export default Fixture3D

@@ -1,11 +1,13 @@
 import { randomUUID } from "crypto"
-import { LED_BAR_CENTER_POSITION } from "../../shared/led_bar"
+import { cellChannels, centerPosition, LED_BAR } from "../../shared/fixtures"
 
-const LED_BAR: LedBarConfig = { channel: 1, rgb_dots_count: 8, position: LED_BAR_CENTER_POSITION, rotation: [0, 0, 0] }
-
-// Red channel of each RGB dot of a LED bar
-const redChannels = ({ channel, rgb_dots_count }: LedBarConfig) =>
-    Array.from({ length: rgb_dots_count }, (_, i) => channel + i * 3)
+const LED_BAR_ELEMENT: SceneElement = {
+    fixture: LED_BAR.id,
+    channel: 1,
+    cells: LED_BAR.cells,
+    position: centerPosition(LED_BAR),
+    rotation: [0, 0, 0],
+}
 
 // What a new show starts with: one track, one 8-dot LED bar, and a white Boom button lighting the whole bar
 export const newShowData = (): ShowData => ({
@@ -15,10 +17,10 @@ export const newShowData = (): ShowData => ({
         track_id: 1,
         color: '#ffffff',
         duration_ms: 500,
-        red_channels: redChannels(LED_BAR),
+        red_channels: cellChannels(LED_BAR_ELEMENT, LED_BAR),
         nature: 'Boom',
         triggering_midi_key: 36,
     }],
     dmx_midis: [{ track_id: 1, midi_patterns: [] }],
-    dmx_scene: { led_bars: [LED_BAR] },
+    dmx_scene: { elements: [LED_BAR_ELEMENT] },
 })

@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Store, STORE_EVENTS } from './Store'
 import { InvalidParamError, NotFoundError } from '../controllers/application.controller'
-import { defaultLedBarPosition } from '../../shared/led_bar'
 
 let store: Store
 
@@ -141,7 +140,7 @@ describe('load and toData', () => {
             dmx_buttons: [],
             dmx_midis: [{ track_id: 31, midi_patterns: [] }],
             dmx_scene: {
-                led_bars: [{ channel: 97, rgb_dots_count: 16, position: [2, 0.5, -3], rotation: [0, 45, 0] }],
+                elements: [{ fixture: 'led-bar', channel: 97, cells: 16, position: [2, 0.5, -3], rotation: [0, 45, 0] }],
                 display: { show_grid: true, show_beams: false, zoom: 12 },
             },
         }
@@ -159,31 +158,16 @@ describe('load and toData', () => {
 })
 
 describe('dmx scene', () => {
-    it('drops the CSS style of shows saved before the 3D scene, and lays out bars without a position', () => {
-        const legacyBar = { channel: 1, rgb_dots_count: 8, style: { transform: 'rotateY(110deg)', left: '-30%' } }
-        store.load({
-            tracks: [],
-            dmx_buttons: [],
-            dmx_midis: [],
-            dmx_scene: { led_bars: [legacyBar, { channel: 25, rgb_dots_count: 8, position: [3, 2, -4], rotation: [0, 90, 0] }] },
-        } as ShowData)
-
-        expect(store.getDmxScene().led_bars).toEqual([
-            { channel: 1, rgb_dots_count: 8, position: defaultLedBarPosition(0), rotation: [0, 0, 0] },
-            { channel: 25, rgb_dots_count: 8, position: [3, 2, -4], rotation: [0, 90, 0] },
-        ])
-    })
-
     it('replaces the scene and emits changed', () => {
         const changed = vi.fn()
         store.on(STORE_EVENTS.CHANGED, changed)
-        const scene: DmxScene = { led_bars: [{ channel: 1, rgb_dots_count: 8 }] }
+        const scene: DmxScene = { elements: [{ fixture: 'led-bar', channel: 1, cells: 8, position: [0, 0.05, 0], rotation: [0, 0, 0] }] }
 
         store.updateDmxScene(scene)
-        scene.led_bars[0].channel = 99
+        scene.elements[0].channel = 99
 
         expect(changed).toHaveBeenCalledTimes(1)
-        expect(store.getDmxScene().led_bars[0].channel).toBe(1)
+        expect(store.getDmxScene().elements[0].channel).toBe(1)
     })
 })
 

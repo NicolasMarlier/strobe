@@ -10,6 +10,7 @@ import { forgetRecentShow, newShow, openRecentShow, openShow, saveShow, showStat
 import { Store, STORE_EVENTS } from '../store/Store';
 import { ShowHistory } from '../store/ShowHistory';
 import { revealWindow } from './splash';
+import { FixtureLibrary, FIXTURE_LIBRARY_EVENTS } from '../fixture_library';
 
 export function handle<C extends Channel>(
   channel: C,
@@ -59,6 +60,8 @@ handle('main_loop:update_current_tick', MainLoopController.update_current_tick)
 
 handle('dmx_scene:get', async () => Store.getInstance().getDmxScene())
 handle('dmx_scene:update', async (dmxScene) => Store.getInstance().updateDmxScene(dmxScene))
+handle('fixtures:list', async () => FixtureLibrary.getInstance().list())
+FixtureLibrary.getInstance().on(FIXTURE_LIBRARY_EVENTS.CHANGED, () => sendToAllWindows('fixtures:changed', null))
 
 handle('show:state', async () => showState())
 handleWithWindow('app:rendered', revealWindow)

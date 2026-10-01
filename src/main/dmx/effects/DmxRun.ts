@@ -1,34 +1,39 @@
 import DmxEffect from "./DmxEffect";
-import { colorHexToArray, setDmxAt } from "./utils"
+import { CellLayouts } from "../../../shared/fixtures"
+
+// A light running along the button's cells, from the first channel to the last (or back, reversed),
+// lighting `spread` channels around it
+export const runAlong = (
+    dmxHexSignal: DmxHexSignal,
+    completeness: number,
+    dmxButton: DmxButton,
+    layouts: CellLayouts,
+    reversed: boolean
+) => {
+    const spread = 2 * 3
+
+    const startRedChannel = Math.min(...dmxButton.red_channels) - 2 * 3
+    const endRedChannel = Math.max(...dmxButton.red_channels) + 2 * 3
+
+    const center = startRedChannel + (endRedChannel - startRedChannel) * (reversed ? 1 - completeness : completeness)
+
+    return DmxEffect.setToColor(
+        dmxButton.red_channels,
+        dmxButton.color,
+        dmxHexSignal,
+        layouts,
+        (redChannel) => Math.max(0, 1 - (Math.abs(center - redChannel) / spread))
+    )
+}
 
 class DmxRun extends DmxEffect {
     static transformDmxHexSignal = (
         dmxHexSignal: DmxHexSignal,
         completeness: number,
         dmxButton: DmxButton,
-        _trigger: DmxButtonTrigger
-    ) => {
-        let newSignal = dmxHexSignal
-        const spread = 2 * 3
-        
-        const startRedChannel = Math.min(...dmxButton.red_channels) - 2 * 3
-        const endRedChannel = Math.max(...dmxButton.red_channels) + 2 * 3
-
-        
-        const center = startRedChannel + (endRedChannel - startRedChannel) * completeness
-
-        const colorArray = colorHexToArray(dmxButton.color)
-
-        dmxButton.red_channels.forEach(redChannel => {
-
-            const colorIntensity = Math.max(0, 1 - (Math.abs(center - redChannel) / spread))
-            newSignal = setDmxAt(newSignal, redChannel + 0, Math.floor(colorArray[0] * colorIntensity))
-            newSignal = setDmxAt(newSignal, redChannel + 1, Math.floor(colorArray[1] * colorIntensity))
-            newSignal = setDmxAt(newSignal, redChannel + 2, Math.floor(colorArray[2] * colorIntensity))
-        })
-
-        return newSignal
-    }
+        _trigger: DmxButtonTrigger,
+        layouts: CellLayouts
+    ) => runAlong(dmxHexSignal, completeness, dmxButton, layouts, false)
 }
 
 export default DmxRun
