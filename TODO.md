@@ -4,7 +4,7 @@
 - [x] Handle "plugins" for devices / scene elements
 - [x] Scene element for the fog machine (machine à brouillard)
 - [x] Installer
-- [ ] Feedback collection process
+- [x] Feedback collection process
 - [x] Public website
 - [ ] Communicate with Enttec
 - [ ] Proper handling of show files on macOS
