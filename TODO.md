@@ -12,3 +12,4 @@
 - [x] Proper version and About
 - [x] Code signing
 - [ ] App Store
+- [ ] Explain the MainStage integration
