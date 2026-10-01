@@ -5,7 +5,7 @@
 - [x] Scene element for the fog machine (machine à brouillard)
 - [x] Installer
 - [ ] Feedback collection process
-- [ ] Public website
+- [x] Public website
 - [ ] Communicate with Enttec
 - [ ] Proper handling of show files on macOS
 - [ ] Test usb v3 on real lights (`usb-v3` branch)
