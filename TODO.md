@@ -13,3 +13,4 @@
 - [x] Code signing
 - [ ] App Store
 - [ ] Explain the MainStage integration
+- [ ] Example show file
