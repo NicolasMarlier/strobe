@@ -169,6 +169,20 @@
                 color: transparent;
                 animation: interfaces-placeholder-sweep 4s ease-in-out infinite;
             }
+
+            // Not waiting for anything: a plain link, lit on hover
+            &.link .name {
+                animation: none;
+                background: none;
+                color: #555;
+                text-decoration: none;
+                cursor: pointer;
+
+                &:hover {
+                    color: #999;
+                    text-decoration: underline;
+                }
+            }
         }
     }
 

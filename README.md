@@ -6,6 +6,8 @@ Strobe drives the lights of a live show from a Mac: build a setlist of tracks, p
 
 It was made for the live shows of the band maad avenue, and it's free for anyone to use.
 
+**Website:** [strobe-website.vercel.app](https://strobe-website.vercel.app/), with a tour of the features and a guide to [driving Strobe from MainStage](https://strobe-website.vercel.app/mainstage).
+
 ## Download
 
 **[Download Strobe for macOS](https://github.com/NicolasMarlier/strobe/releases/latest/download/Strobe.dmg)**

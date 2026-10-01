@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
 import './main/init/ipc-router'
 import { initMidiRouter } from './main/init/midi_router';
@@ -52,6 +52,12 @@ const createWindow = (): void => {
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
+  });
+
+  // Links to the web (e.g. the MainStage help in Interfaces) open in the browser, never in a window of the app
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https://')) shell.openExternal(url)
+    return { action: 'deny' }
   });
 
   // The title shows the open show, don't let index.html's <title> replace it

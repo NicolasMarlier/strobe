@@ -18,6 +18,9 @@ const DMX_STATE_STATUS: Record<USBDeviceState, Status> = {
 // only the bus' name tells them apart
 const IAC_PREFIX = /^(Gestionnaire IAC|IAC Driver)\s+/
 
+// How to set up MainStage to drive Strobe, on the public website: linked from the MIDI inputs until a bus shows up
+const MAINSTAGE_HELP_URL = 'https://strobe-website.vercel.app/mainstage'
+
 type Side = 'input' | 'output'
 
 interface DeviceInfo {
@@ -28,6 +31,8 @@ interface DeviceInfo {
     title: string
     // Stands in for a missing device: just the text, no frame, dot or wire
     placeholder?: boolean
+    // A placeholder can be a link, opened in the browser (see setWindowOpenHandler in index.ts)
+    href?: string
 }
 
 // A wire from a device to Strobe, in the section's pixels
@@ -57,9 +62,11 @@ let nextParticleId = 0
 
 // The dot tells the state. `flash` counts the device's signals: each one flashes the dot again
 const Device = ({ device, flash, deviceRef }: { device: DeviceInfo, flash?: number, deviceRef: (element: HTMLDivElement | null) => void }) =>
-    <div ref={deviceRef} className={`interface-device ${device.status} ${device.placeholder ? 'placeholder' : ''}`} title={device.title}>
+    <div ref={deviceRef} className={`interface-device ${device.status} ${device.placeholder ? 'placeholder' : ''} ${device.href ? 'link' : ''}`} title={device.title}>
         { !device.placeholder && <span key={flash} className={`status-dot ${flash ? 'flash' : ''}`}/> }
-        <span className='name'>{device.name}</span>
+        { device.href
+            ? <a className='name' href={device.href} target='_blank' rel='noreferrer'>{device.name}</a>
+            : <span className='name'>{device.name}</span> }
     </div>
 
 // What Strobe is connected to: the MIDI inputs it listens to stacked on the left, the DMX outputs it drives
@@ -85,9 +92,15 @@ const Interfaces = () => {
 
     const removeParticle = (id: number) => setParticles(particles => particles.filter(particle => particle.id != id))
 
-    const inputs: DeviceInfo[] = midiInputs.length == 0
+    const midiDevices: DeviceInfo[] = midiInputs.length == 0
         ? [{ key: 'none', name: 'No MIDI input', status: 'off', title: 'No MIDI input connected' }]
         : midiInputs.map(name => ({ key: name, name: name.replace(IAC_PREFIX, ''), status: 'on', title: name }))
+    // MainStage talks to Strobe over a virtual MIDI bus: until there's one, a link tells how to set it up
+    const mainStageBus = midiInputs.some(name => IAC_PREFIX.test(name))
+    const inputs: DeviceInfo[] = mainStageBus ? midiDevices : [
+        ...midiDevices,
+        { key: 'mainstage', name: 'Connect to MainStage…', status: 'off', title: 'How to drive Strobe from MainStage', placeholder: true, href: MAINSTAGE_HELP_URL },
+    ]
     const dmxStatus = DMX_STATE_STATUS[enttecOpenUSBState] ?? 'off'
     // Some light is going out: a channel isn't at 0 (the signal's first byte is the DMX start code, not a channel)
     const dmxSending = dmxStatus == 'on' && /[^0]/.test(dmxHexSignal.slice(2))
