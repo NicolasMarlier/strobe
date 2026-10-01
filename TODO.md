@@ -12,5 +12,5 @@
 - [x] Proper version and About
 - [x] Code signing
 - [ ] App Store
-- [ ] Explain the MainStage integration
+- [x] Explain the MainStage integration
 - [ ] Example show file
