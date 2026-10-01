@@ -48,6 +48,9 @@ export const getDmxScene = () =>
 export const updateDmxScene = (dmxScene: DmxScene) =>
     i('dmx_scene:update', dmxScene)
 
+export const listFixtures = () =>
+    i('fixtures:list')
+
 export const getShowState = () =>
     i('show:state')
 

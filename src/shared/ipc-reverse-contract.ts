@@ -28,6 +28,10 @@ export interface ApiReverseContract {
   'interfaces:midi_activity': {
     params: string
   }
+  // A fixture file was added, changed or removed: the UI reloads them (fixtures:list)
+  'fixtures:changed': {
+    params: null
+  }
   // Undo or redo brought the show back to a previous state: the UI reloads it
   'show:restored': {
     params: null

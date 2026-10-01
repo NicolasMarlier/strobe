@@ -90,6 +90,11 @@ export interface ApiContract {
     result: DmxScene
   }
 
+  'fixtures:list': {
+    args: []
+    result: FixtureLibraryContents
+  }
+
   // The app has rendered in the calling window: it can be shown
   'app:rendered': {
     args: []

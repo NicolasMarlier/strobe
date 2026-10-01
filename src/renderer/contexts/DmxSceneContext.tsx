@@ -1,20 +1,25 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { getDmxScene, updateDmxScene as saveDmxScene } from "../ApiClient";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { getDmxScene, listFixtures, updateDmxScene as saveDmxScene } from "../ApiClient";
+import { BUILT_IN_FIXTURES, fixtureLookup, FixtureLookup } from "../../shared/fixtures";
 
 interface DmxSceneContextType {
   dmxScene: DmxScene
-  // Only the given keys change (e.g. the LED bars, or the display options).
+  // Only the given keys change (e.g. the elements, or the display options).
   // Given a function, it gets the latest scene: for changes made after a delay
   updateDmxScene: (changes: DmxSceneChanges) => void
-  // Moves or rotates a LED bar
-  placeLedBar: (index: number, placement: LedBarPlacement) => void
-  // LED bar edited in the scene's details panel, highlighted in the scene
-  selectedLedBarIndex: number | undefined
-  setSelectedLedBarIndex: (index: number | undefined) => void
+  // Moves or rotates an element
+  placeElement: (index: number, placement: ElementPlacement) => void
+  // Element edited in the scene's details panel, highlighted in the scene
+  selectedElementIndex: number | undefined
+  setSelectedElementIndex: (index: number | undefined) => void
+  // The fixtures elements can be made of, and why fixture files were skipped
+  fixtures: FixtureProfile[]
+  fixtureProblems: string[]
+  fixtureOf: FixtureLookup
 }
 
 type DmxSceneChanges = Partial<DmxScene> | ((dmxScene: DmxScene) => Partial<DmxScene>)
-type LedBarPlacement = Pick<LedBarConfig, 'position' | 'rotation'>
+type ElementPlacement = Partial<Pick<SceneElement, 'position' | 'rotation'>>
 
 const DmxSceneContext = createContext<DmxSceneContextType | null>(null);
 
@@ -29,11 +34,12 @@ export const useDmxSceneContext = () => {
   return dmxSceneContext
 }
 
-// The show's scene: how the lights are laid out on screen.
+// The show's scene: how the devices are laid out on screen.
 // Loaded once: opening another show reloads the window.
 export const DmxSceneContextProvider = ({ children }: {children: React.ReactNode}) => {
-  const [dmxScene, setDmxScene] = useState<DmxScene>({ led_bars: [] })
-  const [selectedLedBarIndex, setSelectedLedBarIndex] = useState<number | undefined>(undefined)
+  const [dmxScene, setDmxScene] = useState<DmxScene>({ elements: [] })
+  const [selectedElementIndex, setSelectedElementIndex] = useState<number | undefined>(undefined)
+  const [library, setLibrary] = useState<FixtureLibraryContents>({ fixtures: BUILT_IN_FIXTURES, problems: [] })
   // The latest scene, for changes made before a re-render
   const dmxSceneRef = useRef(dmxScene)
 
@@ -41,10 +47,15 @@ export const DmxSceneContextProvider = ({ children }: {children: React.ReactNode
     dmxSceneRef.current = dmxScene
     setDmxScene(dmxScene)
   })
+  const fetchFixtures = () => listFixtures().then(setLibrary)
 
-  useEffect(() => { fetchDmxScene() }, [])
+  useEffect(() => { fetchDmxScene(); fetchFixtures() }, [])
   // Undo or redo brought back another state of the show
   useEffect(() => window.strobe.api.onMessage('show:restored', fetchDmxScene), [])
+  // A fixture file was added, changed or removed
+  useEffect(() => window.strobe.api.onMessage('fixtures:changed', fetchFixtures), [])
+
+  const fixtureOf = useMemo(() => fixtureLookup(library.fixtures), [library])
 
   // Shown right away, saved in the background
   const updateDmxScene = (changes: DmxSceneChanges) => {
@@ -55,13 +66,16 @@ export const DmxSceneContextProvider = ({ children }: {children: React.ReactNode
     saveDmxScene(dmxScene)
   }
 
-  const placeLedBar = (index: number, placement: LedBarPlacement) =>
+  const placeElement = (index: number, placement: ElementPlacement) =>
     updateDmxScene(dmxScene => ({
-      led_bars: dmxScene.led_bars.map((ledBar, i) => i == index ? { ...ledBar, ...placement } : ledBar),
+      elements: dmxScene.elements.map((element, i) => i == index ? { ...element, ...placement } : element),
     }))
 
   return (
-    <DmxSceneContext.Provider value={ { dmxScene, updateDmxScene, placeLedBar, selectedLedBarIndex, setSelectedLedBarIndex } }>
+    <DmxSceneContext.Provider value={ {
+      dmxScene, updateDmxScene, placeElement, selectedElementIndex, setSelectedElementIndex,
+      fixtures: library.fixtures, fixtureProblems: library.problems, fixtureOf,
+    } }>
       {children}
     </DmxSceneContext.Provider>
   )

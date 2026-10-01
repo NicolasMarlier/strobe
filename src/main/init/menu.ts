@@ -1,4 +1,5 @@
-import { BaseWindow, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron"
+import { BaseWindow, BrowserWindow, Menu, MenuItemConstructorOptions, shell } from "electron"
+import { FixtureLibrary } from "../fixture_library"
 import { newShow, openRecentShow, openShow, saveShow, saveShowAs } from "../show/document"
 import { clearRecentShows, describeRecentShow, listRecentShows, onRecentShowsChange } from "../show/recent_shows"
 import { sendToAllWindows } from "./ipc-router"
@@ -8,6 +9,11 @@ const onWindow = (action: (win: BrowserWindow) => void) =>
     (_item: unknown, win: BaseWindow | undefined) => {
         if (win instanceof BrowserWindow) action(win)
     }
+
+const openFixturesFolder = () => {
+    const dir = FixtureLibrary.getInstance().folder()
+    if (dir) shell.openPath(dir)
+}
 
 const openRecentSubmenu = (): MenuItemConstructorOptions[] => {
     const dirs = listRecentShows()
@@ -36,6 +42,9 @@ const buildMenu = () => {
                 { type: 'separator' },
                 { label: 'Save', accelerator: 'CmdOrCtrl+S', click: onWindow(saveShow) },
                 { label: 'Save As…', accelerator: 'CmdOrCtrl+Shift+S', click: onWindow(saveShowAs) },
+                { type: 'separator' },
+                // Where to add fixtures, as JSON files: they show up in the scene's elements right away
+                { label: 'Open Fixtures Folder', click: openFixturesFolder },
                 { type: 'separator' },
                 { role: 'close' },
             ],

@@ -7,7 +7,7 @@ describe('new show', () => {
 
         expect(show.tracks).toEqual([{ id: 1, name: 'My track', bpm: 85, audio_filename: null }])
         expect(show.dmx_midis).toEqual([{ track_id: 1, midi_patterns: [] }])
-        expect(show.dmx_scene).toEqual({ led_bars: [{ channel: 1, rgb_dots_count: 8, position: [0, 0.05, 0], rotation: [0, 0, 0] }] })
+        expect(show.dmx_scene).toEqual({ elements: [{ fixture: 'led-bar', channel: 1, cells: 8, position: [0, 0.05, 0], rotation: [0, 0, 0] }] })
 
         expect(show.dmx_buttons).toHaveLength(1)
         expect(show.dmx_buttons[0]).toMatchObject({

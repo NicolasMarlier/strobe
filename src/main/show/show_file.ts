@@ -1,5 +1,6 @@
 import fs from "fs"
 import path from "path"
+import { defaultPosition, LED_BAR } from "../../shared/fixtures"
 
 // A show is a folder:
 //   MyShow.strobe/
@@ -9,12 +10,33 @@ import path from "path"
 export const SHOW_EXTENSION = '.strobe'
 const FORMAT = 'strobe-show'
 // 2: programs renamed to tracks (tracks, track_id, audio/track_<id>.<ext>)
-const VERSION = 2
+// 3: the scene's LED bars became elements of any fixture (dmx_scene.elements)
+const VERSION = 3
 
 type ShowFile = ShowData & {
     format: typeof FORMAT
     version: number
 }
+
+// A LED bar of a version 2 show: rgb_dots_count dots from `channel`. The first ones, placed with CSS, had no position
+type LedBarV2 = {
+    channel: number
+    rgb_dots_count: number
+    position?: Vector3Tuple
+    rotation?: Vector3Tuple
+}
+
+// Version 2 scenes only had LED bars: they become LED bar elements, laid out in rows when they had no position
+const migrateSceneV2 = (scene: { led_bars: LedBarV2[], display?: DmxSceneDisplay }): DmxScene => ({
+    elements: scene.led_bars.map(({ channel, rgb_dots_count, position, rotation }, index) => ({
+        fixture: LED_BAR.id,
+        channel,
+        cells: rgb_dots_count,
+        position: position ?? defaultPosition(index, LED_BAR),
+        rotation: rotation ?? [0, 0, 0],
+    })),
+    ...(scene.display && { display: scene.display }),
+})
 
 export class ShowFileError extends Error {}
 
@@ -35,21 +57,31 @@ export const readShow = (dir: string): ShowData => {
 
     if (file.format != FORMAT) throw new ShowFileError('show.json is not a Strobe show')
     if (file.version > VERSION) throw new ShowFileError('This show was made by a newer version of Strobe')
-    if (file.version < VERSION) throw new ShowFileError('This show uses an older format (programs instead of tracks) that this version of Strobe does not open')
+    if (file.version < 2) throw new ShowFileError('This show uses an older format (programs instead of tracks) that this version of Strobe does not open')
     if (!Array.isArray(file.tracks) || !Array.isArray(file.dmx_buttons) || !Array.isArray(file.dmx_midis)) {
         throw new ShowFileError('show.json is missing tracks, dmx_buttons or dmx_midis')
-    }
-    if (file.dmx_scene !== undefined && !Array.isArray(file.dmx_scene?.led_bars)) {
-        throw new ShowFileError('show.json has a dmx_scene without led_bars')
     }
 
     return {
         tracks: file.tracks,
         dmx_buttons: file.dmx_buttons,
         dmx_midis: file.dmx_midis,
-        // Shows made before the scene was part of the show have none
-        dmx_scene: file.dmx_scene ?? { led_bars: [] },
+        dmx_scene: readScene(file),
     }
+}
+
+const readScene = (file: ShowFile): DmxScene => {
+    // Shows made before the scene was part of the show have none
+    if (file.dmx_scene === undefined) return { elements: [] }
+
+    if (file.version == 2) {
+        const scene = file.dmx_scene as unknown as { led_bars?: LedBarV2[] }
+        if (!Array.isArray(scene?.led_bars)) throw new ShowFileError('show.json has a dmx_scene without led_bars')
+        return migrateSceneV2(scene as { led_bars: LedBarV2[] })
+    }
+
+    if (!Array.isArray(file.dmx_scene?.elements)) throw new ShowFileError('show.json has a dmx_scene without elements')
+    return file.dmx_scene
 }
 
 const isTrackAudioFile = (filename: string) => /^track_\d+\.\w+$/.test(filename)

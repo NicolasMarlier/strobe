@@ -34,13 +34,13 @@ function App() {
     setSelectedDmxButtonId(undefined)
   }
 
-  const { setSelectedLedBarIndex } = useDmxSceneContext()
+  const { setSelectedElementIndex } = useDmxSceneContext()
 
-  // Same for the scene's margins: a click there closes the edited bar
+  // Same for the scene's margins: a click there closes the edited element
   // (the 3D scene handles its own clicks, and the details panel keeps them)
   const onSceneSectionClick = (e: React.MouseEvent) => {
     if ((e.target as Element).closest('.dmx-scene, .dmx-scene-details')) return
-    setSelectedLedBarIndex(undefined)
+    setSelectedElementIndex(undefined)
   }
   const { selectedMidiPatterns, isRecording, setIsRecording } = useDmxMidiContext()
   const { debug } = useRealTimeContext()
