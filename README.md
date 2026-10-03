@@ -20,6 +20,20 @@ Open `Strobe.dmg`, then drag Strobe into Applications. The app is signed and not
 
 All versions and their notes are on the [releases page](https://github.com/NicolasMarlier/strobe/releases), and in the [changelog](CHANGELOG.md).
 
+<!-- whats-new:start -->
+## What's new in 0.4.0
+
+### New
+- **Follow the cursor:** while the show plays, the track automation turns its pages to keep the cursor in sight. Scroll away by hand and it stays where you put it, until the cursor shows in the view again or you press Play.
+- **Narrow window:** under 800 pixels wide, Strobe shows a single column made for playing a show. The top bar holds the current track, a click on it opens the setlist, and a dot each for MIDI and DMX. Below come a low track automation, the buttons and the scene. Buttons play without being selected, and editing waits for a wider window.
+- **Camera motion:** the 3D scene's camera drifts slightly while the show plays. It can be turned off in the scene's display settings.
+
+### Improved
+- **Darker unlit lights:** a light that is off now looks off, and a lens dims smoothly down to dark.
+
+Older versions: on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
+<!-- whats-new:end -->
+
 ## What it does
 
 - **Setlist:** the show's tracks, each with its audio, played from Strobe.
