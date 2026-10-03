@@ -20,5 +20,5 @@
 - [ ] Slight camera movements on the 3D scene while the show plays
 - [ ] Visual bug when the window is very narrow
 - [ ] Videos on the website
-- [ ] Move the cursor while playing
+- [x] Move the cursor while playing
 - [ ] Website: a short story, filmed with Nico, on why Strobe was made
