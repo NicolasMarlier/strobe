@@ -17,8 +17,9 @@
 - [ ] Better MIDI recording and MIDI editing
 - [x] Lights aren't dark enough
 - [ ] Block Play when playback is driven by MainStage
-- [ ] Slight camera movements on the 3D scene while the show plays
+- [x] Slight camera movements on the 3D scene while the show plays
 - [ ] Visual bug when the window is very narrow
 - [ ] Videos on the website
 - [x] Move the cursor while playing
 - [ ] Website: a short story, filmed with Nico, on why Strobe was made
+- [ ] Download monitoring
