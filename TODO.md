@@ -26,9 +26,10 @@
 - [ ] Move the cursor by hand during playback (seek while playing)
 - [ ] Usage telemetry in the app, to count installs and real usage, with TelemetryDeck
   - Why TelemetryDeck: an anonymous, hashed ID per install gives unique installs, monthly active users and retention (Aptabase keeps no user ID, so it can't count installs). JavaScript SDK, free plan of 50 to 100k signals a month
-  - First: the user creates the TelemetryDeck account and the app, and gives its app ID
-  - Signals: at launch (version, macOS version, first launch or not), then show opened, playback started, MainStage connected, DMX interface plugged, narrow window used. Never a show's or a track's name, nor any content
-  - A "Share anonymous usage statistics" setting, on by default, that turns it off
-  - A Privacy section in the README listing exactly what is sent
+  - First: the user creates the TelemetryDeck account and the app, and gives its app ID (done)
+  - Implemented on the `telemetry` branch, not merged yet: **validate that the data shows up** in the TelemetryDeck dashboard (Test Mode on: a run from source sends test signals), then merge. The app's sends were accepted (200), but the dashboard kept loading without showing anything: try it without an ad or tracker blocker, which may block it. Running from source, the terminal logs each signal sent
+  - Signals (done on the branch): at launch (version, macOS version, first launch or not), then show opened, playback started, MainStage connected, DMX interface plugged, narrow window used. Never a show's or a track's name, nor any content
+  - A "Share anonymous usage statistics" setting, on by default, that turns it off (done on the branch: Strobe › Share Anonymous Usage Statistics)
+  - A Privacy section in the README listing exactly what is sent (done on the branch)
   - Add the installs and active users to `bin/stats` and the stats skill
   - Ship it in a release (the deploy skill)
