@@ -1,0 +1,106 @@
+#!/usr/bin/env node
+//
+// How Strobe is doing: the website's visits (Vercel Web Analytics) and the installer's downloads
+// (GitHub releases), printed as plain text.
+//
+// Needs:
+// - gh, logged in (brew install gh && gh auth login), for the downloads
+// - a Vercel access token in the keychain, for the visits. Once, create one at
+//   https://vercel.com/account/tokens, then:
+//     security add-generic-password -a "$USER" -s strobe-vercel-token -w
+//   (it asks for the token, so it never shows in the shell's history)
+//
+// bin/stats [days]: the visits of the last <days> days (30 by default)
+
+const { execFileSync } = require('node:child_process')
+
+const REPO = 'NicolasMarlier/strobe'
+const VERCEL_PROJECT = 'strobe-website'
+const KEYCHAIN_SERVICE = 'strobe-vercel-token'
+// A project of a team rather than of the personal account: its slug in STROBE_VERCEL_TEAM
+const VERCEL_TEAM = process.env.STROBE_VERCEL_TEAM
+
+const days = Number(process.argv[2] ?? 30)
+const day = 24 * 60 * 60 * 1000
+const isoDay = date => date.toISOString().slice(0, 10)
+const until = new Date()
+const since = new Date(until.getTime() - (days - 1) * day)
+
+const section = title => console.log(`\n${title}\n${'─'.repeat(title.length)}`)
+const pad = (value, width) => String(value).padStart(width)
+
+const downloads = () => {
+    section('Downloads (GitHub releases)')
+    let releases
+    try {
+        releases = JSON.parse(execFileSync('gh', ['api', `repos/${REPO}/releases`], { encoding: 'utf8' }))
+    } catch {
+        console.log('Unavailable: gh is missing or not logged in (gh auth login)')
+        return
+    }
+    let total = 0
+    for (const release of releases) {
+        const count = release.assets.reduce((sum, asset) => sum + asset.download_count, 0)
+        total += count
+        console.log(`${release.tag_name.padEnd(10)} ${pad(count, 6)}   published ${release.published_at.slice(0, 10)}`)
+    }
+    console.log(`${'Total'.padEnd(10)} ${pad(total, 6)}`)
+}
+
+const vercelToken = () => {
+    try {
+        return execFileSync('security', ['find-generic-password', '-s', KEYCHAIN_SERVICE, '-w'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+    } catch {
+        return undefined
+    }
+}
+
+const vercel = async (dataset, params) => {
+    const url = new URL(`https://api.vercel.com/v1/query/web-analytics/${dataset}`)
+    url.searchParams.set('projectId', VERCEL_PROJECT)
+    if (VERCEL_TEAM) url.searchParams.set('slug', VERCEL_TEAM)
+    for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value)
+    const response = await fetch(url, { headers: { Authorization: `Bearer ${vercelToken()}` } })
+    if (!response.ok) throw new Error(`${response.status} ${(await response.text()).slice(0, 200)}`)
+    return (await response.json()).data
+}
+
+const visits = async () => {
+    section(`Website visits, last ${days} days (Vercel Web Analytics)`)
+    if (!vercelToken()) {
+        console.log(`Unavailable: no Vercel token in the keychain (see how to add one at the top of bin/stats)`)
+        return
+    }
+    const range = { since: isoDay(since), until: isoDay(until) }
+    try {
+        const total = await vercel('visits/aggregate', { ...range, by: 'year' })
+        const sum = key => total.reduce((s, row) => s + (row[key] ?? 0), 0)
+        console.log(`${pad(sum('visitors'), 6)} visitors, ${sum('pageviews')} page views`)
+
+        console.log('\nPer day')
+        const perDay = await vercel('visits/aggregate', { ...range, by: 'day' })
+        if (perDay.length == 0) console.log('(none yet)')
+        for (const row of perDay) {
+            console.log(`${row.timestamp.slice(0, 10)} ${pad(row.visitors, 5)} visitors ${pad(row.pageviews, 5)} views`)
+        }
+
+        for (const [title, dimension] of [['Pages', 'requestPath'], ['Coming from', 'referrerHostname'], ['Countries', 'country']]) {
+            console.log(`\n${title}`)
+            const rows = await vercel('visits/aggregate', { ...range, by: dimension, limit: 8 })
+            if (rows.length == 0) console.log('(none yet)')
+            for (const row of rows) {
+                console.log(`${String(row[dimension] || '(direct)').padEnd(32)} ${pad(row.visitors, 5)} visitors`)
+            }
+        }
+    } catch (error) {
+        console.log(`Unavailable: ${error.message}`)
+    }
+}
+
+const main = async () => {
+    console.log(`Strobe stats, ${isoDay(until)}`)
+    downloads()
+    await visits()
+}
+
+main()
