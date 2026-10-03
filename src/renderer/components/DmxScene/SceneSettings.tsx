@@ -1,8 +1,9 @@
 import { useState } from 'react'
 
-const OPTIONS: { key: 'show_beams' | 'show_grid', label: string }[] = [
+const OPTIONS: { key: 'show_beams' | 'show_grid' | 'camera_motion', label: string }[] = [
     { key: 'show_beams', label: 'Show beams' },
     { key: 'show_grid', label: 'Show grid' },
+    { key: 'camera_motion', label: 'Camera motion while playing' },
 ]
 
 interface Props {

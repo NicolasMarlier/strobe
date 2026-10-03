@@ -10,6 +10,7 @@ import SceneSettings from "./SceneSettings";
 import MoveHint from "./MoveHint";
 import { useModifierKeys } from "./useModifierKeys";
 import { framedArea } from "./framing";
+import { NO_OFFSET, useCameraMotion, type CameraOffset } from "./cameraMotion";
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext";
 import { useRealTimeContext } from "../../contexts/RealTimeContext";
 import { useDmxSceneContext } from "../../contexts/DmxSceneContext";
@@ -40,7 +41,7 @@ const PINCH_SPEED = 0.01
 const SCROLL_SPEED = 0.002
 
 // For shows saved without display options
-const DEFAULT_DISPLAY: DmxSceneDisplay = { show_grid: true, show_beams: true, zoom: ZOOM_DEFAULT }
+const DEFAULT_DISPLAY: DmxSceneDisplay = { show_grid: true, show_beams: true, camera_motion: true, zoom: ZOOM_DEFAULT }
 
 // A zoom is saved once it settles: pinching sends dozens of changes per second
 const ZOOM_SAVE_DELAY_MS = 500
@@ -60,12 +61,31 @@ const verticalFov = (aspect: number, zoom: number) => {
     return MathUtils.radToDeg(2 * Math.atan(Math.tan(fov / 2) / zoom * WIDE_ANGLE))
 }
 
-// Fixed camera, re-framed when the section is resized.
+// Fixed camera, re-framed when the section is resized, drifting slightly while the show plays (cameraMotion).
 // It frames the free part of the section, and the canvas shows around it too (a view offset)
-const FixedCamera = ({ zoom }: { zoom: number }) => {
+const FixedCamera = ({ zoom, still }: { zoom: number, still: boolean }) => {
     const camera = useThree(state => state.camera) as PerspectiveCamera & { manual?: boolean }
     const { width, height } = useThree(state => state.size)
     const invalidate = useThree(state => state.invalidate)
+    const { midiCurrentTickRef } = useRealTimeContext()
+
+    const offsetRef = useRef(NO_OFFSET)
+    const zoomRef = useRef(zoom)
+    zoomRef.current = zoom
+    // Still when the motion is off, or under the pointer while an element is moved or rotated
+    const driftingRef = useRef(!still)
+    driftingRef.current = !still
+
+    const place = ({ position, target }: CameraOffset) => {
+        camera.position.set(...CAMERA_POSITION.map((value, i) => value + position[i]) as Vector3Tuple)
+        camera.lookAt(...CAMERA_TARGET.map((value, i) => value + target[i]) as Vector3Tuple)
+    }
+
+    useCameraMotion(midiCurrentTickRef, zoomRef, driftingRef, offset => {
+        offsetRef.current = offset
+        place(offset)
+        invalidate()
+    })
 
     // The scene is only drawn on demand: redraw it with the new framing,
     // or it would keep showing the previous zoom while the pointer picks with the new one
@@ -74,8 +94,7 @@ const FixedCamera = ({ zoom }: { zoom: number }) => {
 
         // The aspect is the framed part's, not the canvas': keep the canvas from resetting it
         camera.manual = true
-        camera.position.set(...CAMERA_POSITION)
-        camera.lookAt(...CAMERA_TARGET)
+        place(offsetRef.current)
         camera.aspect = framed.width / framed.height
         camera.fov = verticalFov(camera.aspect, zoom)
         camera.setViewOffset(framed.width, framed.height, -framed.left, -framed.top, width, height)
@@ -152,7 +171,7 @@ const DmxScene = () => {
         frameloop='demand'
         onPointerMissed={onPointerMissed}>
 
-        <FixedCamera zoom={zoom}/>
+        <FixedCamera zoom={zoom} still={!display.camera_motion || selectedElementIndex != undefined}/>
         <color attach='background' args={[BACKGROUND]}/>
 
         <Grid

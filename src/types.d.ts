@@ -183,6 +183,8 @@ type Vector3Tuple = [number, number, number]
 type DmxSceneDisplay = {
     show_grid: boolean,
     show_beams: boolean,
+    // Missing in shows saved before it existed: on
+    camera_motion?: boolean,
     zoom: number
 }
 
