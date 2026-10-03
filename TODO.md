@@ -22,5 +22,13 @@
 - [ ] Videos on the website
 - [x] Move the cursor while playing
 - [ ] Website: a short story, filmed with Nico, on why Strobe was made
-- [ ] Download monitoring
+- [x] Download monitoring: website visits (Vercel Web Analytics) and downloads per version (GitHub), in `bin/stats` and the stats skill
 - [ ] Move the cursor by hand during playback (seek while playing)
+- [ ] Usage telemetry in the app, to count installs and real usage, with TelemetryDeck
+  - Why TelemetryDeck: an anonymous, hashed ID per install gives unique installs, monthly active users and retention (Aptabase keeps no user ID, so it can't count installs). JavaScript SDK, free plan of 50 to 100k signals a month
+  - First: the user creates the TelemetryDeck account and the app, and gives its app ID
+  - Signals: at launch (version, macOS version, first launch or not), then show opened, playback started, MainStage connected, DMX interface plugged, narrow window used. Never a show's or a track's name, nor any content
+  - A "Share anonymous usage statistics" setting, on by default, that turns it off
+  - A Privacy section in the README listing exactly what is sent
+  - Add the installs and active users to `bin/stats` and the stats skill
+  - Ship it in a release (the deploy skill)
