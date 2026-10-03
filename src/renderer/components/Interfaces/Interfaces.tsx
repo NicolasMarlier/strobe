@@ -5,9 +5,9 @@ import { useRealTimeContext } from '../../contexts/RealTimeContext'
 // The only DMX output Strobe drives (found by its serial number, see enttec_open_dmx_usb.ts)
 const DMX_OUTPUT_NAME = 'Enttec Open DMX USB'
 
-type Status = 'on' | 'pending' | 'off'
+export type Status = 'on' | 'pending' | 'off'
 
-const DMX_STATE_STATUS: Record<USBDeviceState, Status> = {
+export const DMX_STATE_STATUS: Record<USBDeviceState, Status> = {
     'Connected': 'on',
     'Initializing': 'pending',
     'Identified': 'pending',

@@ -264,23 +264,42 @@ h1 {
 }
 
 @media (max-width: 800px) {
-  // No room for the setlist column: the collapsed one shows the current track instead
-  #app .section.setlist {
+  // One column: the setlist and the interfaces move to the top bar (the current track, and a dot each
+  // for MIDI and DMX), the track automation keeps one low lane, then the buttons and the scene
+  #app .section.setlist,
+  #app .top-sections,
+  #app .note-editor {
     display: none;
-  }
-
-  #app.with-setlist .top-sections .section.setlist-compact {
-    display: flex;
   }
 
   #app, #app.with-setlist {
     grid-template-columns: 100%;
-    grid-template-rows: 50px 100px 1fr 1fr;
+    grid-template-rows: 50px auto minmax(0, 1fr) minmax(0, 1.3fr);
     grid-template-areas:
       "commands"
       "midi"
       "buttons"
       "scene";
+  }
+
+  #app .section.commands-bar {
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+
+    .save-slot {
+      position: static;
+      transform: none;
+    }
+
+    .narrow-only {
+      display: flex;
+    }
+  }
+
+  #app .midi-container {
+    height: 70px;
+    margin-bottom: 12px;
   }
 }
 

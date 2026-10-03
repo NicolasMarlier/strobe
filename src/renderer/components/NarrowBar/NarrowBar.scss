@@ -1,0 +1,139 @@
+// The current track and the interfaces' state, in the top bar of a narrow window only (see App.scss)
+.narrow-only {
+    display: none;
+}
+
+.track-picker {
+    flex: 1;
+    min-width: 0;
+    height: 30px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border-radius: 15px;
+    background-color: #1b1b1b;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.1s ease;
+
+    &:hover, &.open {
+        background-color: #2d2d2d;
+    }
+
+    .chevron {
+        flex: none;
+        color: #666;
+    }
+}
+
+.track-picker, .track-picker-menu {
+    .track-picker-program {
+        flex: none;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #666;
+        text-transform: uppercase;
+    }
+
+    .track-picker-name {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .track-picker-bpm {
+        flex: none;
+        font-size: 11px;
+        color: #888;
+    }
+}
+
+.track-picker .track-picker-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.track-picker-menu {
+    width: 280px;
+    max-height: 60vh;
+    overflow-y: auto;
+    text-align: left;
+
+    .setlist-menu-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #aaa;
+
+        .track-picker-program {
+            width: 24px;
+        }
+
+        &.current {
+            color: #fff;
+            background-color: #3a3a3a;
+
+            .track-picker-name {
+                font-weight: 600;
+            }
+        }
+    }
+
+    .track-picker-empty {
+        padding: 5px 9px;
+        color: #666;
+    }
+}
+
+.interfaces-status {
+    flex: none;
+    height: 30px;
+    box-sizing: border-box;
+    padding: 0 12px;
+    border-radius: 15px;
+    background-color: #1b1b1b;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+
+    .interfaces-status-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #999;
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: #444;
+        }
+
+        // A MIDI signal came in
+        .status-dot.flash {
+            animation: interfaces-dot-flash 0.35s ease-out;
+        }
+
+        &.on .status-dot {
+            background-color: #8fdf61;
+            box-shadow: 0 0 6px #8fdf6188;
+        }
+
+        &.pending .status-dot {
+            background-color: #df9a61;
+        }
+
+        &.off {
+            color: #666;
+        }
+    }
+}

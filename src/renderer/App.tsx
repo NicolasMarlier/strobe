@@ -20,6 +20,8 @@ import SaveButton from './components/SaveButton/SaveButton';
 import SelectionLink from './components/SelectionLink/SelectionLink';
 import { useEditMenu } from './useEditMenu';
 import InterfacesSection from './components/Interfaces/InterfacesSection';
+import TrackPicker from './components/NarrowBar/TrackPicker';
+import InterfacesStatus from './components/NarrowBar/InterfacesStatus';
 
 
 
@@ -55,6 +57,9 @@ function App() {
           <div className="save-slot">
             <SaveButton/>
           </div>
+
+          {/* In a narrow window only: the setlist and the interfaces have no room below */}
+          <TrackPicker/>
           
           <div className="small-buttons-bar">
             <SmallButton
@@ -65,6 +70,8 @@ function App() {
             </SmallButton>
             <AudioPlayer/>
           </div>
+
+          <InterfacesStatus/>
         </div>
 
         {/* Open, the setlist is a column on the left of the window */}
