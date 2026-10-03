@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getDmxScene, listFixtures, updateDmxScene as saveDmxScene } from "../ApiClient";
+import { useNarrowWindow } from "../useNarrowWindow";
 import { BUILT_IN_FIXTURES, fixtureLookup, FixtureLookup } from "../../shared/fixtures";
 
 interface DmxSceneContextType {
@@ -39,6 +40,12 @@ export const useDmxSceneContext = () => {
 export const DmxSceneContextProvider = ({ children }: {children: React.ReactNode}) => {
   const [dmxScene, setDmxScene] = useState<DmxScene>({ elements: [] })
   const [selectedElementIndex, setSelectedElementIndex] = useState<number | undefined>(undefined)
+  // A narrow window has no details panel to edit an element in: the elements can't be selected there
+  // (see Fixture3D), and the window becoming narrow deselects it
+  const isNarrowWindow = useNarrowWindow()
+  useEffect(() => {
+    if (isNarrowWindow) setSelectedElementIndex(undefined)
+  }, [isNarrowWindow])
   const [library, setLibrary] = useState<FixtureLibraryContents>({ fixtures: BUILT_IN_FIXTURES, problems: [] })
   // The latest scene, for changes made before a re-render
   const dmxSceneRef = useRef(dmxScene)

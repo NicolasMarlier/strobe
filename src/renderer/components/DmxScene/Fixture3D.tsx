@@ -92,6 +92,8 @@ interface Props {
     showBeams: boolean
     // Alt is held: the selected bar shows its rotation rings, and can't be moved
     rotating: boolean
+    // In a narrow window, the bar can't be selected or moved: no details panel to edit it in
+    selectable: boolean
 }
 
 // Whether the pointer is over one of the rotation rings.
@@ -211,7 +213,7 @@ const lensLayout = ({ shape, size: [width, height] }: FixtureProfile, count: num
 // A scene element, drawn from its fixture: a housing with a lens per cell, lit by the live DMX signal.
 // Cells making fog have a nozzle instead, and a fog cloud in front of it
 const Fixture3D = (props: Props) => {
-    const { element, fixture, dmxHexSignal, assignMode, editing, selectedRedChannels, onSelectRedChannels, onSelect, onMove, onRotate, gizmoRef, showBeams, rotating } = props
+    const { element, fixture, dmxHexSignal, assignMode, editing, selectedRedChannels, onSelectRedChannels, onSelect, onMove, onRotate, gizmoRef, showBeams, rotating, selectable } = props
     const { cells: size, position, rotation } = element
     const [housingWidth, housingHeight, housingDepth] = fixture.size
     const lens = lensLayout(fixture, size)
@@ -286,7 +288,7 @@ const Fixture3D = (props: Props) => {
     // Pressing a bar selects it, and moves it unless rotating (Alt held: its rings rotate it)
     const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
         // The rotation rings in front of a bar get the click
-        if (assignMode || e.button != 0 || isPointerOverGizmo(gizmoRef.current)) return
+        if (!selectable || assignMode || e.button != 0 || isPointerOverGizmo(gizmoRef.current)) return
         onSelect()
         if (!rotating) drag.onPointerDown(e)
     }
@@ -306,7 +308,12 @@ const Fixture3D = (props: Props) => {
         ref={groupRef}
         position={position}
         rotation={rotation.map(MathUtils.degToRad) as Vector3Tuple}
-        onPointerOver={(e) => { e.stopPropagation(); setHovered(true); setCursor(assignMode || rotating ? 'pointer' : 'grab') }}
+        onPointerOver={(e) => {
+            e.stopPropagation()
+            if (!selectable && !assignMode) return
+            setHovered(true)
+            setCursor(assignMode || rotating ? 'pointer' : 'grab')
+        }}
         onPointerOut={() => { setHovered(false); setCursor('') }}
         onPointerDown={onPointerDown}
         onPointerMove={drag.onPointerMove}

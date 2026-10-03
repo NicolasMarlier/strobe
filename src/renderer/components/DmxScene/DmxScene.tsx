@@ -11,6 +11,7 @@ import MoveHint from "./MoveHint";
 import { useModifierKeys } from "./useModifierKeys";
 import { framedArea } from "./framing";
 import { NO_OFFSET, useCameraMotion, type CameraOffset } from "./cameraMotion";
+import { useNarrowWindow } from "../../useNarrowWindow";
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext";
 import { useRealTimeContext } from "../../contexts/RealTimeContext";
 import { useDmxSceneContext } from "../../contexts/DmxSceneContext";
@@ -109,6 +110,7 @@ const DmxScene = () => {
     const { dmxButtons, selectedDmxButtonId } = useDmxButtonsContext()
     const { dmxScene, updateDmxScene, placeElement, selectedElementIndex, setSelectedElementIndex, fixtureOf } = useDmxSceneContext()
     const { dmxHexSignal } = useRealTimeContext()
+    const isNarrowWindow = useNarrowWindow()
 
     const { updateDmxButtonAndSync } = useDmxButtonsContext()
     const gizmoRef = useRef<TransformControlsImpl>(null)
@@ -201,7 +203,8 @@ const DmxScene = () => {
             onRotate={(rotation) => placeElement(index, { rotation })}
             gizmoRef={gizmoRef}
             showBeams={display.show_beams}
-            rotating={alt}/>
+            rotating={alt}
+            selectable={!isNarrowWindow}/>
         ))}
 
         <EffectComposer>
