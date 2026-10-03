@@ -44,6 +44,14 @@ export const BackToStartIcon = ({ fill = "currentColor", className }: IconProps)
   </svg>
 );
 
+// Outlined: the playhead, and an arrow carrying the view along with it
+export const FollowIcon = ({ className }: Pick<IconProps, 'className'>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M6 4v16M10 12h9M16 9l3 3-3 3"/>
+  </svg>
+);
+
 // Outlined, like a line icon: lid, can and two slats
 export const TrashIcon = ({ className }: Pick<IconProps, 'className'>) => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"

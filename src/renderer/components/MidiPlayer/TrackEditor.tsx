@@ -13,6 +13,9 @@ import { useDmxButtonsContext } from '../../contexts/DmxButtonsContext';
 import { isSelected, midiPatternArrayEqual, midiPatternsInclude, splitPatternsAtTick, sum } from './utils_midi_patterns';
 
 const BEATS_OFFSET = 2
+// Following the cursor, the view turns its page once the cursor passes this share of its width
+const FOLLOW_PAGE_EDGE = 0.9
+const FOLLOW_GLIDE_MS = 150
 
 interface Props {
     track: Track
@@ -29,7 +32,12 @@ const MidiPlayer = (props: Props) => {
         activeEditor,
         isRecording,
         setSelectedMidiPatterns,
+        isFollowing,
+        setIsFollowing,
     } = useDmxMidiContext()
+
+    const isFollowingRef = useRef(isFollowing)
+    isFollowingRef.current = isFollowing
 
     const { audioUrl, uploadTrackAudioAndSync } = useDmxButtonsContext()
 
@@ -49,6 +57,10 @@ const MidiPlayer = (props: Props) => {
 
     const ticksScrollRef = useRef(0)
     const pixelsPerBeatRef = useRef(BASE_PIXELS_PER_BEAT)
+
+    // The page turn in progress, and the cursor's tick on the previous frame
+    const scrollGlideRef = useRef<{ from: number, to: number, start: number } | null>(null)
+    const lastFollowedTickRef = useRef(midiCurrentTickRef.current)
 
     const [audioWaveData, setAudioWaveData] = useState(new Uint8Array() as Uint8Array)
     const audioWaveDataRef = useRef(audioWaveData)
@@ -121,17 +133,20 @@ const MidiPlayer = (props: Props) => {
         else if(e.key == 'l') toggleLoop()
         else if(e.key == 'Enter') {
             midiCurrentTickRef.current = 0
+            scrollGlideRef.current = null
             ticksScrollRef.current = 0
             sendCurrentTickToServer(0)
         }
         else if(e.key == 'ArrowLeft') {
             const targetTick = Math.max(0, magnettedTick(midiCurrentTickRef.current, 1) - PPQ)
             midiCurrentTickRef.current = targetTick
+            scrollGlideRef.current = null
             ticksScrollRef.current = targetTick - BEATS_OFFSET * PPQ
         }
         else if(e.key == 'ArrowRight') {
             const targetTick = (magnettedTick(midiCurrentTickRef.current, 1) + PPQ)
             midiCurrentTickRef.current = targetTick
+            scrollGlideRef.current = null
             ticksScrollRef.current = targetTick - BEATS_OFFSET * PPQ
         }
         else {
@@ -235,21 +250,51 @@ const MidiPlayer = (props: Props) => {
         })
     }
 
-    const mainLoop = () => {
-        // TODO: find a way to handle follow-scroll
-        // if(midiCurrentTickRef.current != serverMidiCurrentTickRef.current) {
-        //     midiCurrentTickRef.current = serverMidiCurrentTickRef.current
-        //     ticksScrollRef.current = serverMidiCurrentTickRef.current - BEATS_OFFSET * PPQ
-        // }
+    // Only a moving cursor turns the page: zooming while it stands still leaves the view alone
+    const followCursor = (now: number) => {
+        const tick = midiCurrentTickRef.current
+        const moved = tick != lastFollowedTickRef.current
+        lastFollowedTickRef.current = tick
+        if(!isFollowingRef.current || !moved || !canvasRef.current) return
 
+        const visibleTicks = canvasRef.current.getBoundingClientRect().width * PPQ / pixelsPerBeatRef.current
+        const scroll = scrollGlideRef.current?.to ?? ticksScrollRef.current
+        if(tick >= scroll && tick <= scroll + visibleTicks * FOLLOW_PAGE_EDGE) return
+
+        scrollGlideRef.current = {
+            from: ticksScrollRef.current,
+            to: Math.max(0, tick - BEATS_OFFSET * PPQ),
+            start: now,
+        }
+    }
+
+    const glideScroll = (now: number) => {
+        const glide = scrollGlideRef.current
+        if(!glide) return
+
+        const progress = Math.min(1, (now - glide.start) / FOLLOW_GLIDE_MS)
+        const eased = 1 - Math.pow(1 - progress, 3)
+        ticksScrollRef.current = glide.from + (glide.to - glide.from) * eased
+        if(progress == 1) scrollGlideRef.current = null
+    }
+
+    const onManualScroll = () => {
+        scrollGlideRef.current = null
+        isFollowingRef.current = false
+        setIsFollowing(false)
+    }
+
+    const mainLoop = (now: number) => {
+        followCursor(now)
+        glideScroll(now)
         redrawMidiCanvas()
     }
 
     useEffect(() => {
         // Redraw on every frame, right before it's painted: with a timer, frames painted between
         // two redraws show the canvas stretched to its new size while the window is resized
-        let frame = requestAnimationFrame(function loop() {
-            mainLoop()
+        let frame = requestAnimationFrame(function loop(now) {
+            mainLoop(now)
             frame = requestAnimationFrame(loop)
         })
         return () => cancelAnimationFrame(frame)
@@ -333,6 +378,7 @@ const MidiPlayer = (props: Props) => {
                     canvasRef={canvasRef}
                     ticksScrollRef={ticksScrollRef}
                     pixelsPerBeatRef={pixelsPerBeatRef}
+                    onManualScroll={onManualScroll}
                     selectionRef={mouseSelectionRef}
                     selectedItemsRef={selectedMidiPatternsRef}
                     onSelectedItemsChange={() => setSelectedMidiPatterns(selectedMidiPatternsRef.current)}

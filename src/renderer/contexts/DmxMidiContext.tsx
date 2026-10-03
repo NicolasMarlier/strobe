@@ -14,6 +14,10 @@ interface DmxMidiContextType {
 
     isRecording: boolean,
     setIsRecording: (v: boolean) => void
+
+    // The track editor's view turns its pages to keep the moving cursor in sight
+    isFollowing: boolean,
+    setIsFollowing: (v: boolean) => void
 }
 
 const DmxMidiContext = createContext<DmxMidiContextType | null>(null)
@@ -67,6 +71,7 @@ export const DmxMidiContextProvider = ({ children }: {children: React.ReactNode}
     const [activeEditor, setActiveEditor] = useState<'TrackEditor' | 'PatternEditor'>('TrackEditor')
 
     const [isRecording, setIsRecording] = useState(false)
+    const [isFollowing, setIsFollowing] = useState(true)
         
 
     useEffect(fetchDmxMidi, [currentTrackId])
@@ -92,6 +97,9 @@ export const DmxMidiContextProvider = ({ children }: {children: React.ReactNode}
 
             isRecording,
             setIsRecording,
+
+            isFollowing,
+            setIsFollowing,
             } }>
             {children}
         </DmxMidiContext.Provider>

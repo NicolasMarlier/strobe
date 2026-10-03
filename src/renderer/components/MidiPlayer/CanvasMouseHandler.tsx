@@ -19,6 +19,7 @@ interface Props<T> {
     isItemInSelection?: (item: T, selectedItems: T[]) => boolean,
     x0?: number,
     editorMode?: 'TrackEditor' | 'PatternEditor',
+    onManualScroll?: () => void,
 }
 
 const CanvasMouseHandler = <T,>(props: Props<T>) => {
@@ -179,6 +180,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         if(Math.abs(e.deltaX) > Math.abs(e.deltaY) && e.deltaX != 0) {
             const scrollAmount = (e.deltaX) * 1000
             ticksScrollRef.current = Math.max(0, ticksScrollRef.current + scrollAmount / pixelsPerBeatRef.current)
+            p.current.onManualScroll?.()
         }
         else if(e.deltaY != 0) {
             const cursorX = e.clientX - canvasLeft()
