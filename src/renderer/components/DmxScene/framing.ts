@@ -1,11 +1,12 @@
+import { isNarrowWindow } from '../../useNarrowWindow'
+
 // The scene is drawn under the whole section, but framed on the part the details panel leaves free:
 // the section's padding, and the panel on the right with the gap before it (see .section.scene in App.scss)
 const SECTION_PADDING = 20
 const DETAILS_PANEL_SPACE = 160 + 20
 
-// A narrow window has no details panel (see the media query in App.scss): the scene is framed on the whole width
-const NARROW_WINDOW = '(max-width: 800px)'
-const detailsPanelSpace = () => window.matchMedia(NARROW_WINDOW).matches ? 0 : DETAILS_PANEL_SPACE
+// A narrow window has no details panel: the scene is framed on the whole width
+const detailsPanelSpace = () => isNarrowWindow() ? 0 : DETAILS_PANEL_SPACE
 
 export interface FramedArea {
     left: number

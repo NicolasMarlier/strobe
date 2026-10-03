@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import { precomputeWaves } from "../components/MidiPlayer/waves";
 import { createDmxButton, deleteDmxButton, getTrackAudio, listDmxButtons, listTracks, selectTrack, updateDmxButton, uploadTrackAudio } from "../ApiClient";
+import { useNarrowWindow } from "../useNarrowWindow";
 
 interface DmxButtonsContextType {
   dmxButtons: DmxButton[]
@@ -148,6 +149,13 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
   
 
   const [selectedDmxButtonId, setSelectedDmxButtonId] = useState(undefined as string | undefined)  
+
+  // A narrow window has no details panel to edit a button in: tapping a button plays it without
+  // selecting it (see DmxButtonsCollection), and the window becoming narrow deselects it
+  const isNarrowWindow = useNarrowWindow()
+  useEffect(() => {
+    if(isNarrowWindow) setSelectedDmxButtonId(undefined)
+  }, [isNarrowWindow])
 
 
   // pass the value in provider and return

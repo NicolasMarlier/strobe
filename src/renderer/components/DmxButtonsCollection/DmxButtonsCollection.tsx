@@ -4,13 +4,15 @@ import DmxButton from "./DmxButton"
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext"
 import { playDmxButton } from "../../ApiClient"
 import { useRealTimeContext } from "../../contexts/RealTimeContext"
+import { isNarrowWindow } from "../../useNarrowWindow"
 
 const DmxButtonsCollection = () => {
     const { track, dmxButtons, setSelectedDmxButtonId, selectedDmxButtonId, createDmxButtonAndSync } = useDmxButtonsContext()
     const { activeDmxButtonIds } = useRealTimeContext()
 
+    // In a narrow window, a button only plays: there's no details panel to edit it in
     const selectAndPlayDmxButton = (dmxButtonId: string) => {
-        setSelectedDmxButtonId(dmxButtonId)
+        if(!isNarrowWindow()) setSelectedDmxButtonId(dmxButtonId)
         playDmxButton(dmxButtonId)
     }
 
