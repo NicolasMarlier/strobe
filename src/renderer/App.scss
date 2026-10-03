@@ -265,10 +265,15 @@ h1 {
 
 @media (max-width: 800px) {
   // One column: the setlist and the interfaces move to the top bar (the current track, and a dot each
-  // for MIDI and DMX), the track automation keeps one low lane, then the buttons and the scene
+  // for MIDI and DMX), the track automation keeps one low lane, then the buttons and the scene.
+  // Neither the note editor nor the buttons' and the scene's details panels: the width goes to the
+  // buttons and the scene
   #app .section.setlist,
   #app .top-sections,
-  #app .note-editor {
+  #app .note-editor,
+  #app .dmx-button-details,
+  #app .selection-link,
+  #app .dmx-scene-details {
     display: none;
   }
 
