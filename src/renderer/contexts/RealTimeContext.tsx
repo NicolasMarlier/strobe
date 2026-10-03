@@ -54,7 +54,7 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
 
 
     useEffect(() => {
-      if(!!lastReceivedMidiKey) {
+      if(lastReceivedMidiKey) {
         const intervalId = setTimeout(() => setLastReceivedMidiKey(undefined), 3000)
         return () => clearInterval(intervalId)
       }

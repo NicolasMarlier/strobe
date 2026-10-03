@@ -31,7 +31,7 @@ const union = (a: MidiNote[], b: MidiNote[]) => [...subtract(a, b), ...b]
 const outer_join = (a: MidiNote[], b: MidiNote[]) => union(subtract(a,b), subtract(b, a))
 
 
-export const magnettedTick = (tick: number, beatMagnet: number=0.25) => PPQ * Math.floor((tick / PPQ) / beatMagnet) * beatMagnet
+export const magnettedTick = (tick: number, beatMagnet=0.25) => PPQ * Math.floor((tick / PPQ) / beatMagnet) * beatMagnet
 
 interface InsertNotesAtTickProps {
     tick: number

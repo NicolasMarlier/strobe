@@ -13,7 +13,7 @@ const SmallButton = (props: Props) => {
     const { value, onClick, children, disabled, className } = props
     return <div
                 className={`small-button ${value ? 'active' : ''} ${disabled ? 'disabled' : 'enabled'} ${className}`}
-                onClick={!disabled && onClick || (() => {})}>
+                onClick={disabled ? undefined : onClick}>
                 { children }
         </div>
 }

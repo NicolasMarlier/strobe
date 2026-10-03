@@ -23,7 +23,7 @@ export class DmxMidiHandler {
     this.isPlaying = false
     this.currentTick = 0
     this.midiNotes = []
-    this.onMidiKey = params.onMidiKey || (() => {}) 
+    this.onMidiKey = params.onMidiKey || (() => { /* No one listens to the keys */ })
   }
 
   setMidiNotes(midiNotes: MidiNote[]) {
@@ -60,7 +60,7 @@ export class DmxMidiHandler {
 
   stop = (options?: {reset?: true}) => {
     this.isPlaying = false
-    if(!!options?.reset) {
+    if(options?.reset) {
       this.currentTick = 0
     }
   }

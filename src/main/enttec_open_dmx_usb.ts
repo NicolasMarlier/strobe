@@ -12,7 +12,7 @@ const customWebUSB = new WebUSB({
 
 export class EnttecOpenDMXUSB {
     static instance: EnttecOpenDMXUSB | undefined
-    device: WebUSBDevice | undefined
+    device: WebUSBDevice | undefined
     endpointNumber: number
     dmxHexString: string
     initSequenceSent: boolean
@@ -24,7 +24,7 @@ export class EnttecOpenDMXUSB {
         this.dmxHexString = emptyDmxHexString()
         this.initSequenceSent = false
         this.mainLoop()
-        this.updateDispatch = () => {}
+        this.updateDispatch = () => { /* Nothing listens to the device state changes yet */ }
     }
 
     static getInstance(): EnttecOpenDMXUSB {
@@ -59,8 +59,8 @@ export class EnttecOpenDMXUSB {
             this.device = device
             this.updateDispatch()
             this.connect()
-        }).catch(e => {
-
+        }).catch(() => {
+            // Not plugged in: the main loop looks for it again
         })
     }
     

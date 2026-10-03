@@ -95,7 +95,15 @@ In the website repo:
 
 ## 9. Website screenshots
 
-The website shows screenshots of the app (`assets/screenshots/` and `assets/mainstage/`, used in `index.html` and `mainstage/`) and a feature list. Go through the approved notes: for each change a user would see on screen (a new mode, a panel that moved, a new button), name the screenshot or the feature-list item it makes outdated. Tell the user which ones, and why. Change nothing without their go: a screenshot is taken by them, from the real app; a feature-list item, you may rewrite once they agree, then commit and push the website again. Nothing outdated: say so in one line.
+The website shows screenshots of the app (`assets/screenshots/` and `assets/mainstage/`, used in `index.html` and `mainstage/`) and a feature list. Go through the approved notes: for each change a user would see on screen (a new mode, a panel that moved, a new button), name the screenshot or the feature-list item it makes outdated. Tell the user which ones, and why. Change nothing without their go; a feature-list item, you may rewrite once they agree. Nothing outdated: say so in one line.
+
+Screenshots to redo are taken from the released app, after step 10 has installed it:
+
+1. Launch it with the debugging port: `open -a /Applications/Strobe.app --args --remote-debugging-port=9222` (quit it first if it runs), and check `curl -s http://127.0.0.1:9222/json/list` lists the `STROBE` page.
+2. The user sets the stage: their show open, playback on a busy passage (several lights lit, fog), no DMX button selected (its link labels clutter the scene) unless a capture needs its details panel, a pattern selected so the overview shows the note editor.
+3. On their go, `node .claude/skills/deploy/capture.mjs <scratchpad>/shots 8 1.5`: 8 rounds 1.5 s apart of `overview-N` (1440×900), `scene-N` and `cues-N` (the sections of a 1680×1050 window) and `narrow-N` (560×900), all at 2x. It lays the page out at each size by emulation, without touching the user's window.
+4. Make contact sheets (`magick montage …`), look at them, recommend the best of each, and open the folder for the user (`open <dir>`). Several tries are normal: lights flash on and off.
+5. Once they pick: `cwebp -q 85` into `assets/screenshots/` (the overview resized to 2048×1280 first), update each `<img>`'s `width`, `height` and `alt` in `index.html`, preview the site locally (`python3 -m http.server`, then `open`), and commit and push the website after their go.
 
 ## 10. Install the released version on this Mac
 
