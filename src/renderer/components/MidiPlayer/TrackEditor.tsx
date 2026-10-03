@@ -255,11 +255,19 @@ const MidiPlayer = (props: Props) => {
         const tick = midiCurrentTickRef.current
         const moved = tick != lastFollowedTickRef.current
         lastFollowedTickRef.current = tick
-        if(!isFollowingRef.current || !moved || !canvasRef.current) return
+        if(!canvasRef.current) return
 
         const visibleTicks = canvasRef.current.getBoundingClientRect().width * PPQ / pixelsPerBeatRef.current
         const scroll = scrollGlideRef.current?.to ?? ticksScrollRef.current
-        if(tick >= scroll && tick <= scroll + visibleTicks * FOLLOW_PAGE_EDGE) return
+        const inPage = tick >= scroll && tick <= scroll + visibleTicks * FOLLOW_PAGE_EDGE
+
+        // Scrolled away by hand: following again once the cursor shows in the view
+        if(!isFollowingRef.current) {
+            if(!inPage) return
+            isFollowingRef.current = true
+            setIsFollowing(true)
+        }
+        if(!moved || inPage) return
 
         scrollGlideRef.current = {
             from: ticksScrollRef.current,

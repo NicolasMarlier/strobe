@@ -4,10 +4,12 @@ import { BackToStartIcon, PauseIcon, PlayIcon } from "../DesignSystem/Icons"
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext"
 import { tickToTime, timeToTick } from "./utils"
 import { useRealTimeContext } from "../../contexts/RealTimeContext"
+import { useDmxMidiContext } from "../../contexts/DmxMidiContext"
 
 const AudioPlayer = () => {
     const { track, audioUrl } = useDmxButtonsContext()
     const { midiCurrentTickRef, sendCurrentTickToServer } = useRealTimeContext()
+    const { setIsFollowing } = useDmxMidiContext()
     const [isPlaying, setIsPlaying] = useState(false)
 
     const audioRef = useRef<HTMLAudioElement>(null)
@@ -33,6 +35,7 @@ const AudioPlayer = () => {
         }
         audioRef.current.play()
         setIsPlaying(true)
+        setIsFollowing(true)
     }
 
 

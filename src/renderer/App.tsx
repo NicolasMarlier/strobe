@@ -14,7 +14,7 @@ import { useRealTimeContext } from './contexts/RealTimeContext';
 import NoteEditor from './components/MidiPlayer/NoteEditor';
 import { useDmxMidiContext } from './contexts/DmxMidiContext';
 import SmallButton from './components/DesignSystem/SmallButton/SmallButton';
-import { FollowIcon, RecordIcon } from './components/DesignSystem/Icons';
+import { RecordIcon } from './components/DesignSystem/Icons';
 import AudioPlayer from './components/MidiPlayer/AudioPlayer';
 import SaveButton from './components/SaveButton/SaveButton';
 import SelectionLink from './components/SelectionLink/SelectionLink';
@@ -42,7 +42,7 @@ function App() {
     if ((e.target as Element).closest('.dmx-scene, .dmx-scene-details')) return
     setSelectedElementIndex(undefined)
   }
-  const { selectedMidiPatterns, isRecording, setIsRecording, isFollowing, setIsFollowing } = useDmxMidiContext()
+  const { selectedMidiPatterns, isRecording, setIsRecording } = useDmxMidiContext()
   const { debug } = useRealTimeContext()
   const setlist = useSetlistOpen()
   
@@ -64,11 +64,6 @@ function App() {
                 <RecordIcon/>
             </SmallButton>
             <AudioPlayer/>
-            <SmallButton
-                value={isFollowing}
-                onClick={() => setIsFollowing(!isFollowing)}>
-                <FollowIcon/>
-            </SmallButton>
           </div>
         </div>
 

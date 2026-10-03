@@ -15,7 +15,8 @@ interface DmxMidiContextType {
     isRecording: boolean,
     setIsRecording: (v: boolean) => void
 
-    // The track editor's view turns its pages to keep the moving cursor in sight
+    // The track editor's view turns its pages to keep the moving cursor in sight. Scrolling it by
+    // hand stops that until the cursor shows in the view again, or playback starts
     isFollowing: boolean,
     setIsFollowing: (v: boolean) => void
 }
