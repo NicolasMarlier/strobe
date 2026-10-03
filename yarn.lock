@@ -1221,6 +1221,11 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
+"@telemetrydeck/sdk@2.0.4":
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/@telemetrydeck/sdk/-/sdk-2.0.4.tgz#f846151784fbc165280c74db830a91865b1381c1"
+  integrity sha512-x4S83AqSo6wvLJ6nRYdyJEqd9qmblUdBgsTRrjH5z++b9pnf2NMc8NpVAa48KIB1pRuP/GTGzXxVYdNoie/DVg==
+
 "@tootallnate/once@2":
   version "2.0.1"
   resolved "https://registry.npmjs.org/@tootallnate/once/-/once-2.0.1.tgz"

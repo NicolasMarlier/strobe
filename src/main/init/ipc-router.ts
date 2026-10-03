@@ -11,6 +11,7 @@ import { Store, STORE_EVENTS } from '../store/Store';
 import { ShowHistory } from '../store/ShowHistory';
 import { revealWindow } from './splash';
 import { FixtureLibrary, FIXTURE_LIBRARY_EVENTS } from '../fixture_library';
+import { RENDERER_SIGNALS, signal } from '../telemetry';
 
 export function handle<C extends Channel>(
   channel: C,
@@ -56,6 +57,9 @@ handle('dmx_buttons:get', DmxButtonController.get)
 handle('dmx_buttons:play', DmxButtonController.play)
 handle('dmx_buttons:update', DmxButtonController.update)
 handle('dmx_buttons:destroy', DmxButtonController.destroy)
+
+// Only the signals the window may send
+handle('telemetry:signal', async (type) => { if (RENDERER_SIGNALS.includes(type)) signal(type) })
 
 
 handle('main_loop:update_current_tick', MainLoopController.update_current_tick)

@@ -5,6 +5,7 @@ import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext"
 import { tickToTime, timeToTick } from "./utils"
 import { useRealTimeContext } from "../../contexts/RealTimeContext"
 import { useDmxMidiContext } from "../../contexts/DmxMidiContext"
+import { sendUsageSignal } from "../../ApiClient"
 
 const AudioPlayer = () => {
     const { track, audioUrl } = useDmxButtonsContext()
@@ -36,6 +37,7 @@ const AudioPlayer = () => {
         audioRef.current.play()
         setIsPlaying(true)
         setIsFollowing(true)
+        sendUsageSignal('Strobe.playbackStarted')
     }
 
 

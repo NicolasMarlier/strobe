@@ -5,6 +5,7 @@ import fs from "fs"
 import { audioDir, readShow, SHOW_EXTENSION, writeShow } from "./show_file"
 import { newShowData } from "./new_show"
 import { addRecentShow, describeRecentShow, listRecentShows, removeRecentShow } from "./recent_shows"
+import { signal } from "../telemetry"
 
 const APP_NAME = 'STROBE'
 
@@ -101,7 +102,10 @@ const startShow = (win: BrowserWindow | null, data: ShowData, dir: string | null
 }
 
 const loadShow = (win: BrowserWindow | null, dir: string) =>
-    withErrorBox('Could not open show', () => startShow(win, readShow(dir), dir))
+    withErrorBox('Could not open show', () => {
+        startShow(win, readShow(dir), dir)
+        signal('Strobe.showOpened')
+    })
 
 // The show opened from the Finder that launched the app: loaded before the window is created
 export const loadShowAtLaunch = (dir: string) => loadShow(null, dir)

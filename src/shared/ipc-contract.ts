@@ -139,6 +139,11 @@ export interface ApiContract {
     args: []
     result: boolean
   }
+  // A feature the window saw used, for the anonymous usage statistics (see telemetry.ts)
+  'telemetry:signal': {
+    args: [type: 'Strobe.playbackStarted' | 'Strobe.narrowWindowUsed']
+    result: void
+  }
 
 }
 
