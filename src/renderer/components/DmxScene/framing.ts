@@ -3,6 +3,10 @@
 const SECTION_PADDING = 20
 const DETAILS_PANEL_SPACE = 160 + 20
 
+// A narrow window has no details panel (see the media query in App.scss): the scene is framed on the whole width
+const NARROW_WINDOW = '(max-width: 800px)'
+const detailsPanelSpace = () => window.matchMedia(NARROW_WINDOW).matches ? 0 : DETAILS_PANEL_SPACE
+
 export interface FramedArea {
     left: number
     top: number
@@ -14,6 +18,6 @@ export interface FramedArea {
 export const framedArea = (canvasWidth: number, canvasHeight: number): FramedArea => ({
     left: SECTION_PADDING,
     top: SECTION_PADDING,
-    width: Math.max(1, canvasWidth - 2 * SECTION_PADDING - DETAILS_PANEL_SPACE),
+    width: Math.max(1, canvasWidth - 2 * SECTION_PADDING - detailsPanelSpace()),
     height: Math.max(1, canvasHeight - 2 * SECTION_PADDING),
 })
