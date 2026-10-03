@@ -15,7 +15,7 @@
 - [ ] Example show file
 - [ ] Handle input devices to trigger a button
 - [ ] Better MIDI recording and MIDI editing
-- [ ] Lights aren't dark enough
+- [x] Lights aren't dark enough
 - [ ] Block Play when playback is driven by MainStage
 - [ ] Slight camera movements on the 3D scene while the show plays
 - [ ] Visual bug when the window is very narrow

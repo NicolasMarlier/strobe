@@ -20,12 +20,17 @@ const ROTATION_SNAP = MathUtils.degToRad(15)
 
 // Dots are drawn brighter than their DMX value so lit dots go past the bloom threshold
 const DOT_BRIGHTNESS = 2
-// An unlit dot stays visible, below the bloom threshold
-const UNLIT_DOT = new Color(0.13, 0.13, 0.13)
-// The housing is almost black, but for its lighter front face, around the lenses
+// Added under every dot's color, so an unlit dot stays barely visible, below the bloom threshold.
+// Added rather than swapped in when unlit: a dot dims down smoothly to it, never darker than unlit
+const UNLIT_DOT = new Color('#1c1c1c')
+// The housing is almost black, but for a box's lighter front face, around its lenses.
+// A bar's lenses cover its whole front face: a lighter one would only show as a line around them
 const HOUSING_COLOR = '#121212'
 const HOUSING_FRONT_COLOR = '#5a5a5a'
-const HOUSING_FACE_COLORS = [HOUSING_COLOR, HOUSING_COLOR, HOUSING_COLOR, HOUSING_COLOR, HOUSING_FRONT_COLOR, HOUSING_COLOR]
+const housingFaceColors = (shape: FixtureProfile['shape']) => {
+    const front = shape == 'bar' ? HOUSING_COLOR : HOUSING_FRONT_COLOR
+    return [HOUSING_COLOR, HOUSING_COLOR, HOUSING_COLOR, HOUSING_COLOR, front, HOUSING_COLOR]
+}
 
 // Seen side-on, a dot keeps this share of its brightness
 const SIDE_BRIGHTNESS = 0.05
@@ -247,13 +252,11 @@ const Fixture3D = (props: Props) => {
         const dots = dotsRef.current!
         const beams = beamsRef.current!
         const color = new Color()
-        const black = new Color(0, 0, 0)
         redChannels.forEach((redChannel, i) => {
             const [red, green, blue] = cellLight(dmxHexSignal, redChannel, fixture.cell)
-            const unlit = red + green + blue == 0
             color.setRGB(red, green, blue, SRGBColorSpace)
-            beams.setColorAt(i, unlit ? black : color)
-            dots.setColorAt(i, unlit ? UNLIT_DOT : color.multiplyScalar(DOT_BRIGHTNESS))
+            beams.setColorAt(i, color)
+            dots.setColorAt(i, color.multiplyScalar(DOT_BRIGHTNESS).add(UNLIT_DOT))
         })
         dots.instanceColor!.needsUpdate = true
         beams.instanceColor!.needsUpdate = true
@@ -313,7 +316,7 @@ const Fixture3D = (props: Props) => {
         <mesh onClick={onHousingClick}>
             <boxGeometry args={fixture.size}/>
             {/* Box faces: +X, -X, +Y, -Y, +Z (the lenses' face), -Z */}
-            { HOUSING_FACE_COLORS.map((color, i) => <meshBasicMaterial key={i} attach={`material-${i}`} color={color}/>) }
+            { housingFaceColors(fixture.shape).map((color, i) => <meshBasicMaterial key={i} attach={`material-${i}`} color={color}/>) }
             { edgesColor && <Edges color={edgesColor}/> }
         </mesh>
 
