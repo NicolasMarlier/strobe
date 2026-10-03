@@ -18,7 +18,7 @@ Open `Strobe.dmg`, then drag Strobe into Applications. The app is signed and not
 - **DMX interface:** an Enttec Open DMX USB, plugged into the Mac.
 - **MIDI controller (optional):** any controller macOS sees, to trigger effects from pads or keys.
 
-All versions and their notes are on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
+All versions and their notes are on the [releases page](https://github.com/NicolasMarlier/strobe/releases), and in the [changelog](CHANGELOG.md).
 
 ## What it does
 

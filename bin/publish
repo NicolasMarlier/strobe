@@ -5,6 +5,8 @@
 #   https://github.com/NicolasMarlier/strobe/releases/latest/download/Strobe.dmg
 #
 # The release is tagged on the commit the installer was built from, which must be on origin/main.
+# Its notes come from the Markdown file given as argument (bin/publish notes.md), followed by how to
+# install; without one, just how to install.
 # Needs: gh, logged in (brew install gh && gh auth login)
 
 set -euo pipefail
@@ -17,6 +19,10 @@ case "$(uname -m)" in
   x86_64) ARCH="x64" ;;
   *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
 esac
+
+NOTES_FILE="${1:-}"
+[ -z "$NOTES_FILE" ] || [ -f "$NOTES_FILE" ] || { echo "No release notes at $NOTES_FILE" >&2; exit 1; }
+NOTES_FILE="${NOTES_FILE:+$(cd "$(dirname "$NOTES_FILE")" && pwd)/$(basename "$NOTES_FILE")}"
 
 cd "$APP_DIR"
 VERSION="$(node -p "require('./package.json').version")"
@@ -42,11 +48,18 @@ UPLOAD_DIR="$(mktemp -d)"
 trap 'rm -rf "$UPLOAD_DIR"' EXIT
 cp "$DMG" "$UPLOAD_DIR/$APP_NAME.dmg"
 
+INSTALL="$APP_NAME $VERSION for Macs with Apple silicon (M1 and later). Open Strobe.dmg, then drag Strobe into Applications."
+if [ -n "$NOTES_FILE" ]; then
+  { cat "$NOTES_FILE"; printf '\n## Install\n\n%s\n' "$INSTALL"; } > "$UPLOAD_DIR/notes.md"
+else
+  echo "$INSTALL" > "$UPLOAD_DIR/notes.md"
+fi
+
 gh release create "$TAG" "$UPLOAD_DIR/$APP_NAME.dmg" \
   --repo NicolasMarlier/strobe \
   --target "$COMMIT" \
   --title "$APP_NAME $VERSION" \
-  --notes "$APP_NAME $VERSION for Macs with Apple silicon (M1 and later). Open Strobe.dmg, then drag Strobe into Applications." \
+  --notes-file "$UPLOAD_DIR/notes.md" \
   --latest
 
 echo "Published: https://github.com/NicolasMarlier/strobe/releases/latest/download/$APP_NAME.dmg"
