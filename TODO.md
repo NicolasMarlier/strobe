@@ -23,3 +23,4 @@
 - [x] Move the cursor while playing
 - [ ] Website: a short story, filmed with Nico, on why Strobe was made
 - [ ] Download monitoring
+- [ ] Move the cursor by hand during playback (seek while playing)
