@@ -34,8 +34,8 @@
 
 ## Improvements
 
-- [ ] Handle input devices to trigger a button
-- [ ] Better MIDI recording and MIDI editing
+- [x] Handle input devices to trigger a button
+- [x] Better MIDI recording and MIDI editing
   - Pause stops recording, and so do the track's end and MainStage stopping (done)
   - A recorded pattern ends on the first beat after its last note (done)
   - While recording, a short shadow pattern that grows with the cursor; nothing recorded, no empty pattern (done)
