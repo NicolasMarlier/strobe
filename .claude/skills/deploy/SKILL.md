@@ -93,17 +93,20 @@ In the website repo:
 - Commit `Strobe <version>`, with the attribution lines, then `git push origin main`.
 - Vercel deploys within a minute or two: check that https://strobe-website.vercel.app shows `Version <version>` (`curl -s … | grep`), a few times at most, a minute apart.
 
-## 9. Website screenshots
+## 9. Website videos, animation and screenshots
 
-The website shows screenshots of the app (`assets/screenshots/` and `assets/mainstage/`, used in `index.html` and `mainstage/`) and a feature list. Go through the approved notes: for each change a user would see on screen (a new mode, a panel that moved, a new button), name the screenshot or the feature-list item it makes outdated. Tell the user which ones, and why. Change nothing without their go; a feature-list item, you may rewrite once they agree. Nothing outdated: say so in one line.
+The website shows the app in videos (`assets/videos/`: the overview, the 3D scene, the narrow window), in an animation of the cues (`.cues-demo` in `index.html`, driven by `script.js`), in screenshots (`assets/mainstage/` in `mainstage/`, and `assets/screenshots/cues.webp`, the cues' fallback without JavaScript) and in a feature list.
+
+- **Videos**: redo them at each release with the website-videos skill, from the released installer. It needs nobody at the keyboard and doesn't touch the user's Strobe: start it as soon as the release is published, in the background, and put them on the website after the user has watched them.
+- **The rest**: go through the approved notes; for each change a user would see on screen (a new mode, a panel that moved, a new button), name what it makes outdated: the cues animation (the buttons, their settings, the effects), a screenshot, a feature-list item. Tell the user which ones, and why. Change nothing without their go; a feature-list item, you may rewrite once they agree. Nothing outdated: say so in one line.
 
 Screenshots to redo are taken from the released app, after step 10 has installed it:
 
 1. Launch it with the debugging port: `open -a /Applications/Strobe.app --args --remote-debugging-port=9222` (quit it first if it runs), and check `curl -s http://127.0.0.1:9222/json/list` lists the `STROBE` page.
-2. The user sets the stage: their show open, playback on a busy passage (several lights lit, fog), no DMX button selected (its link labels clutter the scene) unless a capture needs its details panel, a pattern selected so the overview shows the note editor.
+2. The user sets the stage: their show open, the panel or passage the screenshot needs.
 3. On their go, `node .claude/skills/deploy/capture.mjs <scratchpad>/shots 8 1.5`: 8 rounds 1.5 s apart of `overview-N` (1440×900), `scene-N` and `cues-N` (the sections of a 1680×1050 window) and `narrow-N` (560×900), all at 2x. It lays the page out at each size by emulation, without touching the user's window.
-4. Make contact sheets (`magick montage …`), look at them, recommend the best of each, and open the folder for the user (`open <dir>`). Several tries are normal: lights flash on and off.
-5. Once they pick: `cwebp -q 85` into `assets/screenshots/` (the overview resized to 2048×1280 first), update each `<img>`'s `width`, `height` and `alt` in `index.html`, preview the site locally (`python3 -m http.server`, then `open`), and commit and push the website after their go.
+4. Make contact sheets (`magick montage …`), look at them, recommend the best, and open the folder for the user (`open <dir>`).
+5. Once they pick: `cwebp -q 85` into the website's assets, update the `<img>`'s `width`, `height` and `alt`, preview the site locally (`npx --yes http-server -p 8080 -c-1 -s .`, then `open`), and commit and push the website after their go.
 
 ## 10. Install the released version on this Mac
 
