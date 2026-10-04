@@ -1,6 +1,6 @@
 import { BaseWindow, BrowserWindow, Menu, MenuItemConstructorOptions, shell } from "electron"
 import { FixtureLibrary } from "../fixture_library"
-import { newShow, openRecentShow, openShow, saveShow, saveShowAs } from "../show/document"
+import { newShow, openExampleShow, openRecentShow, openShow, saveShow, saveShowAs } from "../show/document"
 import { clearRecentShows, describeRecentShow, listRecentShows, onRecentShowsChange } from "../show/recent_shows"
 import { sendToAllWindows } from "./ipc-router"
 import { isTelemetryEnabled, setTelemetryEnabled } from "../telemetry"
@@ -77,6 +77,7 @@ const buildMenu = () => {
                 { label: 'New Show', accelerator: 'CmdOrCtrl+N', click: onWindow(newShow) },
                 { label: 'Open Show…', accelerator: 'CmdOrCtrl+O', click: onWindow(openShow) },
                 { label: 'Open Recent', submenu: openRecentSubmenu() },
+                { label: 'Open Example Show', click: onWindow(openExampleShow) },
                 { type: 'separator' },
                 { label: 'Save', accelerator: 'CmdOrCtrl+S', click: onWindow(saveShow) },
                 { label: 'Save As…', accelerator: 'CmdOrCtrl+Shift+S', click: onWindow(saveShowAs) },

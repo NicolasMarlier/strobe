@@ -13,6 +13,7 @@ const TELEMETRYDECK_APP_ID = '4891B7D2-EECB-4F7E-B001-F2DE2A466C5E'
 // What happens in a session, sent the first time only: a session says whether a feature is used, not how often
 export type UsageSignal =
     | 'Strobe.showOpened'
+    | 'Strobe.exampleShowOpened'
     | 'Strobe.playbackStarted'
     | 'Strobe.mainStageConnected'
     | 'Strobe.dmxInterfaceConnected'

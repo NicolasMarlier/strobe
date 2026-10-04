@@ -60,6 +60,9 @@ export const newShow = () =>
 export const openShow = () =>
     i('show:open')
 
+export const openExampleShow = () =>
+    i('show:open_example')
+
 export const openRecentShow = (dir: string) =>
     i('show:open_recent', dir)
 
