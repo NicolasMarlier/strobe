@@ -7,8 +7,9 @@ const ForkTsCheckerWebpackPlugin: typeof IForkTsCheckerWebpackPlugin = require('
 const { version } = require('./package.json');
 
 // The Strobe project of Sentry, where the crash reports go (see src/main/crash_reports.ts)
-const SENTRY_ORG = '';
-const SENTRY_PROJECT = '';
+const SENTRY_ORG = 'nicolas-marlier';
+// Its ID, which Sentry takes as well as its name
+const SENTRY_PROJECT = '4512196981227600';
 
 export const plugins = [
   new ForkTsCheckerWebpackPlugin({
