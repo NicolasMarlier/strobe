@@ -31,6 +31,10 @@ const SEEK_CURSOR_SVG = `<svg xmlns='http://www.w3.org/2000/svg' width='15' heig
 </svg>`
 const SEEK_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SEEK_CURSOR_SVG)}") 7 11, pointer`
 
+// How far the mouse must go, in pixels, before a click on an item moves it: a click that only selects
+// often slips by a pixel or two
+const DRAG_THRESHOLD = 5
+
 const CanvasMouseHandler = <T,>(props: Props<T>) => {
     const {
         canvasRef,
@@ -63,6 +67,9 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         seek,
         drivenByMidi,
     }
+
+    // Whether the mouse went past DRAG_THRESHOLD since the click on an item
+    const dragStartedRef = useRef(false)
 
     const canvasTop = () => canvasRef.current?.getBoundingClientRect().top || 0
     const canvasLeft = () => canvasRef.current?.getBoundingClientRect().left || 0
@@ -149,6 +156,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
                 else if(!clickedItemAlreadySelected) {
                     setSelectedItems(items)
                 }
+                dragStartedRef.current = false
                 selectionRef.current = {
                     mode: 'drag',
                     rect: {
@@ -167,13 +175,20 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         showSeekHover(null)
 
         if(selectionRef.current) {
+            const x = event.clientX - canvasLeft()
+            const y = event.clientY - canvasTop()
+            if(selectionRef.current.mode == 'drag' && !dragStartedRef.current) {
+                const { x0, y0 } = selectionRef.current.rect
+                if(Math.hypot(x - x0, y - y0) < DRAG_THRESHOLD) return
+                dragStartedRef.current = true
+            }
             selectionRef.current = {
                 mode: selectionRef.current.mode,
                 rect: {
                     x0: selectionRef.current.rect.x0,
                     y0: selectionRef.current.rect.y0,
-                    x1: event.clientX - canvasLeft(),
-                    y1: event.clientY - canvasTop(),
+                    x1: x,
+                    y1: y,
                 }
             }
             if(selectionRef.current.mode == 'select') {
