@@ -19,6 +19,15 @@ The main checkout (`/Users/nicolasmarlier/perso/strobe`) is shared: other sessio
 5. In TODO.md, mention the branch on the item, e.g. `- [ ] Crash monitoring (\`crash-monitoring\` branch)`.
 6. From then on, use absolute paths inside `.claude/worktrees/<name>` for every read, edit and command. Never edit the same files in the main checkout.
 
+## Running the app
+
+Several worktrees can run Strobe at once (`yarn start` in each), each with its own ports. They come from `src/shared/dev_worktree.ts`, which `forge.config.ts` uses:
+- Webpack's dev server and its logger get ports made from the worktree's folder name: always the same ones for a worktree, and different from the main checkout's (Forge's defaults, 3000 and 9000). Never set fixed ports in `forge.config.ts`: two worktrees would fight over them.
+- If a launch fails because a port is taken (two names giving the same port, rarely), run it with `STROBE_DEV_PORT=<port> yarn start` (the logger takes `<port> + 6000`).
+- A branch made before this existed has fixed ports: merge `main` into it first.
+- Run from source, each window shows which worktree it is: a frame in the branch's color, the branch's name at the bottom, in the title (`[branch]`) and as the Dock icon's badge. The released app shows none of it.
+- They share the app's data (recent shows, Fixtures folder, settings), and only one can open the DMX USB interface at a time. MIDI is shared.
+
 ## While working
 
 - Commit in the worktree, on the feature branch, when the user asks or when a step is validated.

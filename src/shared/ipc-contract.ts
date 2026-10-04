@@ -1,3 +1,5 @@
+import type { DevWorktree } from './dev_worktree';
+
 export interface ApiContract {
   'tracks:list':   {
       args: []
@@ -143,6 +145,11 @@ export interface ApiContract {
   'telemetry:signal': {
     args: [type: 'Strobe.playbackStarted' | 'Strobe.narrowWindowUsed']
     result: void
+  }
+  // Run from source, the worktree and branch it runs from, to show them; null when released
+  'dev:worktree': {
+    args: []
+    result: DevWorktree | null
   }
 
 }

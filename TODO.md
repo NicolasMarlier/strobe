@@ -37,3 +37,7 @@
 - [ ] Display the keyboard shortcuts
 - [ ] App icon
 - [ ] No window title ("Untitled — Strobe") while no show is open yet
+- [x] Run several worktrees at once
+  - Webpack dev ports made from the worktree's name, `STROBE_DEV_PORT` to force one (done)
+  - Run from source, the window shows its branch: a frame in its color, its name at the bottom, in the title and as the Dock badge (done)
+  - The feature-worktree skill explains it (done)
