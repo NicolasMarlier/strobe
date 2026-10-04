@@ -35,3 +35,5 @@
   - Ship it in a release (the deploy skill), along with the next features
 - [ ] Crash monitoring
 - [ ] Display the keyboard shortcuts
+- [ ] App icon
+- [ ] No window title ("Untitled — Strobe") while no show is open yet
