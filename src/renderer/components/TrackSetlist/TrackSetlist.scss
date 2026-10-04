@@ -278,3 +278,9 @@
         margin: 4px 2px;
     }
 }
+
+// A narrow column: the hint takes what's right of the title
+#app .section.setlist .section-hint {
+    max-width: none;
+    right: 12px;
+}

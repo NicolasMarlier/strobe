@@ -48,8 +48,12 @@
   - Validate that the crashes show up in Sentry (done: a test error from the window arrived, in release Strobe@0.4.0). Run from source, `STROBE_CRASH_REPORTS=1 yarn start` sends them
   - In Sentry: an email alert on a new crash (done: the project's alert rule already existed)
   - Ship it in a release (done: Strobe 0.5.0)
-- [ ] Display the keyboard shortcuts
+- [ ] Display the keyboard shortcuts (`shortcuts` branch)
   - The transport's: a Playback menu (Play / Pause, Back to Start) and its buttons' tooltips (done)
+  - Every shortcut in the app's menu: Edit (Copy, Paste, Delete, Select All on patterns and notes), a Pattern menu (Split T, Join J, Loop L), Playback (one beat ← →, previous / next track ↑ ↓), View (Show / Hide Setlist ⌘\)
+  - The app's own shortcuts on screen (not the generic ones like Copy, Paste and Delete, only in the menu): hints on the Track automation's and the setlist's borders; the note editor's mouse hint removed, self-explanatory
+  - ↑ ↓ switch tracks even with the setlist collapsed
+  - The timeline's hint is contextual: with nothing selected, the cursor's keys (← → one beat, ↵ back to start); with a selection, its own (T split for one pattern, J join for two or more, L loop). Join does nothing below two
 - [x] Show file icon, in the Finder and the title bar
 - [x] Window title is just STROBE, no "Untitled", while no show is open yet
 - [x] Run several worktrees at once

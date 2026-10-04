@@ -20,11 +20,53 @@ export interface ApiReverseContract {
   'edit:redo': {
     params: null
   }
+  // Edit > Copy, Paste, Delete and Select All: a text field's, or else the timeline's patterns
+  // or the note editor's notes (see useEditMenu)
+  'edit:copy': {
+    params: null
+  }
+  'edit:paste': {
+    params: null
+  }
+  'edit:delete': {
+    params: null
+  }
+  'edit:selectAll': {
+    params: null
+  }
+  // Pattern > Split at Cursor (T), Join (J) and Loop (L): the timeline's (TrackEditor)
+  'pattern:split': {
+    params: null
+  }
+  'pattern:join': {
+    params: null
+  }
+  'pattern:loop': {
+    params: null
+  }
   // Playback > Play / Pause (Space) and Back to Start (Return): the transport's buttons
   'playback:toggle': {
     params: null
   }
   'playback:rewind': {
+    params: null
+  }
+  // Playback > Back One Beat (Left) and Forward One Beat (Right): the timeline's cursor
+  'playback:back': {
+    params: null
+  }
+  'playback:forward': {
+    params: null
+  }
+  // Playback > Previous Track (Up) and Next Track (Down), in the setlist's order
+  'tracks:previous': {
+    params: null
+  }
+  'tracks:next': {
+    params: null
+  }
+  // View > Show / Hide Setlist (Cmd+\)
+  'view:toggleSetlist': {
     params: null
   }
   // A MIDI input was plugged or unplugged: the names of those connected

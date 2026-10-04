@@ -145,6 +145,11 @@ export interface ApiContract {
     args: []
     result: boolean
   }
+  // Edit > Copy, Paste and Select All left to the page (a text field, selected text): the window does them
+  'edit:native': {
+    args: [action: 'copy' | 'paste' | 'selectAll']
+    result: void
+  }
   // A feature the window saw used, for the anonymous usage statistics (see telemetry.ts)
   'telemetry:signal': {
     args: [type: 'Strobe.playbackStarted' | 'Strobe.narrowWindowUsed']
