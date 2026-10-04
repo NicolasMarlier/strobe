@@ -1,15 +1,15 @@
 ---
 name: website-videos
-description: Record the website's videos of Strobe (the overview, the 3D scene, the cues and the narrow window) by itself, from a released version and the bundled example show, with nobody at the keyboard, then put them on the website (sibling repo strobe-website). Use when the user asks to record, redo or update the website's videos, and at each release (the deploy skill's website step).
+description: Record the website's videos of Strobe (the overview and the 3D scene) by itself, from a released version and the bundled example show, with nobody at the keyboard, then put them on the website (sibling repo strobe-website). Use when the user asks to record, redo or update the website's videos, and at each release (the deploy skill's website step).
 ---
 
 # The website's videos
 
 Talk to the user in French. Everything written in the repos stays in English.
 
-The home page of the website (`/Users/nicolasmarlier/perso/strobe-website`, `index.html`) shows short muted loops of the app, in `assets/videos/`: `overview` (the whole window), `scene` (the 3D stage) and `narrow` (the narrow window). Each comes with its poster, `<name>.webp`: its first frame, shown until it plays and to those who'd rather avoid motion. `script.js` plays the `.app-video`s only while on screen.
+The home page of the website (`/Users/nicolasmarlier/perso/strobe-website`, `index.html`) shows short muted loops of the app, in `assets/videos/`: `overview` (the whole window) and `scene` (the 3D stage). Each comes with its poster, `<name>.webp`: its first frame, shown until it plays and to those who'd rather avoid motion. `script.js` plays the `.app-video`s only while on screen.
 
-The cues section isn't a video: it's an animation in HTML and JavaScript (`.cues-demo` in `index.html`, its engine in `script.js`), a copy of the app's buttons, their settings and a stage acting out a cue's editing. Nothing to record for it; but when the app's buttons, their settings panel or the effects change, tell the user it may need updating too. `record.mjs` can still record a `cues` video (a button edited by a drawn pointer), on request only: `... 10 cues`. Without it, record the others: `... 10 overview,scene,narrow`.
+Three sections aren't videos but animations in HTML and JavaScript (in `index.html`, their engines in `script.js`), copies of the app's look acting out a story by themselves: the cues (`.cues-demo`: a cue's editing), recording (`.record-demo`: a take played on a MIDI keyboard, then its playback) and the stage (`.stage-demo`: Strobe in a narrow window next to a sketch of MainStage, which drives it). Nothing to record for them; but when what they copy changes in the app (the buttons and their settings, the effects, the transport, the timeline, recording, the narrow window, what Strobe takes from MainStage), tell the user they may need updating too. `record.mjs` can still record a `cues` or a `narrow` video, on request only: `... 10 cues`. Without it, record the others: `... 10 overview,scene`.
 
 `record.mjs`, next to this file, records them all by itself: the user doesn't need to do anything, nor to quit their own Strobe.
 
@@ -26,13 +26,13 @@ hdiutil attach -nobrowse -readonly -mountpoint <scratchpad>/mnt <scratchpad>/Str
 
 ## 2. Record
 
-From the app repo: `node .claude/skills/website-videos/record.mjs <scratchpad>/mnt/Strobe.app <scratchpad>/videos 10 overview,scene,narrow`, in the background (5 to 10 minutes). Some of them only: `... <scratchpad>/videos 10 cues,scene` (the third argument is the passage's length in seconds).
+From the app repo: `node .claude/skills/website-videos/record.mjs <scratchpad>/mnt/Strobe.app <scratchpad>/videos 10 overview,scene`, in the background (5 to 10 minutes). Some of them only: `... <scratchpad>/videos 10 cues,scene` (the third argument is the passage's length in seconds).
 
 What it does, so you can tell the user and debug it:
 - It starts its own Strobe from the mounted app, next to the user's if it's open: its own profile (no usage statistics nor crash reports sent, the user's recent shows and settings untouched), the sound muted, the Chrome DevTools protocol on port 9223. Its window shows up on screen; the user can keep working, but must not quit it (Cmd+Q may quit both Strobes).
 - It opens a copy of the example show (`assets/Example.strobe` from this repo, so a version without it bundled works too), and selects its first pattern so the overview shows the note editor.
 - Scouting: it plays the whole track once and measures the scene's brightness on every frame, then picks the liveliest 10 seconds that keep to the website's flashing rule (no flashing faster than about twice a second, see `script.js` in the website).
-- Then for each video: the page laid out at its size by emulation (overview 1440×900, scene as a section of 1680×1050, narrow 560×900, all at 2x), the track played from the start, and that passage filmed through the protocol's screencast. Encoded in H.264 at 60 fps (`.mp4`), each frame the captured one nearest to its time, with its poster (`.webp`).
+- Then for each video: the page laid out at its size by emulation (overview 1440×900, scene as a section of 1680×1050, narrow 560×900 when asked for, all at 2x), the track played from the start, and that passage filmed through the protocol's screencast. Encoded in H.264 at 60 fps (`.mp4`), each frame the captured one nearest to its time, with its poster (`.webp`).
 - The cues video first, the track stopped: the buttons and the scene of a 1680×860 window, and a mouse pointer drawn in the page (the screencast doesn't show macOS's) acting out `editButton`: the D#1 button clicked, its color changed twice and the button clicked again each time, then a click in an empty spot closes its settings. macOS's color panel is a window the screencast can't see: the pointer clicks the color without the app getting the click, and the color is set as the panel would.
 - Out, in `<scratchpad>/videos`: `<name>.mp4`, `<name>.webp`, `<name>-sheet.png` (4 frames of it) and `report.json` (the passage, each video's size, frame rate, weight and flashes).
 

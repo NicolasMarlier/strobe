@@ -95,10 +95,10 @@ In the website repo:
 
 ## 9. Website videos, animation and screenshots
 
-The website shows the app in videos (`assets/videos/`: the overview, the 3D scene, the narrow window), in an animation of the cues (`.cues-demo` in `index.html`, driven by `script.js`), in screenshots (`assets/mainstage/` in `mainstage/`, and `assets/screenshots/cues.webp`, the cues' fallback without JavaScript) and in a feature list.
+The website shows the app in videos (`assets/videos/`: the overview, the 3D scene), in animations in HTML (in `index.html`, driven by `script.js`: the cues `.cues-demo`, recording `.record-demo`, and the stage `.stage-demo`, MainStage driving Strobe in a narrow window), in screenshots (`assets/mainstage/` in `mainstage/`, and `assets/screenshots/cues.webp`, the cues' fallback without JavaScript) and in a feature list.
 
 - **Videos**: redo them at each release with the website-videos skill, from the released installer. It needs nobody at the keyboard and doesn't touch the user's Strobe: start it as soon as the release is published, in the background, and put them on the website after the user has watched them.
-- **The rest**: go through the approved notes; for each change a user would see on screen (a new mode, a panel that moved, a new button), name what it makes outdated: the cues animation (the buttons, their settings, the effects), a screenshot, a feature-list item. Tell the user which ones, and why. Change nothing without their go; a feature-list item, you may rewrite once they agree. Nothing outdated: say so in one line.
+- **The rest**: go through the approved notes; for each change a user would see on screen (a new mode, a panel that moved, a new button), name what it makes outdated: an animation (the cues': the buttons, their settings, the effects; recording's: the transport, the timeline, recording; the stage's: the narrow window, what Strobe takes from MainStage), a screenshot, a feature-list item. Tell the user which ones, and why. Change nothing without their go; a feature-list item, you may rewrite once they agree. Nothing outdated: say so in one line.
 
 Screenshots to redo are taken from the released app, once the Strobe in `/Applications` has updated itself to it (step 10; `defaults read /Applications/Strobe.app/Contents/Info.plist CFBundleShortVersionString`):
 
