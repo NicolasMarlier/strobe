@@ -31,8 +31,8 @@ const openRecentSubmenu = (): MenuItemConstructorOptions[] => {
     ]
 }
 
-// Space and Return stay the renderer's: registered by the menu, they would also fire while typing in a
-// text field. The menu only shows them
+// Space and Return are handled by the window first (AudioPlayer, TrackEditor), which takes them; on macOS,
+// those it leaves come here (registerAccelerator only works on Linux and Windows)
 const PLAYBACK_ITEM_IDS = ['playback-toggle', 'playback-rewind']
 let playbackDrivenByMidi = false
 

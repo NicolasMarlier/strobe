@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 // Where Cmd+Z undoes the typing instead of the show's last change
-const isTextField = (element: Element | null) =>
+export const isTextField = (element: Element | null) =>
     element instanceof HTMLTextAreaElement ||
     (element instanceof HTMLInputElement && !['range', 'checkbox', 'radio', 'color', 'button'].includes(element.type))
 

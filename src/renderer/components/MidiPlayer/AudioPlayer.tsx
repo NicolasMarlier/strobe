@@ -6,6 +6,7 @@ import { tickToTime, timeToTick } from "./utils"
 import { useRealTimeContext } from "../../contexts/RealTimeContext"
 import { useDmxMidiContext } from "../../contexts/DmxMidiContext"
 import { sendUsageSignal } from "../../ApiClient"
+import { isTextField } from "../../useEditMenu"
 
 const AudioPlayer = () => {
     const { track, audioUrl } = useDmxButtonsContext()
@@ -39,7 +40,8 @@ const AudioPlayer = () => {
         if(track) {
             audioRef.current.currentTime = tickToTime(midiCurrentTickRef.current, track.bpm)
         }
-        audioRef.current.play()
+        // Paused before it really started (e.g. MainStage taking over): not an error
+        audioRef.current.play().catch(() => { /* interrupted by pause() */ })
         setIsPlaying(true)
         setIsFollowing(true)
         sendUsageSignal('Strobe.playbackStarted')
@@ -63,11 +65,13 @@ const AudioPlayer = () => {
         }
     }, [isPlaying])
 
-    // Playback > Play / Pause and Back to Start: registered once, they call the latest play, pause and rewind
+    // Playback > Play / Pause and Back to Start: registered once, they call the latest play, pause and rewind.
+    // On macOS, a key the page doesn't take goes on to the menu: Space and Return typed in a text field
+    // land here too, and are the field's
     const menuActionsRef = useRef({ toggle: () => { /* set below */ }, rewind: () => { /* set below */ } })
     menuActionsRef.current = {
-        toggle: () => { if (!drivenByMidi) (isPlaying ? pause : play)() },
-        rewind: () => { if (!isPlaying) onRewindButton() },
+        toggle: () => { if (!drivenByMidi && !isTextField(document.activeElement)) (isPlaying ? pause : play)() },
+        rewind: () => { if (!isPlaying && !isTextField(document.activeElement)) onRewindButton() },
     }
     useEffect(() => {
         const unsubscribes = [
@@ -78,8 +82,11 @@ const AudioPlayer = () => {
     }, [])
 
     const onKeyDown = (e: KeyboardEvent) => {
+        if(e.key != ' ' || isTextField(document.activeElement)) return
+        // Taken here, so that macOS doesn't pass it on to Playback > Play / Pause, which would toggle again
+        e.preventDefault()
         // Holding Space repeats the key: only its first press toggles
-        if(e.key == ' ' && !e.repeat) (isPlaying ? pause : play)()
+        if(!e.repeat) (isPlaying ? pause : play)()
     }
 
     useEffect(() => {
