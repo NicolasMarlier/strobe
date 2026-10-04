@@ -26,7 +26,7 @@
 - [ ] Videos on the website (`website-videos` branch)
   - Recorded by themselves, with nobody at the keyboard, from a released version and the example show: the website-videos skill (done)
   - The overview, the 3D scene and the narrow window, in place of their screenshots (`website-videos` branch of strobe-website)
-  - The cues: a button edited, its color changed live; waits for the item below
+  - The cues: an animation in HTML and JavaScript of a cue's editing, in the app's look (`website-videos` branch of strobe-website)
 - [ ] While a selected button plays, the scene shows its effect (colors, beams), not its links' white outlines: they hide what a change of color does
 - [x] Move the cursor while playing
 - [ ] Website: a short story, filmed with Nico, on why Strobe was made

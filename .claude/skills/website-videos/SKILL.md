@@ -9,7 +9,7 @@ Talk to the user in French. Everything written in the repos stays in English.
 
 The home page of the website (`/Users/nicolasmarlier/perso/strobe-website`, `index.html`) shows short muted loops of the app, in `assets/videos/`: `overview` (the whole window), `scene` (the 3D stage) and `narrow` (the narrow window). Each comes with its poster, `<name>.webp`: its first frame, shown until it plays and to those who'd rather avoid motion. `script.js` plays the `.app-video`s only while on screen.
 
-`cues` (a button edited: clicked, its color changed live, the scene showing each try) is recorded too, but not on the website yet: while a button is selected, the scene shows its links (white outlines, "Link all") over the effect, which hides the color. It waits for the app to show the effect playing instead (see TODO.md); until then the cues section keeps its screenshot (`assets/screenshots/cues.webp`).
+The cues section isn't a video: it's an animation in HTML and JavaScript (`.cues-demo` in `index.html`, its engine in `script.js`), a copy of the app's buttons, their settings and a stage acting out a cue's editing. Nothing to record for it; but when the app's buttons, their settings panel or the effects change, tell the user it may need updating too. `record.mjs` can still record a `cues` video (a button edited by a drawn pointer), on request only: `... 10 cues`. Without it, record the others: `... 10 overview,scene,narrow`.
 
 `record.mjs`, next to this file, records them all by itself: the user doesn't need to do anything, nor to quit their own Strobe.
 
@@ -26,7 +26,7 @@ hdiutil attach -nobrowse -readonly -mountpoint <scratchpad>/mnt <scratchpad>/Str
 
 ## 2. Record
 
-From the app repo: `node .claude/skills/website-videos/record.mjs <scratchpad>/mnt/Strobe.app <scratchpad>/videos`, in the background (5 to 10 minutes). Some of them only: `... <scratchpad>/videos 10 cues,scene` (the third argument is the passage's length in seconds).
+From the app repo: `node .claude/skills/website-videos/record.mjs <scratchpad>/mnt/Strobe.app <scratchpad>/videos 10 overview,scene,narrow`, in the background (5 to 10 minutes). Some of them only: `... <scratchpad>/videos 10 cues,scene` (the third argument is the passage's length in seconds).
 
 What it does, so you can tell the user and debug it:
 - It starts its own Strobe from the mounted app, next to the user's if it's open: its own profile (no usage statistics nor crash reports sent, the user's recent shows and settings untouched), the sound muted, the Chrome DevTools protocol on port 9223. Its window shows up on screen; the user can keep working, but must not quit it (Cmd+Q may quit both Strobes).
