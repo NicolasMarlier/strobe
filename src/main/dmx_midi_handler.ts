@@ -10,17 +10,22 @@ const PPQ = 480
 // ie 20 CLOCK events per second at 60 BPM
 const CLOCK_PPQM = 24
 
+// MainStage stopped, quit or crashed without a Stop message when its clock is silent this long
+const CLOCK_TIMEOUT_MS = 1000
+
 
 
 
 export class DmxMidiHandler {
   private isPlaying: boolean
+  private lastClockAt: number
   currentTick: number
   private midiNotes: MidiNote[]
   private onMidiKey: (midiKey: MidiKey) => void
 
   constructor(params: {onMidiKey?: (midiKey: MidiKey) => void}) {
     this.isPlaying = false
+    this.lastClockAt = 0
     this.currentTick = 0
     this.midiNotes = []
     this.onMidiKey = params.onMidiKey || (() => { /* No one listens to the keys */ })
@@ -56,7 +61,12 @@ export class DmxMidiHandler {
   play = () => {
     this.currentTick = -PPQ / CLOCK_PPQM
     this.isPlaying = true
+    this.lastClockAt = Date.now()
   }
+
+  // Whether MIDI (MainStage) drives playback: started, and its clock still ticking.
+  // The app's own Play doesn't count: it moves the tick through updateCurrentTickManually
+  isDrivenByMidi = () => this.isPlaying && Date.now() - this.lastClockAt < CLOCK_TIMEOUT_MS
 
   stop = (options?: {reset?: true}) => {
     this.isPlaying = false
@@ -67,6 +77,7 @@ export class DmxMidiHandler {
 
   receiveClock = () => {
       if(!this.isPlaying) { return false }
+      this.lastClockAt = Date.now()
       this.updateCurrentTickManually(this.nextTick())
   }
 

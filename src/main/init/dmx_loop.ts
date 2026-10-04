@@ -14,6 +14,7 @@ export const initDmxLoop = () => {
             },
             dmxHexSignal: EnttecOpenDMXUSB.getInstance().dmxHexString,
             midiCurrentTick: DmxLoop.getInstance().dmxMidiHandler.currentTick,
+            drivenByMidi: DmxLoop.getInstance().dmxMidiHandler.isDrivenByMidi(),
             activeDmxButtonIds: DmxLoop.getInstance().activeDmxButtonIds(),
         })
     })

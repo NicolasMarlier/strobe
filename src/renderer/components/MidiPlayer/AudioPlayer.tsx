@@ -9,7 +9,7 @@ import { sendUsageSignal } from "../../ApiClient"
 
 const AudioPlayer = () => {
     const { track, audioUrl } = useDmxButtonsContext()
-    const { midiCurrentTickRef, sendCurrentTickToServer } = useRealTimeContext()
+    const { midiCurrentTickRef, sendCurrentTickToServer, drivenByMidi } = useRealTimeContext()
     const { setIsFollowing } = useDmxMidiContext()
     const [isPlaying, setIsPlaying] = useState(false)
 
@@ -22,6 +22,11 @@ const AudioPlayer = () => {
         if (!audioUrl) audioRef.current.src = ''
     }, [audioUrl])
 
+    // MainStage starts while the app plays: it takes over, the app's own playback stops
+    useEffect(() => {
+        if (drivenByMidi) pause()
+    }, [drivenByMidi])
+
     const pause = () => {
         if(!audioRef.current) return 
         audioRef.current.pause()
@@ -29,7 +34,7 @@ const AudioPlayer = () => {
     }
 
     const play = () => {
-        if(!audioRef.current) return
+        if(!audioRef.current || drivenByMidi) return
 
         if(track) {
             audioRef.current.currentTime = tickToTime(midiCurrentTickRef.current, track.bpm)
@@ -42,7 +47,7 @@ const AudioPlayer = () => {
 
 
     const onRewindButton = () => {
-        if(!audioRef.current) return 
+        if(!audioRef.current || drivenByMidi) return 
         audioRef.current.currentTime = 0
         sendCurrentTickToServer(0)
     }
@@ -68,7 +73,9 @@ const AudioPlayer = () => {
         return () => {
             document.removeEventListener("keydown", onKeyDown)
         }
-    }, [isPlaying])
+    }, [isPlaying, drivenByMidi])
+
+    const drivenTitle = drivenByMidi ? 'Playback is driven by MainStage' : undefined
 
     return <>
         <audio
@@ -76,13 +83,16 @@ const AudioPlayer = () => {
             src={audioUrl}/>
         <SmallButton
             value={isPlaying}
-            onClick={() => {(isPlaying ? pause : play)() }}>
+            title={drivenTitle}
+            onClick={() => {(isPlaying ? pause : play)() }}
+            disabled={drivenByMidi}>
             { isPlaying ? <PauseIcon/> : <PlayIcon/> }
         </SmallButton>
         <SmallButton
             value={false}
+            title={drivenTitle}
             onClick={onRewindButton}
-            disabled={isPlaying}>
+            disabled={isPlaying || drivenByMidi}>
             <BackToStartIcon/>
         </SmallButton>
     </>

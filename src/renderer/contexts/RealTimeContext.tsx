@@ -7,6 +7,7 @@ interface RealTimeContextType {
     setLastReceivedMidiKey: (received_midi_key: ReceivedMidiKey | undefined) => void
 
     sendCurrentTickToServer: (tick: number) => void  
+    drivenByMidi: boolean
 
     dmxHexSignal: DmxHexSignal
     activeDmxButtonIds: string[]
@@ -36,6 +37,7 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
     const { setCurrentTrackId, syncTracks, tracks } = useDmxButtonsContext()
 
     const midiCurrentTickRef = useRef(0)
+    const [drivenByMidi, setDrivenByMidi] = useState(false)
     const [lastReceivedMidiKey, setLastReceivedMidiKey] = useState(
         undefined as ReceivedMidiKey | undefined
     )
@@ -75,6 +77,7 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
                 },
                 dmxHexSignal: dmxHexSignal,
                 midiCurrentTick: midiCurrentTick,
+                drivenByMidi: drivenByMidiNow,
                 activeDmxButtonIds: activeDmxButtonIds
           } = data
           setEnttecOpenUSBState(state)
@@ -82,6 +85,7 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
           // A new array comes 50 times per second: keep the previous one while the ids are the same
           setActiveDmxButtonIds(previous => previous.join() == activeDmxButtonIds.join() ? previous : activeDmxButtonIds)
           midiCurrentTickRef.current = midiCurrentTick
+          setDrivenByMidi(drivenByMidiNow)
         }),
 
         window.strobe.api.onMessage('track:change', trackId => {
@@ -116,6 +120,7 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
             midiCurrentTickRef,
 
             sendCurrentTickToServer,
+            drivenByMidi,
 
             dmxHexSignal,
             activeDmxButtonIds,

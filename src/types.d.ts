@@ -208,6 +208,8 @@ type DmxSignalParams = {
     },
     dmxHexSignal: DmxHexSignal,
     midiCurrentTick: number
+    // MainStage (MIDI Start and clock) drives playback: the app's Play is blocked meanwhile
+    drivenByMidi: boolean
     // Buttons whose effect is running, i.e. currently changing the DMX signal
     activeDmxButtonIds: string[]
 }
