@@ -5,6 +5,7 @@ import { useDmxSceneContext } from './contexts/DmxSceneContext';
 import DmxButtonDetails from './components/DmxButtonDetails/DmxButtonDetails';
 import TrackSetlist from './components/TrackSetlist/TrackSetlist';
 import { useSetlistOpen } from './components/TrackSetlist/useSetlistOpen';
+import { useTrackArrows } from './components/TrackSetlist/useTrackArrows';
 import TrackSetlistCompact from './components/TrackSetlist/TrackSetlistCompact';
 import DmxButtonsCollection from './components/DmxButtonsCollection/DmxButtonsCollection';
 import MidiPlayer from './components/MidiPlayer/TrackEditor';
@@ -13,6 +14,7 @@ import DebugConsole from './components/DebugConsole/DebugConsole';
 import { useRealTimeContext } from './contexts/RealTimeContext';
 import NoteEditor from './components/MidiPlayer/NoteEditor';
 import { useDmxMidiContext } from './contexts/DmxMidiContext';
+import { isSelected } from './components/MidiPlayer/utils_midi_patterns';
 import SmallButton from './components/DesignSystem/SmallButton/SmallButton';
 import { RecordIcon } from './components/DesignSystem/Icons';
 import AudioPlayer from './components/MidiPlayer/AudioPlayer';
@@ -53,9 +55,12 @@ function App() {
     if ((e.target as Element).closest('.dmx-scene, .dmx-scene-details')) return
     setSelectedElementIndex(undefined)
   }
-  const { selectedMidiPatterns, isRecording, setIsRecording } = useDmxMidiContext()
+  const { selectedMidiPatterns, midiPatterns, isRecording, setIsRecording } = useDmxMidiContext()
+  // Those still in the track (a change can have replaced them), for the timeline's hint
+  const selectedPatternCount = midiPatterns.filter(p => isSelected(p, selectedMidiPatterns)).length
   const { debug, drivenByMidi } = useRealTimeContext()
   const setlist = useSetlistOpen()
+  useTrackArrows()
   
   return (
       <div id="app" className={setlist.open ? 'with-setlist' : ''}>
@@ -103,6 +108,19 @@ function App() {
 
           <div className="section midi">
             <div className="section-title">Track automation</div>
+            {/* The timeline's own keys, for what's at hand: moving the cursor while nothing is selected,
+                what can be done to the selection otherwise. The generic ones (Copy, Paste, Delete…) are only
+                in the Edit menu, all of them in the menus */}
+            <div className="section-hint">
+              { selectedPatternCount == 0 ? <>
+                <span><kbd>←</kbd> <kbd>→</kbd> one beat</span>
+                <span><kbd>↵</kbd> back to start</span>
+              </> : <>
+                { selectedPatternCount == 1 && <span><kbd>T</kbd> split</span> }
+                { selectedPatternCount >= 2 && <span><kbd>J</kbd> join</span> }
+                <span><kbd>L</kbd> loop</span>
+              </> }
+            </div>
             <div className="section-body">
               { track ? <MidiPlayer track={track}/> : <></>}
 

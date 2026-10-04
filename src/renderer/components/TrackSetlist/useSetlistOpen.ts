@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useMenuMessage } from '../../useEditMenu'
 
 // Remembered in this window's storage: a display preference, not part of the show
 const STORAGE_KEY = 'setlist-open'
@@ -13,7 +14,7 @@ const saveOpen = (open: boolean) => {
     catch { /* Not remembered: it opens again next time */ }
 }
 
-// Whether the setlist sidebar shows. Cmd+\ shows or hides it
+// Whether the setlist sidebar shows. View > Show / Hide Setlist (Cmd+\) shows or hides it
 export const useSetlistOpen = () => {
     const [open, setOpen] = useState(readOpen)
 
@@ -22,16 +23,7 @@ export const useSetlistOpen = () => {
         return !open
     })
 
-    useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key == '\\' && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault()
-                toggle()
-            }
-        }
-        document.addEventListener('keydown', onKeyDown)
-        return () => document.removeEventListener('keydown', onKeyDown)
-    }, [])
+    useMenuMessage('view:toggleSetlist', toggle)
 
     return { open, toggle }
 }

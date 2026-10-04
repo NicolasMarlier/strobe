@@ -94,28 +94,9 @@ const TrackSetlist = ({ collapse }: Props) => {
         return () => clearTimeout(timeout)
     }, [error])
 
-    // Up and down arrows switch to the previous and next track, unless typing
+    // For the drag's handlers, registered when it starts
     const tracksRef = useRef(tracks)
     tracksRef.current = tracks
-    const currentTrackIdRef = useRef(currentTrackId)
-    currentTrackIdRef.current = currentTrackId
-    useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key != 'ArrowDown' && e.key != 'ArrowUp') return
-            if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return
-            const target = e.target as HTMLElement
-            if (['input', 'textarea', 'select'].includes(target.localName)) return
-
-            const tracks = tracksRef.current
-            if (tracks.length == 0) return
-            const index = tracks.findIndex(p => p.id == currentTrackIdRef.current)
-            const next = tracks[Math.max(0, Math.min(index + (e.key == 'ArrowDown' ? 1 : -1), tracks.length - 1))]!
-            if (next.id != currentTrackIdRef.current) selectTrack(next.id)
-            e.preventDefault()
-        }
-        document.addEventListener('keydown', onKeyDown)
-        return () => document.removeEventListener('keydown', onKeyDown)
-    }, [])
 
     const stopEditing = () => setEditing(undefined)
 
@@ -253,6 +234,8 @@ const TrackSetlist = ({ collapse }: Props) => {
             Setlist
             <ChevronIcon/>
         </div>
+        {/* Also in the Playback menu */}
+        <div className='section-hint'><span><kbd>↑</kbd> <kbd>↓</kbd> switch</span></div>
         <div className='section-body'>
             <div className={`setlist-rows ${drag ? 'dragging' : ''}`} ref={rowsRef}>
                 { tracks.map((track, index) => <div key={track.id} className='setlist-slot'>

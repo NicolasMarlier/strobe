@@ -11,6 +11,7 @@ import CanvasMouseHandler from './CanvasMouseHandler';
 import { useDmxMidiContext } from '../../contexts/DmxMidiContext';
 import { useDmxButtonsContext } from '../../contexts/DmxButtonsContext';
 import { isSelected, midiPatternArrayEqual, midiPatternsInclude, splitPatternsAtTick, sum } from './utils_midi_patterns';
+import { isPageEdit, useMenuMessage } from '../../useEditMenu';
 
 const BEATS_OFFSET = 2
 // Following the cursor, the view turns its page once the cursor passes this share of its width
@@ -77,9 +78,15 @@ const MidiPlayer = (props: Props) => {
     const updateTrackDmxMidiAndSyncRef = useRef(updateTrackDmxMidiAndSync)
     updateTrackDmxMidiAndSyncRef.current = updateTrackDmxMidiAndSync
 
+    // The selection, here and in the context (the shortcuts' hint and the note editor follow it)
+    const setSelection = (patterns: MidiPattern[]) => {
+        selectedMidiPatternsRef.current = patterns
+        setSelectedMidiPatterns(patterns)
+    }
+
     const splitAtCurrentTick = () => {
         updateTrackDmxMidiAndSyncRef.current(splitPatternsAtTick(midiPatternsRef.current, midiCurrentTickRef.current))
-        selectedMidiPatternsRef.current = []
+        setSelection([])
     }
 
     const activeEditorRef = useRef<'TrackEditor' | 'PatternEditor'>(null)
@@ -92,6 +99,7 @@ const MidiPlayer = (props: Props) => {
         updateTrackDmxMidiAndSyncRef.current(
             midiPatternsRef.current.filter(midiPattern => !isSelected(midiPattern, selectedMidiPatternsRef.current))
         )
+        setSelection([])
     }
 
     const copySelectedMidiPatterns = () => {
@@ -109,13 +117,16 @@ const MidiPlayer = (props: Props) => {
         )
     }
 
+    // Two patterns or more
     const joinSelection = () => {
+        if(selectedMidiPatternsRef.current.length < 2) return
         updateTrackDmxMidiAndSyncRef.current(
             [
                 ...midiPatternsRef.current.filter(midiPattern => !isSelected(midiPattern, selectedMidiPatternsRef.current)),
                 ...[sum(selectedMidiPatternsRef.current)]
             ]
         )
+        setSelection([])
     }
 
     const toggleLoop = () => {
@@ -123,46 +134,58 @@ const MidiPlayer = (props: Props) => {
         updateTrackDmxMidiAndSyncRef.current(toggleLoopForPatterns(midiPatternsRef.current, selectedMidiPatternsRef.current))
     }
 
+    // Back to Start, one beat back or forward. While MainStage drives playback, it alone moves the cursor
+    const moveCursor = (to: 'start' | 'back' | 'forward') => {
+        if(drivenByMidiRef.current) return
+        const beat = magnettedTick(midiCurrentTickRef.current, 1)
+        const targetTick = to == 'start' ? 0 : to == 'back' ? Math.max(0, beat - PPQ) : beat + PPQ
+        seek(targetTick)
+        scrollGlideRef.current = null
+        ticksScrollRef.current = to == 'start' ? 0 : targetTick - BEATS_OFFSET * PPQ
+    }
+
+    // The timeline's keys, also in the app's menu (Edit, Pattern, Playback): the menu's shows them,
+    // and a click there does the same
+    const commands = {
+        delete: () => deleteSelectedMidiPatterns(),
+        copy: () => copySelectedMidiPatterns(),
+        paste: () => pasteSelectedMidiPatterns(),
+        selectAll: () => selectAll(),
+        split: () => splitAtCurrentTick(),
+        join: () => joinSelection(),
+        loop: () => toggleLoop(),
+        back: () => moveCursor('back'),
+        forward: () => moveCursor('forward'),
+    }
+    // Not while a form control has the focus (a text field, a slider, which takes the arrows)
+    const isActive = () => activeEditorRef.current === 'TrackEditor' &&
+        !['input', 'textarea', 'select'].includes(document.activeElement?.localName ?? '')
+    const onCommand = (command: keyof typeof commands) => () => { if(isActive()) commands[command]() }
+    useMenuMessage('edit:delete', onCommand('delete'))
+    useMenuMessage('edit:copy', () => { if(!isPageEdit('copy')) onCommand('copy')() })
+    useMenuMessage('edit:paste', onCommand('paste'))
+    useMenuMessage('edit:selectAll', onCommand('selectAll'))
+    useMenuMessage('pattern:split', onCommand('split'))
+    useMenuMessage('pattern:join', onCommand('join'))
+    useMenuMessage('pattern:loop', onCommand('loop'))
+    useMenuMessage('playback:back', onCommand('back'))
+    useMenuMessage('playback:forward', onCommand('forward'))
+
+    // The keys without a modifier. Those with Cmd (copy, paste, select all) go through the menu
+    const KEYS: Record<string, keyof typeof commands> = {
+        Backspace: 'delete', t: 'split', j: 'join', l: 'loop', ArrowLeft: 'back', ArrowRight: 'forward',
+    }
     const onKeyDown = (e: KeyboardEvent) => {
-        if(activeEditorRef.current !== 'TrackEditor') return
-        if((e.target as any).localName == 'input') return
+        if(!isActive() || e.metaKey || e.ctrlKey || e.altKey) return
 
-        let shouldPreventDefault = true
-        if(e.key == 'Backspace') deleteSelectedMidiPatterns()
-        else if(e.key == 'c' && e.metaKey) copySelectedMidiPatterns()
-        else if(e.key == 'v' && e.metaKey) pasteSelectedMidiPatterns()
-        else if(e.key == 'a' && e.metaKey) selectAll()
-        else if(e.key == 't') splitAtCurrentTick()
-        else if(e.key == 'j') joinSelection()
-        else if(e.key == 'l') toggleLoop()
-        // While MainStage drives playback, it alone moves the cursor: the keys are taken, and do nothing
-        else if(['Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key) && drivenByMidiRef.current) { /* MainStage's */ }
-        else if(e.key == 'Enter') {
-            seek(0)
-            scrollGlideRef.current = null
-            ticksScrollRef.current = 0
-        }
-        else if(e.key == 'ArrowLeft') {
-            const targetTick = Math.max(0, magnettedTick(midiCurrentTickRef.current, 1) - PPQ)
-            seek(targetTick)
-            scrollGlideRef.current = null
-            ticksScrollRef.current = targetTick - BEATS_OFFSET * PPQ
-        }
-        else if(e.key == 'ArrowRight') {
-            const targetTick = (magnettedTick(midiCurrentTickRef.current, 1) + PPQ)
-            seek(targetTick)
-            scrollGlideRef.current = null
-            ticksScrollRef.current = targetTick - BEATS_OFFSET * PPQ
-        }
-        else {
-            shouldPreventDefault = false
-        }
-        if(shouldPreventDefault) e.preventDefault()
+        if(e.key == 'Enter') moveCursor('start')
+        else if(KEYS[e.key]) commands[KEYS[e.key]]()
+        else return
+        // Taken here, so that macOS doesn't pass it on to the menu, which would do it again
+        e.preventDefault()
     }
 
-    const selectAll = () => {
-        selectedMidiPatternsRef.current = midiPatternsRef.current
-    }
+    const selectAll = () => setSelection(midiPatternsRef.current)
 
     const onDropAudioFile = (file: File) => {
         uploadTrackAudioAndSync(file)

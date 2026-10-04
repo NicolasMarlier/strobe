@@ -84,6 +84,7 @@ handleWithWindow('show:save', saveShow)
 ShowHistory.getInstance()
 handle('show:undo', async () => ShowHistory.getInstance().undo())
 handle('show:redo', async () => ShowHistory.getInstance().redo())
+handleWithWindow('edit:native', async (win, action) => { win.webContents[action]() })
 Store.getInstance().on(STORE_EVENTS.RESTORED, () => sendToAllWindows('show:restored', null))
 
 

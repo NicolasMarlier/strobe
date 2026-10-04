@@ -6,6 +6,7 @@ import { buildRowKeys, midiNotesArrayEqual, midiNotesIncludes } from './utils_mi
 import { useDmxMidiContext } from '../../contexts/DmxMidiContext'
 import { useRealTimeContext } from '../../contexts/RealTimeContext'
 import CanvasMouseHandler from './CanvasMouseHandler'
+import { isPageEdit, useMenuMessage } from '../../useEditMenu'
 
 const DEFAULT_PIXELS_PER_BEAT = 80
 
@@ -102,25 +103,31 @@ const NoteEditor = (props: Props) => {
         }
     }
 
+    // Delete (Backspace) and Select All (Cmd+A), also in the app's Edit menu
+    const deleteSelectedNotes = () => {
+        if (selectedNotesRef.current.length == 0) return
+        const toRemove = new Set(selectedNotesRef.current.map(n => `${n.ticks}:${n.midi}`))
+        onUpdateNotesRef.current(patternRef.current.midi_notes.filter(n => !toRemove.has(`${n.ticks}:${n.midi}`)))
+        selectedNotesRef.current = []
+    }
+    const selectAllNotes = () => {
+        selectedNotesRef.current = [...patternRef.current.midi_notes]
+    }
+    const isActive = () => isFocusedRef.current && !isPageEdit('delete')
+    useMenuMessage('edit:delete', () => { if (isActive()) deleteSelectedNotes() })
+    useMenuMessage('edit:selectAll', () => { if (isActive()) selectAllNotes() })
+
+    // Cmd+A goes through the menu
     const onKeyDown = (e: KeyboardEvent) => {
-        if (!isFocusedRef.current) return
-        if((e.target as any).localName == 'input') return
-        
-        if (e.key === 'Backspace' && selectedNotesRef.current.length > 0) {
+        if (!isActive() || (e.target as any).localName == 'input') return
+        if (e.key === 'Backspace' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+            // Taken here, so that macOS doesn't pass it on to the menu, which would do it again
             e.preventDefault()
-            const toRemove = new Set(selectedNotesRef.current.map(n => `${n.ticks}:${n.midi}`))
-            onUpdateNotesRef.current(patternRef.current.midi_notes.filter(n => !toRemove.has(`${n.ticks}:${n.midi}`)))
-            selectedNotesRef.current = []
-        }
-        if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
-            e.preventDefault()
-            selectedNotesRef.current = [...patternRef.current.midi_notes]
+            deleteSelectedNotes()
         }
     }
 
     useEffect(() => {
-        const canvas = canvasRef.current
-        if (!canvas) return
         document.addEventListener('keydown', onKeyDown)
         return () => {
             document.removeEventListener('keydown', onKeyDown)
@@ -195,9 +202,6 @@ const NoteEditor = (props: Props) => {
             className={`note-editor${isFocused ? ' note-editor--focused' : ''}`}>
             <div className="note-editor-header">
                 <span className="note-editor-title">Editor</span>
-                <span className="note-editor-hint">
-                    click to add · drag to select · drag note to move · ⌫ delete
-                </span>
             </div>
             <div className="note-editor-canvas-scroll">
                 <canvas
