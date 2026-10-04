@@ -19,6 +19,9 @@ import AudioPlayer from './components/MidiPlayer/AudioPlayer';
 import SaveButton from './components/SaveButton/SaveButton';
 import SelectionLink from './components/SelectionLink/SelectionLink';
 import { useEditMenu } from './useEditMenu';
+import { useNarrowWindow } from './useNarrowWindow';
+import { sendUsageSignal } from './ApiClient';
+import { useEffect } from 'react';
 import InterfacesSection from './components/Interfaces/InterfacesSection';
 import TrackPicker from './components/NarrowBar/TrackPicker';
 import InterfacesStatus from './components/NarrowBar/InterfacesStatus';
@@ -27,6 +30,12 @@ import InterfacesStatus from './components/NarrowBar/InterfacesStatus';
 
 function App() {
   useEditMenu()
+
+  // For the anonymous usage statistics: whether the narrow window is used at all
+  const isNarrowWindow = useNarrowWindow()
+  useEffect(() => {
+    if (isNarrowWindow) sendUsageSignal('Strobe.narrowWindowUsed')
+  }, [isNarrowWindow])
   const { track, setSelectedDmxButtonId } = useDmxButtonsContext()
 
   // A click on the section's empty space deselects the button; clicks on a button,

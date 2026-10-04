@@ -72,3 +72,7 @@ export const saveShow = () =>
 export const getTrackAudio = (track_id: number) =>
     i('tracks:audio:get', track_id)
 
+
+// For the anonymous usage statistics: a feature seen used (once a session is enough, the app filters)
+export const sendUsageSignal = (type: 'Strobe.playbackStarted' | 'Strobe.narrowWindowUsed') =>
+    i('telemetry:signal', type)

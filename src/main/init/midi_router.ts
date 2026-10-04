@@ -1,6 +1,10 @@
 import { DmxLoop } from "../dmx_loop"
 import { MIDI_MODES, MidiRouter } from "../midi_router"
 import { handle, sendToAllWindows } from "./ipc-router"
+import { signal } from "../telemetry"
+
+// macOS' virtual MIDI buses, named after the IAC driver in the system's language: how MainStage talks to Strobe
+const IAC_PREFIX = /^(Gestionnaire IAC|IAC Driver)\s+/
 
 let midi_router: MidiRouter | undefined
 
@@ -18,6 +22,7 @@ export const initMidiRouter = () => {
     // Plugged or unplugged devices (the router scans every second)
     const sendMidiInputs = () => sendToAllWindows('interfaces:midi_inputs_changed', midiInputNames())
     midi_router.on('connected', sendMidiInputs)
+    midi_router.on('connected', (name: string) => { if (IAC_PREFIX.test(name)) signal('Strobe.mainStageConnected') })
     midi_router.on('disconnected', sendMidiInputs)
 
     // Which device is sending, for the Interfaces section to light it up (at most every MIDI_ACTIVITY_INTERVAL_MS)
@@ -49,7 +54,10 @@ export const initMidiRouter = () => {
     midi_router.on('clock', () => {
         DmxLoop.getInstance().dmxMidiHandler.receiveClock()
     })
-    midi_router.on('midistart', () => DmxLoop.getInstance().dmxMidiHandler.play())
+    midi_router.on('midistart', () => {
+        DmxLoop.getInstance().dmxMidiHandler.play()
+        signal('Strobe.playbackStarted')
+    })
     midi_router.on('midistop', () => {
         DmxLoop.getInstance().dmxMidiHandler.stop()
     })

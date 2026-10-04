@@ -3,6 +3,7 @@ import { FixtureLibrary } from "../fixture_library"
 import { newShow, openRecentShow, openShow, saveShow, saveShowAs } from "../show/document"
 import { clearRecentShows, describeRecentShow, listRecentShows, onRecentShowsChange } from "../show/recent_shows"
 import { sendToAllWindows } from "./ipc-router"
+import { isTelemetryEnabled, setTelemetryEnabled } from "../telemetry"
 
 // Menu callbacks receive the focused window, which is always our BrowserWindow
 const onWindow = (action: (win: BrowserWindow) => void) =>
@@ -32,7 +33,28 @@ const openRecentSubmenu = (): MenuItemConstructorOptions[] => {
 
 const buildMenu = () => {
     const template: MenuItemConstructorOptions[] = [
-        ...(process.platform == 'darwin' ? [{ role: 'appMenu' } as MenuItemConstructorOptions] : []),
+        // The standard app menu, plus whether to share the anonymous usage statistics (see telemetry.ts)
+        ...(process.platform == 'darwin' ? [{
+            role: 'appMenu',
+            submenu: [
+                { role: 'about' },
+                { type: 'separator' },
+                {
+                    label: 'Share Anonymous Usage Statistics',
+                    type: 'checkbox',
+                    checked: isTelemetryEnabled(),
+                    click: (item) => setTelemetryEnabled(item.checked),
+                },
+                { type: 'separator' },
+                { role: 'services' },
+                { type: 'separator' },
+                { role: 'hide' },
+                { role: 'hideOthers' },
+                { role: 'unhide' },
+                { type: 'separator' },
+                { role: 'quit' },
+            ],
+        } as MenuItemConstructorOptions] : []),
         {
             label: 'File',
             submenu: [

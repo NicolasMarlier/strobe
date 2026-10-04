@@ -54,6 +54,18 @@ Feedback, bug reports and ideas are very welcome. They all go to **[GitHub Issue
    - **For a bug:** what you did, what you expected, and what happened instead. A screenshot or a short screen recording helps a lot. If it's about a show, you can attach its `.strobe` folder, zipped.
    - **For an idea:** what you're trying to do in your show, more than the feature you have in mind.
 
+## Privacy
+
+Strobe sends anonymous usage statistics to [TelemetryDeck](https://telemetrydeck.com), so we know how many people use it and which of its features matter. To turn them off: **Strobe › Share Anonymous Usage Statistics**.
+
+What is sent, and nothing else:
+
+- **At launch:** Strobe's version, the macOS version, the Mac's architecture (Apple silicon or Intel), and whether it's the first launch.
+- **Once a session, the first time it happens:** a show was opened, playback started, MainStage was connected, a DMX interface was connected, the narrow window was used.
+- **To tell installs apart:** a random ID made on the first launch, which TelemetryDeck hashes again before storing it. It says nothing about you or your Mac.
+
+Never sent: the names of your shows, tracks or buttons, their content, your audio, your IP address (TelemetryDeck doesn't keep it), or anything typed in Strobe.
+
 ## Fixture plugins: add your own devices
 
 Strobe knows each kind of device it drives, a **fixture**, from a small description: its shape and size in the 3D scene, and what each of its DMX channels does. LED bars and a fog machine come built in. Any other device can be added as a **fixture file**, without changing the app.
