@@ -31,6 +31,21 @@ const openRecentSubmenu = (): MenuItemConstructorOptions[] => {
     ]
 }
 
+// Space and Return stay the renderer's: registered by the menu, they would also fire while typing in a
+// text field. The menu only shows them
+const PLAYBACK_ITEM_IDS = ['playback-toggle', 'playback-rewind']
+let playbackDrivenByMidi = false
+
+// While MainStage drives playback, the Playback menu is greyed out, like the transport's buttons
+export const setPlaybackDrivenByMidi = (driven: boolean) => {
+    if (driven == playbackDrivenByMidi) return
+    playbackDrivenByMidi = driven
+    for (const id of PLAYBACK_ITEM_IDS) {
+        const item = Menu.getApplicationMenu()?.getMenuItemById(id)
+        if (item) item.enabled = !driven
+    }
+}
+
 const buildMenu = () => {
     const template: MenuItemConstructorOptions[] = [
         // The standard app menu, plus whether to share the anonymous usage statistics (see telemetry.ts)
@@ -83,6 +98,19 @@ const buildMenu = () => {
                 { role: 'copy' },
                 { role: 'paste' },
                 { role: 'selectAll' },
+            ],
+        },
+        {
+            label: 'Playback',
+            submenu: [
+                {
+                    id: 'playback-toggle', label: 'Play / Pause', accelerator: 'Space', registerAccelerator: false,
+                    enabled: !playbackDrivenByMidi, click: () => sendToAllWindows('playback:toggle', null),
+                },
+                {
+                    id: 'playback-rewind', label: 'Back to Start', accelerator: 'Return', registerAccelerator: false,
+                    enabled: !playbackDrivenByMidi, click: () => sendToAllWindows('playback:rewind', null),
+                },
             ],
         },
         { role: 'viewMenu' },

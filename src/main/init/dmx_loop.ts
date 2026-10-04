@@ -2,11 +2,14 @@ import { DMX_LOOP_EVENTS, DmxLoop } from "../dmx_loop";
 import { EnttecOpenDMXUSB } from "../enttec_open_dmx_usb";
 import { sendToAllWindows } from "./ipc-router";
 import { signal } from "../telemetry";
+import { setPlaybackDrivenByMidi } from "./menu";
 
 export const initDmxLoop = () => {
     DmxLoop.getInstance().on(DMX_LOOP_EVENTS.TICK, (dmx_hex_signal) => {
         EnttecOpenDMXUSB.getInstance().setDmxHex(dmx_hex_signal)
         if (EnttecOpenDMXUSB.getInstance().state() == 'Connected') signal('Strobe.dmxInterfaceConnected')
+
+        setPlaybackDrivenByMidi(DmxLoop.getInstance().dmxMidiHandler.isDrivenByMidi())
 
         sendToAllWindows('dmx', {
             enttecOpenDMXUSB: {

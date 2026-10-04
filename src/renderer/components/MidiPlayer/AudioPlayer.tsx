@@ -63,6 +63,20 @@ const AudioPlayer = () => {
         }
     }, [isPlaying])
 
+    // Playback > Play / Pause and Back to Start: registered once, they call the latest play, pause and rewind
+    const menuActionsRef = useRef({ toggle: () => { /* set below */ }, rewind: () => { /* set below */ } })
+    menuActionsRef.current = {
+        toggle: () => { if (!drivenByMidi) (isPlaying ? pause : play)() },
+        rewind: () => { if (!isPlaying) onRewindButton() },
+    }
+    useEffect(() => {
+        const unsubscribes = [
+            window.strobe.api.onMessage('playback:toggle', () => menuActionsRef.current.toggle()),
+            window.strobe.api.onMessage('playback:rewind', () => menuActionsRef.current.rewind()),
+        ]
+        return () => unsubscribes.forEach(unsubscribe => unsubscribe())
+    }, [])
+
     const onKeyDown = (e: KeyboardEvent) => {
         // Holding Space repeats the key: only its first press toggles
         if(e.key == ' ' && !e.repeat) (isPlaying ? pause : play)()
@@ -83,14 +97,14 @@ const AudioPlayer = () => {
             src={audioUrl}/>
         <SmallButton
             value={isPlaying}
-            title={drivenTitle}
+            title={drivenTitle ?? (isPlaying ? 'Pause (Space)' : 'Play (Space)')}
             onClick={() => {(isPlaying ? pause : play)() }}
             disabled={drivenByMidi}>
             { isPlaying ? <PauseIcon/> : <PlayIcon/> }
         </SmallButton>
         <SmallButton
             value={false}
-            title={drivenTitle}
+            title={drivenTitle ?? 'Back to Start (Return)'}
             onClick={onRewindButton}
             disabled={isPlaying || drivenByMidi}>
             <BackToStartIcon/>
