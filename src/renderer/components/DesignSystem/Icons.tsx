@@ -51,3 +51,27 @@ export const TrashIcon = ({ className }: Pick<IconProps, 'className'>) => (
     <path d="M4 7h16M10 7V5h4v2M6 7l1 12.5h10L18 7M10 11v5M14 11v5"/>
   </svg>
 );
+
+// Outlined, like TrashIcon
+export const PlusIcon = ({ className }: Pick<IconProps, 'className'>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinecap="round" className={className}>
+    <path d="M12 5v14M5 12h14"/>
+  </svg>
+);
+
+// Outlined, like TrashIcon: a folder with its tab
+export const FolderIcon = ({ className }: Pick<IconProps, 'className'>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="1.8" strokeLinejoin="round" className={className}>
+    <path d="M3.5 7.5V17q0 1.5 1.5 1.5h14q1.5 0 1.5-1.5V9.5Q20.5 8 19 8h-7l-2-2.5H5Q3.5 5.5 3.5 7z"/>
+  </svg>
+);
+
+// Outlined, like TrashIcon: a chevron pointing right
+export const ChevronRightIcon = ({ className }: Pick<IconProps, 'className'>) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M9.5 6l6 6-6 6"/>
+  </svg>
+);

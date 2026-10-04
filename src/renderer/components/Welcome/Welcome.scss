@@ -1,3 +1,5 @@
+// The app's look (App.scss): buttons with a 2px border that lightens on hover, line icons
+
 .welcome {
     width: 100%;
     height: 100%;
@@ -5,27 +7,38 @@
     align-items: center;
     justify-content: center;
     background-color: #222;
+    user-select: none;
 
     .welcome-panel {
         flex: 0 1 420px;
         margin: 20px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
         text-align: left;
+        animation: welcome-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    // Like the splash before it (see splash.ts): the icon, then the name
+    .welcome-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
     }
 
     .welcome-icon {
-        align-self: center;
-        width: 112px;
-        height: 112px;
+        width: 96px;
+        height: 96px;
     }
 
     .welcome-title {
         font-size: 28px;
         letter-spacing: 10px;
-        text-align: center;
-        margin-bottom: 20px;
+        // The letter spacing also follows the last letter: offset it so the word itself is centered
+        text-indent: 10px;
+        color: #ccc;
     }
 
     .welcome-section-title {
@@ -33,6 +46,7 @@
         font-size: 13px;
         text-transform: uppercase;
         letter-spacing: 2px;
+        margin-bottom: -6px;
     }
 
     .welcome-recent-shows {
@@ -42,37 +56,58 @@
     }
 
     .welcome-recent-show {
-        padding: 10px 16px;
-        cursor: pointer;
+        padding: 10px 12px 10px 16px;
         border-bottom: 1px solid #444;
+        cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
+        transition: background-color 0.1s ease;
 
         .details {
             flex: 1;
             min-width: 0;
         }
 
-        // Barely visible, clearer when hovering the show, fully when hovering the cross
+        .name {
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        .folder {
+            color: #666;
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        // Both show on hover only: the cross to forget the show, the chevron that it opens
         .remove {
             flex: 0 0 auto;
             width: 20px;
             height: 20px;
-            line-height: 20px;
+            line-height: 19px;
             text-align: center;
             border-radius: 50%;
-            font-size: 16px;
-            color: #ffffff1a;
+            font-size: 15px;
+            color: #888;
+            opacity: 0;
+            transition: opacity 0.1s ease, background-color 0.1s ease;
 
             &:hover {
-                color: #000;
-                background-color: #00000022;
+                color: #fff;
+                background-color: #ffffff1a;
             }
         }
 
-        &:hover .remove {
-            color: #00000066;
+        .open {
+            flex: 0 0 auto;
+            width: 16px;
+            height: 16px;
+            color: #555;
+            opacity: 0;
+            transition: opacity 0.1s ease, transform 0.15s ease;
         }
 
         &:last-child {
@@ -80,65 +115,135 @@
         }
 
         &:hover {
-            background-color: #fff;
-            color: #000;
+            background-color: #ffffff0d;
 
-            .folder {
-                color: #555;
+            .name {
+                color: #fff;
             }
-        }
 
-        .folder {
-            color: #888;
-            font-size: 13px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            .remove,
+            .open {
+                opacity: 1;
+            }
+
+            .open {
+                transform: translateX(2px);
+                color: #999;
+            }
         }
     }
 
     .welcome-actions {
         display: flex;
         gap: 12px;
-        margin-top: 8px;
     }
 
-    // A track of maad avenue with its lights, to see what a show looks like
-    .welcome-example {
-        margin-top: 8px;
-        text-align: center;
-        color: #888;
+    // The app's buttons (.btn), a bit taller
+    .welcome-button {
+        flex: 1;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 2px solid #444;
+        border-radius: 5px;
+        background-color: #222;
+        color: #ccc;
         font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: border-color 0.1s ease, background-color 0.1s ease, color 0.1s ease;
 
-        .link {
-            color: #ccc;
-            text-decoration: underline;
-            cursor: pointer;
+        svg {
+            width: 16px;
+            height: 16px;
+            color: #888;
+            transition: color 0.1s ease;
+        }
+
+        &:hover {
+            border-color: #666;
+            color: #fff;
+
+            svg {
+                color: #ccc;
+            }
+        }
+
+        &:active {
+            background-color: #1c1c1c;
+        }
+
+        // What most people come for
+        &.primary {
+            background-color: #2c2c2c;
+            border-color: #555;
+            color: #eee;
+
+            svg {
+                color: #fff;
+            }
 
             &:hover {
-                color: #fff;
+                border-color: #777;
+                background-color: #303030;
+            }
+
+            &:active {
+                background-color: #262626;
             }
         }
     }
 
-    .welcome-button {
-        flex: 1;
-        text-align: center;
-        border: 2px solid #444;
+    // A track of maad avenue with its lights, to see what a show looks like
+    .welcome-example {
+        align-self: center;
+        margin-top: 4px;
+        padding: 4px 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
         border-radius: 5px;
-        box-shadow: 5px 5px 0px #111;
-        padding: 8px 10px;
+        color: #777;
+        font-size: 13px;
         cursor: pointer;
-        position: relative;
+        transition: color 0.1s ease;
 
-        &.primary {
-            border-color: #aaa;
+        .play {
+            width: 14px;
+            height: 14px;
+            color: #fff;
+            opacity: 0.6;
+            transition: opacity 0.1s ease;
+        }
+
+        .link {
+            color: #aaa;
+            transition: color 0.1s ease;
         }
 
         &:hover {
-            top: 1px;
-            left: 1px;
-            box-shadow: 4px 4px 0px #000;
+            .link {
+                color: #fff;
+            }
+
+            .play {
+                opacity: 1;
+            }
         }
+    }
+}
+
+@keyframes welcome-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .welcome .welcome-panel {
+        animation: none;
     }
 }

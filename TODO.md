@@ -68,3 +68,5 @@
   - `bin/release` also builds the ZIP, `bin/publish` uploads it; the deploy skill checks the feed (done)
   - The README's Privacy section says what the update check sends (done)
   - Validate on real releases: 0.5.0 has no ZIP, so the first version that updates by itself is the one after the release that ships this
+- [ ] Welcome screen redesign, in the app's look (`welcome-screen` branch)
+  - Buttons like the app's, with white line icons, New Show the primary one; no more offset shadows; the recent shows framed as before, rows highlighted on hover with the remove cross and an open chevron; the example show as a quiet link with a play icon (done)
