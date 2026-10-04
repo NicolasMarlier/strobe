@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRealTimeContext } from '../../contexts/RealTimeContext';
 import { getWave } from './waves';
 import { endTabRect, redrawFullCanvas } from './TrackEditorCanvasDrawer';
-import { addNoteAtTick, insertPatternsAtTick, magnettedTick, nextFreeTick, setLoopEnd, toggleLoopForPatterns } from './utils_midi_notes';
+import { addNoteAtTick, insertPatternsAtTick, magnettedTick, nearestMagnettedTick, recordingRoomEnd, setLoopEnd, toggleLoopForPatterns, trimRecordedPattern } from './utils_midi_notes';
 import { doRectanglesIntersect, midiPatternToRectangle, parseTrackLength, PPQ, tickToTime, ticksDurationToPixels, ticksOffsetToPixels, xToTicks } from './utils';
 import CanvasMouseHandler from './CanvasMouseHandler';
 import { useDmxMidiContext } from '../../contexts/DmxMidiContext';
@@ -73,6 +73,7 @@ const MidiPlayer = (props: Props) => {
         allMidiKeys,
         activeEditor,
         isRecording,
+        setIsRecording,
         setSelectedMidiPatterns,
         isFollowing,
         setIsFollowing,
@@ -95,7 +96,7 @@ const MidiPlayer = (props: Props) => {
     const selectedMidiPatternsRef = useRef<MidiPattern[]>([])
     selectedMidiPatternsRef.current = midiPatterns.filter(p => isSelected(p, selectedMidiPatternsRef.current))
     
-    const { midiCurrentTickRef, lastReceivedMidiKey, seek, drivenByMidi } = useRealTimeContext()
+    const { midiCurrentTickRef, lastReceivedMidiKey, seek, onSeek, drivenByMidi } = useRealTimeContext()
     // For the keyboard handler, registered once
     const drivenByMidiRef = useRef(drivenByMidi)
     drivenByMidiRef.current = drivenByMidi
@@ -271,29 +272,49 @@ const MidiPlayer = (props: Props) => {
         if(file) uploadTrackAudioAndSync(file)
     }
 
-    const persistRecordingPattern = () => {
-        if(!recordingPatternRef.current) return
-        if(recordingPatternRef.current.midi_notes.length == 0) return
+    // Recorded patterns saved but not back from the store yet: a recording right after them sees them too
+    const pendingRecordedRef = useRef<MidiPattern[]>([])
+    useEffect(() => { pendingRecordedRef.current = [] }, [midiPatterns])
+    const patternsWithRecorded = () => [...midiPatternsRef.current, ...pendingRecordedRef.current]
 
-        updateTrackDmxMidiAndSyncRef.current([...midiPatternsRef.current, ...[recordingPatternRef.current]])
+    const persistRecordingPattern = () => {
+        const recorded = recordingPatternRef.current
         recordingPatternRef.current = null
+        // Nothing recorded: no empty pattern
+        if(!recorded || recorded.midi_notes.length == 0) return
+
+        const trimmed = trimRecordedPattern(recorded)
+        updateTrackDmxMidiAndSyncRef.current([...patternsWithRecorded(), trimmed])
+        pendingRecordedRef.current = [...pendingRecordedRef.current, trimmed]
+    }
+
+    // A new pattern to record into, from the cursor up to the next pattern or the track's end. No room there
+    // (the cursor in a pattern, or right at one): recording stops
+    const startRecordingPattern = () => {
+        const start = magnettedTick(midiCurrentTickRef.current)
+        const duration = recordingRoomEnd(patternsWithRecorded(), midiCurrentTickRef.current, currentEndTick()) - start
+        if(duration > 0 && midiCurrentTickRef.current < currentEndTick()) {
+            recordingPatternRef.current = { ticks: start, durationTicks: duration, midi_notes: [] }
+        }
+        else setIsRecording(false)
+    }
+
+    // The cursor moved by hand while recording: what was recorded is kept, and recording goes on from there
+    useEffect(() => onSeek(() => {
+        if(!recordingPatternRef.current) return
+        persistRecordingPattern()
+        startRecordingPattern()
+    }), [])
+
+    // The cursor got to the next pattern, or the track's end: no more room to record
+    const isPastRecordingRoom = () => {
+        const recording = recordingPatternRef.current
+        return !!recording && midiCurrentTickRef.current >= recording.ticks + recording.durationTicks
     }
 
     useEffect(() => {
         if(isRecording) {
-            if(!recordingPatternRef.current) {
-                const duration = nextFreeTick(midiPatternsRef.current, midiCurrentTickRef.current, currentEndTick()) - midiCurrentTickRef.current
-                if(duration > 0) {
-                    recordingPatternRef.current = {
-                        ticks: magnettedTick(midiCurrentTickRef.current),
-                        durationTicks: duration,
-                        midi_notes: []
-                    }
-                }
-            }
-            else {
-                //TODO: Handle case when we are after durationTicks, send to server and 
-            }
+            if(!recordingPatternRef.current) startRecordingPattern()
         }
         else {
             if(recordingPatternRef.current) {
@@ -305,12 +326,16 @@ const MidiPlayer = (props: Props) => {
 
 
     useEffect(() => {
-        if(!!lastReceivedMidiKey && isRecording && recordingPatternRef.current) {
+        if(!!lastReceivedMidiKey && isRecording && recordingPatternRef.current && !isPastRecordingRoom()) {
+            // On the nearest sixteenth, but not on the next pattern's start
+            const recording = recordingPatternRef.current
+            const nearest = nearestMagnettedTick(midiCurrentTickRef.current)
+            const tick = nearest < recording.ticks + recording.durationTicks ? nearest : magnettedTick(midiCurrentTickRef.current)
             recordingPatternRef.current = {
                 ...recordingPatternRef.current,
                 ...{
                     midi_notes: addNoteAtTick({
-                        tick: magnettedTick(midiCurrentTickRef.current),
+                        tick,
                         midiKey: lastReceivedMidiKey.midi,
                         midiNotes: recordingPatternRef.current.midi_notes || [],
                         ppq: PPQ
@@ -345,7 +370,7 @@ const MidiPlayer = (props: Props) => {
             canvas: canvasRef.current,
             midiPatterns: midiPatternsRef.current,
             selectedMidiPatterns: selectedMidiPatternsRef.current,
-            recordingMidiPattern: recordingPatternRef.current,
+            recordingMidiPattern: recordingPatternRef.current && trimRecordedPattern(recordingPatternRef.current, midiCurrentTickRef.current),
             ppq: PPQ,
             currentMidiTick: midiCurrentTickRef.current,
             hoverTick: hoverTickRef.current,
@@ -418,6 +443,8 @@ const MidiPlayer = (props: Props) => {
         // stays where it is
         ticksScrollRef.current = Math.min(ticksScrollRef.current, Math.max(maxScroll(), lastScrollRef.current))
         lastScrollRef.current = ticksScrollRef.current
+        // Recording stops where the next pattern starts
+        if(isPastRecordingRoom()) setIsRecording(false)
         redrawMidiCanvas()
     }
 

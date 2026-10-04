@@ -33,6 +33,9 @@ const outer_join = (a: MidiNote[], b: MidiNote[]) => union(subtract(a,b), subtra
 
 export const magnettedTick = (tick: number, beatMagnet=0.25) => PPQ * Math.floor((tick / PPQ) / beatMagnet) * beatMagnet
 
+// A played note goes on the nearest sixteenth: played a hair early, it still lands on the beat
+export const nearestMagnettedTick = (tick: number, beatMagnet=0.25) => PPQ * Math.round((tick / PPQ) / beatMagnet) * beatMagnet
+
 interface InsertNotesAtTickProps {
     tick: number
     midiNotesToInsert: MidiNote[]
@@ -70,6 +73,16 @@ type AddNoteAtTickProps = {
         remove_if_exist?: boolean
     }
 }
+// A recorded pattern ends on the first beat after its last note, never past the room it had. While it records,
+// it also reaches the beat after the cursor, at least one beat long
+export const trimRecordedPattern = (pattern: MidiPattern, currentTick?: number): MidiPattern => {
+    const lastEnd = Math.max(
+        ...pattern.midi_notes.map(n => n.ticks + n.durationTicks),
+        ...(currentTick == undefined ? [] : [currentTick + 1, pattern.ticks + PPQ]))
+    const durationTicks = Math.ceil((lastEnd - pattern.ticks) / PPQ) * PPQ
+    return { ...pattern, durationTicks: Math.min(pattern.durationTicks, durationTicks) }
+}
+
 export const addNoteAtTick = (props: AddNoteAtTickProps) => insertNotesAtTick(
     {
         ...props,
@@ -120,6 +133,13 @@ export const nextFreeTick = (midiPatterns: MidiPattern[], tick: number, endTick 
         .filter(p => p.ticks + p.durationTicks > tick)
         .reduce((freeTick, pattern) => Math.min(pattern.ticks, freeTick), endTick)
 )
+
+// Where a recording from `tick` has to stop: the next pattern, or the track's end. A looped pattern takes
+// the room up to its loop's end, and the cursor inside a pattern leaves no room at all
+export const recordingRoomEnd = (midiPatterns: MidiPattern[], tick: number, endTick = MAX_TICK) => nextFreeTick(
+    midiPatterns.map(p => ({ ...p, durationTicks: Math.max(p.durationTicks, (p.loop_until_tick ?? 0) - p.ticks) })),
+    tick,
+    endTick)
 
 // A loop's end, moved to `tick`: no further than the next pattern or the track's end, and back to the
 // pattern's own end, the loop is gone
