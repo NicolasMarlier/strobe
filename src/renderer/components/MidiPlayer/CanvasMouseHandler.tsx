@@ -24,6 +24,13 @@ interface Props<T> {
     hoverTickRef?: RefObject<number | null>,
 }
 
+// A playhead: a triangle pointing down over a line, white outlined in black to show on any background.
+// Its hotspot is on the line, where the cursor would go
+const SEEK_CURSOR_SVG = `<svg xmlns='http://www.w3.org/2000/svg' width='15' height='22' viewBox='0 0 15 22'>
+<path d='M1.5 1.5h12v5.5l-5.25 4.5v9h-1.5v-9l-5.25-4.5z' fill='white' stroke='black' stroke-width='1.2' stroke-linejoin='round'/>
+</svg>`
+const SEEK_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SEEK_CURSOR_SVG)}") 7 11, pointer`
+
 const CanvasMouseHandler = <T,>(props: Props<T>) => {
     const {
         canvasRef,
@@ -80,10 +87,11 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         return x >= p.current.x0 && x < rect.width && y >= 0 && y < p.current.timelineHeight
     }
 
-    // A pointing hand and a faint cursor where a click would put it; neither while MainStage drives playback
+    // A playhead-shaped mouse cursor and a faint cursor where a click would put it; neither while MainStage
+    // drives playback
     const showSeekHover = (tick: number | null) => {
         if (p.current.hoverTickRef) p.current.hoverTickRef.current = tick
-        if (canvasRef.current) canvasRef.current.style.cursor = tick === null ? '' : 'pointer'
+        if (canvasRef.current) canvasRef.current.style.cursor = tick === null ? '' : SEEK_CURSOR
     }
 
     const onMouseUp = (_event: MouseEvent) => {
