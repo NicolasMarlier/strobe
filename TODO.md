@@ -43,7 +43,7 @@
   - Turned off by the same setting as the usage statistics: Strobe › Share Anonymous Usage Statistics and Crash Reports (done). The README's Privacy section lists what is sent (done)
   - The source maps sent to Sentry by `bin/release`, then deleted from the app (done, in `webpack.plugins.ts`): the organization, the project and the organization token in the keychain are set (done). The upload itself is checked at the next release
   - Validate that the crashes show up in Sentry (done: a test error from the window arrived, in release Strobe@0.4.0). Run from source, `STROBE_CRASH_REPORTS=1 yarn start` sends them
-  - In Sentry: an email alert on a new crash
+  - In Sentry: an email alert on a new crash (done: the project's alert rule already existed)
   - Ship it in a release (the deploy skill)
 - [ ] Display the keyboard shortcuts
   - The transport's: a Playback menu (Play / Pause, Back to Start) and its buttons' tooltips (done)
