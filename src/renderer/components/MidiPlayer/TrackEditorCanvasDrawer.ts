@@ -1,4 +1,4 @@
-import { drawBeatsGrid, drawTimeline, drawCurrentTick, type DrawerFunctionProps, drawCurrentSelection, SELECTED_COLOR, ITEM_COLOR, drawRoundedRect, RECORDING_COLOR } from "./GenericCanvasDrawer";
+import { drawBeatsGrid, drawTimeline, drawCurrentTick, drawHoverTick, type DrawerFunctionProps, drawCurrentSelection, SELECTED_COLOR, ITEM_COLOR, drawRoundedRect, RECORDING_COLOR } from "./GenericCanvasDrawer";
 import { isVisibleX, midiKeyToPixelsHeight, midiKeyToPixelsOffset, midiPatternToRectangle, setupCanvasDPR, ticksDurationToPixels, ticksOffsetToPixels } from "./utils";
 
 interface Props {
@@ -12,6 +12,7 @@ interface Props {
     allMidiKeys: MidiKey[]
     selectedMidiPatterns: MidiPattern[]
     currentMidiTick: number
+    hoverTick: number | null
     ghostMidiPattern: MidiPattern | undefined
     mouseSelection: MouseSelection | null
     transformMidiPattern: (midiPattern: MidiPattern, x: number, y: number) => MidiPattern
@@ -143,6 +144,7 @@ export const redrawFullCanvas = (props: Props) => {
             ghostMidiPattern,
             selectedMidiPatterns,
             currentMidiTick,
+            hoverTick,
             mouseSelection,
             transformMidiPattern
         } = props
@@ -183,6 +185,7 @@ export const redrawFullCanvas = (props: Props) => {
         drawAudioWave(drawerFunctionProps, audioWaveData)
 
         // Overlay
+        drawHoverTick(drawerFunctionProps, hoverTick)
         drawCurrentTick(drawerFunctionProps, currentMidiTick)
         if(mouseSelection?.mode == 'select') {
             drawCurrentSelection(drawerFunctionProps, mouseSelection.rect)

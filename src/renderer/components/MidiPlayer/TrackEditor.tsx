@@ -50,7 +50,10 @@ const MidiPlayer = (props: Props) => {
     const selectedMidiPatternsRef = useRef<MidiPattern[]>([])
     selectedMidiPatternsRef.current = midiPatterns.filter(p => isSelected(p, selectedMidiPatternsRef.current))
     
-    const { midiCurrentTickRef, lastReceivedMidiKey, sendCurrentTickToServer } = useRealTimeContext()
+    const { midiCurrentTickRef, lastReceivedMidiKey, seek, drivenByMidi } = useRealTimeContext()
+    // For the keyboard handler, registered once
+    const drivenByMidiRef = useRef(drivenByMidi)
+    drivenByMidiRef.current = drivenByMidi
 
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const mouseSelectionRef = useRef<MouseSelection | null>(null)
@@ -69,6 +72,7 @@ const MidiPlayer = (props: Props) => {
     const recordingPatternRef = useRef<MidiPattern>(null)
 
     const ghostMidiPatternRef = useRef<MidiPattern | undefined>(undefined)
+    const hoverTickRef = useRef<number | null>(null)
 
     const updateTrackDmxMidiAndSyncRef = useRef(updateTrackDmxMidiAndSync)
     updateTrackDmxMidiAndSyncRef.current = updateTrackDmxMidiAndSync
@@ -131,21 +135,22 @@ const MidiPlayer = (props: Props) => {
         else if(e.key == 't') splitAtCurrentTick()
         else if(e.key == 'j') joinSelection()
         else if(e.key == 'l') toggleLoop()
+        // While MainStage drives playback, it alone moves the cursor: the keys are taken, and do nothing
+        else if(['Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key) && drivenByMidiRef.current) { /* MainStage's */ }
         else if(e.key == 'Enter') {
-            midiCurrentTickRef.current = 0
+            seek(0)
             scrollGlideRef.current = null
             ticksScrollRef.current = 0
-            sendCurrentTickToServer(0)
         }
         else if(e.key == 'ArrowLeft') {
             const targetTick = Math.max(0, magnettedTick(midiCurrentTickRef.current, 1) - PPQ)
-            midiCurrentTickRef.current = targetTick
+            seek(targetTick)
             scrollGlideRef.current = null
             ticksScrollRef.current = targetTick - BEATS_OFFSET * PPQ
         }
         else if(e.key == 'ArrowRight') {
             const targetTick = (magnettedTick(midiCurrentTickRef.current, 1) + PPQ)
-            midiCurrentTickRef.current = targetTick
+            seek(targetTick)
             scrollGlideRef.current = null
             ticksScrollRef.current = targetTick - BEATS_OFFSET * PPQ
         }
@@ -240,6 +245,7 @@ const MidiPlayer = (props: Props) => {
             recordingMidiPattern: recordingPatternRef.current,
             ppq: PPQ,
             currentMidiTick: midiCurrentTickRef.current,
+            hoverTick: hoverTickRef.current,
             ticksScroll: ticksScrollRef.current,
             pixelsPerBeat: pixelsPerBeatRef.current,
             audioWaveData: audioWaveDataRef.current,
@@ -396,6 +402,7 @@ const MidiPlayer = (props: Props) => {
                     updateSelectedItems={updateSelectedMidiPatterns}
                     itemFromXY={patternFromXY}
                     ghostItemRef={ghostMidiPatternRef}
+                    hoverTickRef={hoverTickRef}
                     isItemInSelection={(item, selected) => midiPatternsInclude(selected, item)}/>
             </Draggable>
         </div>

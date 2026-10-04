@@ -7,6 +7,11 @@ interface RealTimeContextType {
     setLastReceivedMidiKey: (received_midi_key: ReceivedMidiKey | undefined) => void
 
     sendCurrentTickToServer: (tick: number) => void  
+    // Moves the cursor by hand (a click in the timeline, the arrows, Back to Start), playing or not.
+    // Does nothing while MainStage drives playback: it alone moves the cursor then
+    seek: (tick: number) => void
+    // Called on every seek: the app's own playback jumps there too (AudioPlayer)
+    onSeek: (listener: (tick: number) => void) => () => void
     drivenByMidi: boolean
 
     dmxHexSignal: DmxHexSignal
@@ -38,6 +43,10 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
 
     const midiCurrentTickRef = useRef(0)
     const [drivenByMidi, setDrivenByMidi] = useState(false)
+    // For seek, which the canvases' handlers registered once keep calling
+    const drivenByMidiRef = useRef(false)
+    drivenByMidiRef.current = drivenByMidi
+    const seekListenersRef = useRef(new Set<(tick: number) => void>())
     const [lastReceivedMidiKey, setLastReceivedMidiKey] = useState(
         undefined as ReceivedMidiKey | undefined
     )
@@ -111,6 +120,18 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
     const sendCurrentTickToServer = (midiCurrentTick: number) => {
       window.strobe.api.invoke('main_loop:update_current_tick', midiCurrentTick)
     }
+
+    const seek = (tick: number) => {
+      if (drivenByMidiRef.current) return
+      midiCurrentTickRef.current = tick
+      sendCurrentTickToServer(tick)
+      seekListenersRef.current.forEach(listener => listener(tick))
+    }
+
+    const onSeek = (listener: (tick: number) => void) => {
+      seekListenersRef.current.add(listener)
+      return () => { seekListenersRef.current.delete(listener) }
+    }
     
     return (
         <RealTimeContext.Provider value={ {
@@ -120,6 +141,8 @@ export const RealTimeContextProvider = ({ children }: {children: React.ReactNode
             midiCurrentTickRef,
 
             sendCurrentTickToServer,
+            seek,
+            onSeek,
             drivenByMidi,
 
             dmxHexSignal,
