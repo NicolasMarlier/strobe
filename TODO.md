@@ -27,7 +27,6 @@
   - Recorded by themselves, with nobody at the keyboard, from a released version and the example show: the website-videos skill, run at each release by the deploy skill (done)
   - The overview, the 3D scene and the narrow window, in place of their screenshots (done)
   - The cues: an animation in HTML and JavaScript of a cue's editing, in the app's look (done)
-- [ ] While a selected button plays, the scene shows its effect (colors, beams), not its links' white outlines: they hide what a change of color does
 - [x] Move the cursor while playing
 - [ ] Website: a short story, filmed with Nico, on why Strobe was made
 - [x] Download monitoring: website visits (Vercel Web Analytics) and downloads per version (GitHub), in `bin/stats` and the stats skill
