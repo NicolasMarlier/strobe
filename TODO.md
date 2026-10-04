@@ -23,10 +23,10 @@
   - Play, Space and Back to Start greyed out while MainStage plays, the app's own playback stops when MainStage starts, the cursor can't be moved by hand; a pulsing MainStage badge next to the transport (done)
 - [x] Slight camera movements on the 3D scene while the show plays
 - [x] Visual bug when the window is very narrow
-- [ ] Videos on the website (`website-videos` branch)
-  - Recorded by themselves, with nobody at the keyboard, from a released version and the example show: the website-videos skill (done)
-  - The overview, the 3D scene and the narrow window, in place of their screenshots (`website-videos` branch of strobe-website)
-  - The cues: an animation in HTML and JavaScript of a cue's editing, in the app's look (`website-videos` branch of strobe-website)
+- [x] Videos on the website
+  - Recorded by themselves, with nobody at the keyboard, from a released version and the example show: the website-videos skill, run at each release by the deploy skill (done)
+  - The overview, the 3D scene and the narrow window, in place of their screenshots (done)
+  - The cues: an animation in HTML and JavaScript of a cue's editing, in the app's look (done)
 - [ ] While a selected button plays, the scene shows its effect (colors, beams), not its links' white outlines: they hide what a change of color does
 - [x] Move the cursor while playing
 - [ ] Website: a short story, filmed with Nico, on why Strobe was made
