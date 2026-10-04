@@ -132,9 +132,17 @@
         font-variant-numeric: tabular-nums;
 
         .audio {
-            width: 10px;
-            height: 10px;
-            fill: #888;
+            display: flex;
+
+            svg {
+                width: 10px;
+                height: 10px;
+                fill: #888;
+            }
+
+            &.missing svg {
+                fill: #ff7b6b;
+            }
         }
     }
 

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import fs from 'fs'
 import os from 'os'
 import path from 'path'
-import { readShow, ShowFileError, writeShow } from './show_file'
+import { findAudioFile, newAudioFileId, readShow, ShowFileError, writeShow } from './show_file'
 
 let tmp: string
 
@@ -98,6 +98,62 @@ describe('show files', () => {
         writeShow(to, data, from)
         expect(fs.readdirSync(path.join(to, 'audio'))).toEqual(['track_31.mp3'])
         expect(fs.readdirSync(path.join(from, 'audio'))).toEqual(['track_31.mp3'])
+    })
+
+    it('moves the imported audio in, and the audio no track plays any more out, to the pending folder', () => {
+        const dir = path.join(tmp, 'A.strobe')
+        const pending = path.join(tmp, 'pending')
+        fs.mkdirSync(pending)
+        writeShow(dir, data, null)
+        writeAudio(dir, 'track_31.mp3', 'intro')
+        writeAudio(dir, 'track_4.wav', 'left behind by a deleted track')
+
+        // INTRO gets a new file, imported as track_32, and a copy of it plays the same one
+        fs.writeFileSync(path.join(pending, 'track_32.wav'), 'new intro')
+        const intro = { ...data.tracks[0]!, audio_filename: 'new intro.wav', audio_id: 32 }
+        writeShow(dir, { ...data, tracks: [intro, { ...intro, id: 33, name: 'INTRO copy' }] }, dir, pending)
+
+        expect(fs.readdirSync(path.join(dir, 'audio'))).toEqual(['track_32.wav'])
+        expect(fs.readFileSync(path.join(dir, 'audio', 'track_32.wav'), 'utf8')).toBe('new intro')
+        // Kept until the show is closed, for an undo
+        expect(fs.readdirSync(pending).sort()).toEqual(['track_31.mp3', 'track_4.wav'])
+
+        // Undone: the old file comes back from the pending folder
+        writeShow(dir, data, dir, pending)
+        expect(fs.readdirSync(path.join(dir, 'audio'))).toEqual(['track_31.mp3'])
+    })
+
+    it('saves a new show with its imported audio, and a track without audio with none', () => {
+        const dir = path.join(tmp, 'New.strobe')
+        const pending = path.join(tmp, 'pending')
+        fs.mkdirSync(pending)
+        fs.writeFileSync(path.join(pending, 'track_1.mp3'), 'song')
+        fs.writeFileSync(path.join(pending, 'track_2.mp3'), 'removed before saving')
+
+        const tracks = [
+            { id: 1, name: 'A', bpm: 85, audio_filename: 'song.mp3', audio_id: 1 },
+            { id: 2, name: 'B', bpm: 85, audio_filename: null, audio_id: 2 },
+        ]
+        writeShow(dir, { ...data, tracks }, null, pending)
+        expect(fs.readdirSync(path.join(dir, 'audio'))).toEqual(['track_1.mp3'])
+        expect(fs.readdirSync(pending)).toEqual(['track_2.mp3'])
+    })
+
+    it('finds audio files and gives new ones an id no file uses', () => {
+        const a = path.join(tmp, 'a')
+        const b = path.join(tmp, 'b')
+        fs.mkdirSync(a)
+        fs.mkdirSync(b)
+        fs.writeFileSync(path.join(a, 'track_7.wav'), '')
+        fs.writeFileSync(path.join(b, 'track_7.mp3'), '')
+        fs.writeFileSync(path.join(b, 'track_12.mp3'), '')
+
+        expect(findAudioFile([null, a, b], 7)).toBe(path.join(a, 'track_7.wav'))
+        expect(findAudioFile([a, b], 12)).toBe(path.join(b, 'track_12.mp3'))
+        expect(findAudioFile([a, path.join(tmp, 'none')], 12)).toBeNull()
+
+        expect(newAudioFileId(data.tracks, [a, b])).toBe(32)
+        expect(newAudioFileId([], [null, a, b])).toBe(13)
     })
 
     it('refuses to write into a folder that is not a show', () => {

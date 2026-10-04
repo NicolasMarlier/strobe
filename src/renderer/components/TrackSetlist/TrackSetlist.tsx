@@ -28,16 +28,19 @@ interface ContextMenuState {
 
 interface ContextMenuProps extends ContextMenuState {
     trackName: string
+    hasAudio: boolean
     onClose: () => void
     onRename: () => void
     onChangeProgram: () => void
     onChangeBpm: () => void
     onDuplicate: () => void
+    onChooseAudio: () => void
+    onRemoveAudio: () => void
     onDelete: () => void
 }
 
 // The right-click menu of a row. Closes on Escape or a click anywhere else
-const ContextMenu = ({ x, y, trackName, onClose, onRename, onChangeProgram, onChangeBpm, onDuplicate, onDelete }: ContextMenuProps) => {
+const ContextMenu = ({ x, y, trackName, hasAudio, onClose, onRename, onChangeProgram, onChangeBpm, onDuplicate, onChooseAudio, onRemoveAudio, onDelete }: ContextMenuProps) => {
     useEffect(() => {
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key == 'Escape') onClose()
@@ -65,6 +68,9 @@ const ContextMenu = ({ x, y, trackName, onClose, onRename, onChangeProgram, onCh
             { item('Change BPM…', onChangeBpm) }
             { item('Duplicate', onDuplicate) }
             <div className='setlist-menu-separator'/>
+            { item(hasAudio ? 'Replace Audio File…' : 'Choose Audio File…', onChooseAudio) }
+            { hasAudio && item('Remove Audio', onRemoveAudio) }
+            <div className='setlist-menu-separator'/>
             { item(`Delete “${trackName}”…`, onDelete, 'danger') }
         </div>,
         document.body,
@@ -80,7 +86,7 @@ interface Props {
 }
 
 const TrackSetlist = ({ collapse }: Props) => {
-    const { tracks, currentTrackId, syncTracks } = useDmxButtonsContext()
+    const { tracks, currentTrackId, syncTracks, chooseTrackAudioAndSync, resetTrackAudioAndSync } = useDmxButtonsContext()
 
     const [editing, setEditing] = useState(undefined as { trackId: number, field: RowEditing } | undefined)
     const [menu, setMenu] = useState(undefined as ContextMenuState | undefined)
@@ -270,11 +276,14 @@ const TrackSetlist = ({ collapse }: Props) => {
         { menu && menuTrack && <ContextMenu
             {...menu}
             trackName={menuTrack.name}
+            hasAudio={!!menuTrack.audio_filename}
             onClose={() => setMenu(undefined)}
             onRename={() => setEditing({ trackId: menuTrack.id, field: 'name' })}
             onChangeProgram={() => setEditing({ trackId: menuTrack.id, field: 'program' })}
             onChangeBpm={() => setEditing({ trackId: menuTrack.id, field: 'bpm' })}
             onDuplicate={() => duplicate(menuTrack.id)}
+            onChooseAudio={() => chooseTrackAudioAndSync(menuTrack.id)}
+            onRemoveAudio={() => resetTrackAudioAndSync(menuTrack.id)}
             onDelete={() => setDeletingTrackId(menuTrack.id)}/> }
 
         { deletingTrack && <ConfirmModal

@@ -63,7 +63,12 @@
   - Webpack dev ports made from the worktree's name, `STROBE_DEV_PORT` to force one (done)
   - Run from source, the window shows its branch: a frame in its color, its name at the bottom, in the title and as the Dock badge (done)
   - The feature-worktree skill explains it (done)
-- [ ] Audio files management
+- [ ] Audio files management (`audio-files` branch)
+  - Importing really works: a file dropped on the track, or Choose / Replace Audio File… in the setlist's right-click menu, is copied into the show, under a new id so a copy of the track keeps the old one. WAV, MP3, M4A, FLAC, OGG as they are; AIFF and CAF turned into WAV by macOS (afconvert), since the window can't play them (done)
+  - Until the show is saved, imported files wait in a pending folder: an unsaved show doesn't change on disk, and a new show can get audio before its first save (done)
+  - Remove Audio in the right-click menu; the file stays until the save, so an undo brings it back (done)
+  - Saving keeps only the files the tracks play: files of deleted tracks no longer pile up, nor play on a new track that gets their id (done)
+  - The setlist's note icon gives the file's name, and turns red when the file isn't found (done)
 - [ ] Loop and max length management
 - [x] Auto-update
   - Electron's autoUpdater (Squirrel.Mac) fed by update.electronjs.org, which reads the GitHub releases: checked 10 s after launch, then every 4 hours, downloaded in the background, installed when Strobe quits, never during a show (done)

@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog } from "electron"
 import path from "path"
 import { Store, STORE_EVENTS } from "../store/Store"
 import fs from "fs"
+import os from "os"
 import { audioDir, readShow, SHOW_EXTENSION, writeShow } from "./show_file"
 import { newShowData } from "./new_show"
 import { addRecentShow, describeRecentShow, listRecentShows, removeRecentShow } from "./recent_shows"
@@ -22,14 +23,26 @@ let templateDir: string | null = null
 // Whether the store has changes that are not saved in currentShowDir
 let dirty = false
 
-// Where the open show's audio is read from
-export const currentAudioDir = () => {
-    const dir = currentShowDir ?? templateDir
-    return dir && audioDir(dir)
+// The audio files imported since the last save, and those the last save left out (an undo may bring them back).
+// Saving moves them into the show: until then, a show that isn't saved keeps its audio as it was
+let pendingDir: string | null = null
+
+export const pendingAudioDir = () => {
+    pendingDir ??= fs.mkdtempSync(path.join(os.tmpdir(), 'strobe-audio-'))
+    return pendingDir
 }
 
-// Where the open show's audio is saved: none for an unsaved show, whose audio (the example's) is read-only
-export const savedAudioDir = () => currentShowDir && audioDir(currentShowDir)
+const discardPendingAudio = () => {
+    if (pendingDir) fs.rmSync(pendingDir, { recursive: true, force: true })
+    pendingDir = null
+}
+app.on('will-quit', discardPendingAudio)
+
+// Where the open show's audio is read from, first one first
+export const audioDirs = () => {
+    const dir = currentShowDir ?? templateDir
+    return [pendingDir, dir && audioDir(dir)]
+}
 
 const showName = () => {
     const dir = currentShowDir ?? templateDir
@@ -121,6 +134,7 @@ export const guardWindowClose = (win: BrowserWindow) => {
 // A show opened from a template (the example) is unsaved: its first save asks where, and copies its audio along
 const startShow = (win: BrowserWindow | null, data: ShowData, dir: string | null, template: string | null = null) => {
     Store.getInstance().load(data)
+    discardPendingAudio()
     isShowOpen = true
     currentShowDir = dir
     templateDir = template
@@ -228,7 +242,7 @@ export const saveShow = async(win: BrowserWindow): Promise<boolean> => {
 
     const dir = currentShowDir
     return withErrorBox('Could not save show', () => {
-        writeShow(dir, Store.getInstance().toData(), dir)
+        writeShow(dir, Store.getInstance().toData(), dir, pendingDir)
         setDirty(false)
     })
 }
@@ -240,7 +254,7 @@ export const saveShowAs = async(win: BrowserWindow): Promise<boolean> => {
     if (!dir) return false
 
     return withErrorBox('Could not save show', () => {
-        writeShow(dir, Store.getInstance().toData(), currentShowDir ?? templateDir)
+        writeShow(dir, Store.getInstance().toData(), currentShowDir ?? templateDir, pendingDir)
         currentShowDir = dir
         templateDir = null
         addRecentShow(dir)

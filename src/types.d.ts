@@ -43,6 +43,8 @@ type Track = {
     // The id the track's audio file is named after (audio/track_<audio_id>.<ext>), when not its own:
     // the track changed id (MIDI program) or is a copy, and its file was left as it was
     audio_id?: number
+    // Listed only, never saved: it has audio but its file isn't found (moved or deleted outside Strobe)
+    audio_missing?: boolean
 }
 
 type TrackCreationParams = {

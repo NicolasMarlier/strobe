@@ -40,7 +40,13 @@ export const deleteDmxButton = (id: string) =>
     i('dmx_buttons:destroy', id)
 
 export const uploadTrackAudio = (track_id: number, file: File) =>
-    i('tracks:audio:upload', track_id, file)
+    i('tracks:audio:upload', track_id, window.strobe.pathForFile(file))
+
+export const chooseTrackAudio = (track_id: number) =>
+    i('tracks:audio:choose', track_id)
+
+export const resetTrackAudio = (track_id: number) =>
+    i('tracks:audio:reset', track_id)
 
 export const getDmxScene = () =>
     i('dmx_scene:get')
