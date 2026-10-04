@@ -11,6 +11,8 @@ import { useDmxMidiContext } from '../../contexts/DmxMidiContext';
 import { useDmxButtonsContext } from '../../contexts/DmxButtonsContext';
 import { isSelected, midiPatternArrayEqual, midiPatternsInclude, splitPatternsAtTick, sum } from './utils_midi_patterns';
 import { isPageEdit, useMenuMessage } from '../../useEditMenu';
+import ContextMenu from '../DesignSystem/ContextMenu/ContextMenu';
+import { audioMenuItems } from '../../audioMenu';
 
 const BEATS_OFFSET = 2
 // Following the cursor, the view turns its page once the cursor passes this share of its width
@@ -23,8 +25,9 @@ interface Props {
 
 const BASE_PIXELS_PER_BEAT = 40
 
-// Where the waveform goes, the bottom 2/5 of the track (see drawAudioWave): the only place an audio file can be dropped
-const isInAudioLane = (e: React.DragEvent) => {
+// Where the waveform goes, the bottom 2/5 of the track (see drawAudioWave): the only place an audio file can be
+// dropped, and where a right-click is about the track's audio
+const isInAudioLane = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect()
     return e.clientY >= rect.top + rect.height * 3 / 5
 }
@@ -58,7 +61,7 @@ const MidiPlayer = (props: Props) => {
     const isFollowingRef = useRef(isFollowing)
     isFollowingRef.current = isFollowing
 
-    const { audioUrl, uploadTrackAudioAndSync } = useDmxButtonsContext()
+    const { audioUrl, uploadTrackAudioAndSync, chooseTrackAudioAndSync, resetTrackAudioAndSync } = useDmxButtonsContext()
 
     const allMidiKeysRef = useRef(allMidiKeys)
     allMidiKeysRef.current = allMidiKeys
@@ -206,6 +209,12 @@ const MidiPlayer = (props: Props) => {
     const selectAll = () => setSelection(midiPatternsRef.current)
 
     const [isDraggingAudio, setIsDraggingAudio] = useState(false)
+    const [audioMenu, setAudioMenu] = useState(undefined as { x: number, y: number } | undefined)
+
+    const onContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault()
+        if(isInAudioLane(e)) setAudioMenu({ x: e.clientX, y: e.clientY })
+    }
 
     const onDragOver = (e: React.DragEvent) => {
         const inLane = isInAudioLane(e)
@@ -441,6 +450,7 @@ const MidiPlayer = (props: Props) => {
                 onDragOver={onDragOver}
                 onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setIsDraggingAudio(false)}
                 onDrop={onDrop}
+                onContextMenu={onContextMenu}
                 className={`midi-canvas-container${activeEditor === 'TrackEditor' ? ' midi-canvas-container--focused' : ''}`}>
                 <canvas
                     ref={canvasRef}
@@ -466,6 +476,10 @@ const MidiPlayer = (props: Props) => {
                     isItemInSelection={(item, selected) => midiPatternsInclude(selected, item)}/>
                 <AudioDropHint track={track} isDraggedOver={isDraggingAudio}/>
             </div>
+            { audioMenu && <ContextMenu
+                {...audioMenu}
+                onClose={() => setAudioMenu(undefined)}
+                items={audioMenuItems(track, chooseTrackAudioAndSync, resetTrackAudioAndSync)}/> }
         </div>
         
     </>)
