@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18" result="b1"/>
+      <feGaussianBlur stdDeviation="4" result="b2" in="SourceGraphic"/>
+      <feMerge><feMergeNode in="b1"/><feMergeNode in="b1"/><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#040a24"/><stop offset="1" stop-color="#01030c"/>
+    </linearGradient>
+  </defs>
+  <!-- The page, its top right corner folded -->
+  <path d="M232 92 H632 L824 284 V888 Q824 932 780 932 H244 Q200 932 200 888 V136 Q200 92 244 92 Z" fill="url(#fill)"/>
+  <g fill="none" stroke="#2a6bff" stroke-width="9" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M244 92 H632 L824 284 V888 Q824 932 780 932 H244 Q200 932 200 888 V136 Q200 92 244 92 Z"/>
+    <path d="M632 92 V240 Q632 284 676 284 H824"/>
+  </g>
+</svg>
