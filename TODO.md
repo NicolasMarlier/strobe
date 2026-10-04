@@ -62,3 +62,4 @@
   - The feature-worktree skill explains it (done)
 - [ ] Audio files management
 - [ ] Loop and max length management
+- [ ] Auto-update
