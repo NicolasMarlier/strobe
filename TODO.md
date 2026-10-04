@@ -24,8 +24,9 @@
 - [x] Move the cursor while playing
 - [ ] Website: a short story, filmed with Nico, on why Strobe was made
 - [x] Download monitoring: website visits (Vercel Web Analytics) and downloads per version (GitHub), in `bin/stats` and the stats skill
-- [ ] Move the cursor by hand during playback (seek while playing) (`seek-while-playing` branch)
-  - A click in the timeline, the arrows, Return and Back to Start move the cursor while playing, and the audio follows; none of them while MainStage drives playback (done, to test)
+- [x] Move the cursor by hand during playback (seek while playing)
+  - A click in the timeline, the arrows, Return and Back to Start move the cursor while playing, and the audio follows; none of them while MainStage drives playback (done)
+  - Over the timeline, where a click moves the cursor: a playhead mouse cursor and a very faint ghost cursor (done)
 - [ ] Usage telemetry in the app, to count installs and real usage, with TelemetryDeck
   - Why TelemetryDeck: an anonymous, hashed ID per install gives unique installs, monthly active users and retention (Aptabase keeps no user ID, so it can't count installs). JavaScript SDK, free plan of 50 to 100k signals a month
   - First: the user creates the TelemetryDeck account and the app, and gives its app ID (done)
