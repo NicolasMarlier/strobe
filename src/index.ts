@@ -1,3 +1,5 @@
+// First: it reports the crashes of everything loaded after it
+import './main/crash_reports';
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import path from 'path';
 import './main/init/ipc-router'
