@@ -1,21 +1,39 @@
 # TODO
 
-- [x] Better tracks management UX
-- [x] Handle "plugins" for devices / scene elements
-- [x] Scene element for the fog machine (machine à brouillard)
-- [x] Installer
+## Promotion
+
+- [ ] Communicate with Enttec
+- [ ] Website: a short story, filmed with Nico, on why Strobe was made
+- [ ] Website: fewer videos, more animated HTML
+  - A section on recording a show: why it's useful, next to an HTML animation of a take (Record, the cues played on a MIDI keyboard along with the song, Pause) and its playback with nobody touching anything (done)
+  - "Made for the stage": MainStage driving Strobe, an HTML animation in place of the narrow window's video: Strobe narrow on the left of a screen, a sketch of MainStage on the right, its patch change, Play and Stop sent to Strobe along a MIDI wire; the narrow video removed, and from the website-videos skill (done)
+  - "Your stage, in 3D": the scene drawn live with three.js, a copy of the app's (the example show's stage, beams, bloom, fog, the camera's drift), in place of its video; the website-videos skill only records the overview now (done)
+  - The hero's overview video removed, the site has no video left; the "four steps" section removed; more room between sections, and blocks fading in as they scroll into view (done)
+- [ ] Promote Strobe: posts on r/MainStage, then r/macapps and r/lightingdesign, and a listing on AlternativeTo (suggested as an alternative to Lightkey and QLC+)
+  - Drafts ready to paste in `~/Documents/Strobe - Promotion Reddit et AlternativeTo.pdf`
 - [x] Feedback collection process
 - [x] Public website
-- [ ] Communicate with Enttec
-- [x] Proper handling of show files on macOS
-- [x] Test usb v3 on real lights
-- [x] Proper version and About
-- [x] Code signing
-- [x] Explain the MainStage integration
-- [x] Example show file
-  - Bundled with the app (`assets/Example.strobe`): the first 100 seconds of maad avenue's "Dead In My Head", with its buttons, MIDI patterns and the stage's scene (done)
-  - Opened from the Welcome screen ("New to Strobe? Open the example show") and File › Open Example Show, as an unsaved copy: Save asks where and copies its audio along (done)
-  - Its own usage signal, `Strobe.exampleShowOpened`, listed in the README's Privacy section (done)
+- [x] Videos on the website
+  - Recorded by themselves, with nobody at the keyboard, from a released version and the example show: the website-videos skill, run at each release by the deploy skill (done)
+  - The overview, the 3D scene and the narrow window, in place of their screenshots (done)
+  - The cues: an animation in HTML and JavaScript of a cue's editing, in the app's look (done)
+- [x] Download monitoring: website visits (Vercel Web Analytics) and downloads per version (GitHub), in `bin/stats` and the stats skill
+- [x] Website: SEO
+  - Keyword titles and descriptions, canonical URLs, a 1200x630 social preview image (`assets/og-image.jpg`), SoftwareApplication structured data (its version updated by the deploy skill's grep), robots.txt, sitemap.xml, clean URLs without trailing slash (done)
+  - The GitHub repo's description, website link and topics (done)
+  - Staying on strobe-website.vercel.app, no custom domain for now
+  - Google Search Console: the site verified (meta tag on the home page), Google can index the home page (done). To do: submit `sitemap.xml` if not done yet, and redo the indexing request (it failed right after the verification)
+
+## Fixes
+
+- [x] Bug: Space didn't start playback after selecting a track, the Play button did; Space plays the selected track now
+- [x] Lights aren't dark enough
+- [x] Visual bug when the window is very narrow
+- [x] Window title is just STROBE, no "Untitled", while no show is open yet
+- [x] Bug: selecting a pattern or a note moved it when the mouse slipped during the click; it only moves past 5 pixels now
+
+## Improvements
+
 - [ ] Handle input devices to trigger a button
 - [ ] Better MIDI recording and MIDI editing
   - Pause stops recording, and so do the track's end and MainStage stopping (done)
@@ -25,24 +43,23 @@
   - The cursor moved by hand while recording: what was recorded is kept, recording goes on from there (done)
   - Played notes go on the nearest sixteenth (done)
   - Record starts playback (done)
-- [x] Bug: Space didn't start playback after selecting a track, the Play button did; Space plays the selected track now
-- [x] Lights aren't dark enough
+- [x] Better tracks management UX
+- [x] Handle "plugins" for devices / scene elements
+- [x] Scene element for the fog machine (machine à brouillard)
+- [x] Installer
+- [x] Proper handling of show files on macOS
+- [x] Test usb v3 on real lights
+- [x] Proper version and About
+- [x] Code signing
+- [x] Explain the MainStage integration
+- [x] Example show file
+  - Bundled with the app (`assets/Example.strobe`): the first 100 seconds of maad avenue's "Dead In My Head", with its buttons, MIDI patterns and the stage's scene (done)
+  - Opened from the Welcome screen ("New to Strobe? Open the example show") and File › Open Example Show, as an unsaved copy: Save asks where and copies its audio along (done)
+  - Its own usage signal, `Strobe.exampleShowOpened`, listed in the README's Privacy section (done)
 - [x] Block Play when playback is driven by MainStage
   - Play, Space and Back to Start greyed out while MainStage plays, the app's own playback stops when MainStage starts, the cursor can't be moved by hand; a pulsing MainStage badge next to the transport (done)
 - [x] Slight camera movements on the 3D scene while the show plays
-- [x] Visual bug when the window is very narrow
-- [x] Videos on the website
-  - Recorded by themselves, with nobody at the keyboard, from a released version and the example show: the website-videos skill, run at each release by the deploy skill (done)
-  - The overview, the 3D scene and the narrow window, in place of their screenshots (done)
-  - The cues: an animation in HTML and JavaScript of a cue's editing, in the app's look (done)
 - [x] Move the cursor while playing
-- [ ] Website: a short story, filmed with Nico, on why Strobe was made
-- [ ] Website: fewer videos, more animated HTML
-  - A section on recording a show: why it's useful, next to an HTML animation of a take (Record, the cues played on a MIDI keyboard along with the song, Pause) and its playback with nobody touching anything (done)
-  - "Made for the stage": MainStage driving Strobe, an HTML animation in place of the narrow window's video: Strobe narrow on the left of a screen, a sketch of MainStage on the right, its patch change, Play and Stop sent to Strobe along a MIDI wire; the narrow video removed, and from the website-videos skill (done)
-  - "Your stage, in 3D": the scene drawn live with three.js, a copy of the app's (the example show's stage, beams, bloom, fog, the camera's drift), in place of its video; the website-videos skill only records the overview now (done)
-  - The hero's overview video removed, the site has no video left; the "four steps" section removed; more room between sections, and blocks fading in as they scroll into view (done)
-- [x] Download monitoring: website visits (Vercel Web Analytics) and downloads per version (GitHub), in `bin/stats` and the stats skill
 - [x] Move the cursor by hand during playback (seek while playing)
   - A click in the timeline, the arrows, Return and Back to Start move the cursor while playing, and the audio follows; none of them while MainStage drives playback (done)
   - Over the timeline, where a click moves the cursor: a playhead mouse cursor and a very faint ghost cursor (done)
@@ -71,7 +88,6 @@
   - ↑ ↓ switch tracks even with the setlist collapsed
   - The timeline's hint is contextual: with nothing selected, the cursor's keys (← → one beat, ↵ back to start); with a selection, its own (T split for one pattern, J join for two or more, L loop). Join does nothing below two
 - [x] Show file icon, in the Finder and the title bar
-- [x] Window title is just STROBE, no "Untitled", while no show is open yet
 - [x] Run several worktrees at once
   - Webpack dev ports made from the worktree's name, `STROBE_DEV_PORT` to force one (done)
   - Run from source, the window shows its branch: a frame in its color, its name at the bottom, in the title and as the Dock badge (done)
@@ -100,11 +116,3 @@
   - Validated on real releases: an installed 0.6.0 found 0.6.1, downloaded it and restarted into it, still notarized (done)
 - [x] Welcome screen redesign, in the app's look
   - Buttons like the app's, with white line icons, New Show the primary one; no more offset shadows; the recent shows framed as before, rows highlighted on hover with the remove cross and an open chevron; the example show as a quiet link with a play icon (done)
-- [x] Website: SEO
-  - Keyword titles and descriptions, canonical URLs, a 1200x630 social preview image (`assets/og-image.jpg`), SoftwareApplication structured data (its version updated by the deploy skill's grep), robots.txt, sitemap.xml, clean URLs without trailing slash (done)
-  - The GitHub repo's description, website link and topics (done)
-  - Staying on strobe-website.vercel.app, no custom domain for now
-  - Google Search Console: the site verified (meta tag on the home page), Google can index the home page (done). To do: submit `sitemap.xml` if not done yet, and redo the indexing request (it failed right after the verification)
-- [ ] Promote Strobe: posts on r/MainStage, then r/macapps and r/lightingdesign, and a listing on AlternativeTo (suggested as an alternative to Lightkey and QLC+)
-  - Drafts ready to paste in `~/Documents/Strobe - Promotion Reddit et AlternativeTo.pdf`
-- [x] Bug: selecting a pattern or a note moved it when the mouse slipped during the click; it only moves past 5 pixels now
