@@ -54,7 +54,7 @@ function App() {
     setSelectedElementIndex(undefined)
   }
   const { selectedMidiPatterns, isRecording, setIsRecording } = useDmxMidiContext()
-  const { debug } = useRealTimeContext()
+  const { debug, drivenByMidi } = useRealTimeContext()
   const setlist = useSetlistOpen()
   
   return (
@@ -70,14 +70,21 @@ function App() {
           {/* In a narrow window only: the setlist and the interfaces have no room below */}
           <TrackPicker/>
           
-          <div className="small-buttons-bar">
-            <SmallButton
-                className="red"
-                value={isRecording}
-                onClick={() => setIsRecording(!isRecording)}>
-                <RecordIcon/>
-            </SmallButton>
-            <AudioPlayer/>
+          <div className={`transport ${drivenByMidi ? 'driven-by-midi' : ''}`}>
+            <div className="small-buttons-bar">
+              <SmallButton
+                  className="red"
+                  title={isRecording ? 'Stop Recording' : 'Record'}
+                  value={isRecording}
+                  onClick={() => setIsRecording(!isRecording)}>
+                  <RecordIcon/>
+              </SmallButton>
+              <AudioPlayer/>
+            </div>
+            {/* While MainStage drives playback, said next to the transport it replaces */}
+            { drivenByMidi && <div className="driven-by-midi-badge" title='Playback is driven by MainStage'>
+              <span className="light"/>MainStage
+            </div> }
           </div>
 
           <InterfacesStatus/>

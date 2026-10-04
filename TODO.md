@@ -16,7 +16,8 @@
 - [ ] Handle input devices to trigger a button
 - [ ] Better MIDI recording and MIDI editing
 - [x] Lights aren't dark enough
-- [ ] Block Play when playback is driven by MainStage
+- [x] Block Play when playback is driven by MainStage
+  - Play, Space and Back to Start greyed out while MainStage plays, the app's own playback stops when MainStage starts, the cursor can't be moved by hand; a pulsing MainStage badge next to the transport (done)
 - [x] Slight camera movements on the 3D scene while the show plays
 - [x] Visual bug when the window is very narrow
 - [ ] Videos on the website
@@ -35,6 +36,7 @@
   - Ship it in a release (the deploy skill), along with the next features
 - [ ] Crash monitoring
 - [ ] Display the keyboard shortcuts
+  - The transport's: a Playback menu (Play / Pause, Back to Start) and its buttons' tooltips (done)
 - [ ] App icon
 - [ ] No window title ("Untitled — Strobe") while no show is open yet
 - [x] Run several worktrees at once

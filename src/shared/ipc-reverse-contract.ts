@@ -20,6 +20,13 @@ export interface ApiReverseContract {
   'edit:redo': {
     params: null
   }
+  // Playback > Play / Pause (Space) and Back to Start (Return): the transport's buttons
+  'playback:toggle': {
+    params: null
+  }
+  'playback:rewind': {
+    params: null
+  }
   // A MIDI input was plugged or unplugged: the names of those connected
   'interfaces:midi_inputs_changed': {
     params: string[]
