@@ -1,3 +1,7 @@
+// The app's look (App.scss): framed sections on #222, their title a small uppercase tab on the border,
+// buttons with a 2px border that lightens on hover, the green of what's live for what starts something
+$green: rgb(114, 203, 63);
+
 .welcome {
     width: 100%;
     height: 100%;
@@ -5,140 +9,247 @@
     align-items: center;
     justify-content: center;
     background-color: #222;
+    user-select: none;
 
     .welcome-panel {
         flex: 0 1 420px;
         margin: 20px;
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
         text-align: left;
+        animation: welcome-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+
+    // Like the splash before it (see splash.ts): the icon, then the name
+    .welcome-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
     }
 
     .welcome-icon {
-        align-self: center;
-        width: 112px;
-        height: 112px;
+        width: 96px;
+        height: 96px;
     }
 
     .welcome-title {
         font-size: 28px;
         letter-spacing: 10px;
-        text-align: center;
-        margin-bottom: 20px;
+        // The letter spacing also follows the last letter: offset it so the word itself is centered
+        text-indent: 10px;
+        color: #ccc;
+    }
+
+    // A section of the app
+    .welcome-recent-shows {
+        position: relative;
+        border: 2px solid #161616;
+        border-radius: 5px;
+        padding: 14px 6px 6px;
     }
 
     .welcome-section-title {
-        color: #888;
-        font-size: 13px;
+        position: absolute;
+        top: -10px;
+        left: 20px;
+        line-height: 14px;
+        font-size: 10px;
+        font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 2px;
-    }
-
-    .welcome-recent-shows {
-        border: 2px solid #444;
+        background-color: #161616;
+        color: #666;
+        padding: 2px 10px;
         border-radius: 5px;
-        overflow: hidden;
     }
 
     .welcome-recent-show {
-        padding: 10px 16px;
+        padding: 8px 10px 8px 14px;
+        border-radius: 4px;
         cursor: pointer;
-        border-bottom: 1px solid #444;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
+        transition: background-color 0.1s ease;
 
         .details {
             flex: 1;
             min-width: 0;
         }
 
-        // Barely visible, clearer when hovering the show, fully when hovering the cross
+        .name {
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        .folder {
+            color: #666;
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        // Both show on hover only: the cross to forget the show, the chevron that it opens
         .remove {
             flex: 0 0 auto;
             width: 20px;
             height: 20px;
-            line-height: 20px;
+            line-height: 19px;
             text-align: center;
             border-radius: 50%;
-            font-size: 16px;
-            color: #ffffff1a;
+            font-size: 15px;
+            color: #888;
+            opacity: 0;
+            transition: opacity 0.1s ease, background-color 0.1s ease;
 
             &:hover {
-                color: #000;
-                background-color: #00000022;
+                color: #fff;
+                background-color: #ffffff1a;
             }
         }
 
-        &:hover .remove {
-            color: #00000066;
-        }
-
-        &:last-child {
-            border-bottom: none;
+        .open {
+            flex: 0 0 auto;
+            width: 16px;
+            height: 16px;
+            color: #555;
+            opacity: 0;
+            transition: opacity 0.1s ease, transform 0.15s ease;
         }
 
         &:hover {
-            background-color: #fff;
-            color: #000;
+            background-color: #ffffff0d;
 
-            .folder {
-                color: #555;
+            .name {
+                color: #fff;
             }
-        }
 
-        .folder {
-            color: #888;
-            font-size: 13px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            .remove,
+            .open {
+                opacity: 1;
+            }
+
+            .open {
+                transform: translateX(2px);
+                color: #999;
+            }
         }
     }
 
     .welcome-actions {
         display: flex;
         gap: 12px;
-        margin-top: 8px;
     }
 
-    // A track of maad avenue with its lights, to see what a show looks like
-    .welcome-example {
-        margin-top: 8px;
-        text-align: center;
-        color: #888;
+    // The app's buttons (.btn), a bit taller
+    .welcome-button {
+        flex: 1;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 2px solid #444;
+        border-radius: 5px;
+        background-color: #222;
+        color: #ccc;
         font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: border-color 0.1s ease, background-color 0.1s ease, color 0.1s ease;
 
-        .link {
-            color: #ccc;
-            text-decoration: underline;
-            cursor: pointer;
+        svg {
+            width: 16px;
+            height: 16px;
+            color: #888;
+            transition: color 0.1s ease;
+        }
+
+        &:hover {
+            border-color: #666;
+            color: #fff;
+
+            svg {
+                color: #ccc;
+            }
+        }
+
+        &:active {
+            background-color: #1c1c1c;
+        }
+
+        // What most people come for
+        &.primary {
+            background-color: #2c2c2c;
+            border-color: #555;
+            color: #eee;
+
+            svg {
+                color: $green;
+            }
 
             &:hover {
-                color: #fff;
+                border-color: #777;
+                background-color: #303030;
+            }
+
+            &:active {
+                background-color: #262626;
             }
         }
     }
 
-    .welcome-button {
-        flex: 1;
-        text-align: center;
-        border: 2px solid #444;
+    // A track of maad avenue with its lights, to see what a show looks like
+    .welcome-example {
+        align-self: center;
+        margin-top: 4px;
+        padding: 4px 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
         border-radius: 5px;
-        box-shadow: 5px 5px 0px #111;
-        padding: 8px 10px;
+        color: #777;
+        font-size: 13px;
         cursor: pointer;
-        position: relative;
+        transition: color 0.1s ease;
 
-        &.primary {
-            border-color: #aaa;
+        .play {
+            width: 14px;
+            height: 14px;
+            color: $green;
+            opacity: 0.7;
+            transition: opacity 0.1s ease;
+        }
+
+        .link {
+            color: #aaa;
+            transition: color 0.1s ease;
         }
 
         &:hover {
-            top: 1px;
-            left: 1px;
-            box-shadow: 4px 4px 0px #000;
+            .link {
+                color: #fff;
+            }
+
+            .play {
+                opacity: 1;
+            }
         }
+    }
+}
+
+@keyframes welcome-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .welcome .welcome-panel {
+        animation: none;
     }
 }
