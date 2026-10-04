@@ -63,7 +63,7 @@ Strobe sends anonymous usage statistics to [TelemetryDeck](https://telemetrydeck
 The usage statistics, and nothing else:
 
 - **At launch:** Strobe's version, the macOS version, the Mac's architecture (Apple silicon or Intel), and whether it's the first launch.
-- **Once a session, the first time it happens:** a show was opened, playback started, MainStage was connected, a DMX interface was connected, the narrow window was used.
+- **Once a session, the first time it happens:** a show was opened, the example show was opened, playback started, MainStage was connected, a DMX interface was connected, the narrow window was used.
 - **To tell installs apart:** a random ID made on the first launch, which TelemetryDeck hashes again before storing it. It says nothing about you or your Mac.
 
 The crash reports, when Strobe hits an error it didn't expect or crashes:

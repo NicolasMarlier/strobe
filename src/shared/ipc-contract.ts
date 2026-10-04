@@ -114,6 +114,10 @@ export interface ApiContract {
     args: []
     result: void
   }
+  'show:open_example': {
+    args: []
+    result: void
+  }
   'show:open_recent': {
     args: [dir: string]
     result: void

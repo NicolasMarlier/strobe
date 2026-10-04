@@ -6,7 +6,7 @@ import { DmxMidiController } from '../controllers/dmx_midi.controller';
 import { DmxButtonController } from '../controllers/dmx_buttons.controller';
 import { MainLoopController } from '../controllers/main_loop.controller';
 import { ApiReverseContract, ReverseChannel } from '../../shared/ipc-reverse-contract';
-import { forgetRecentShow, newShow, openRecentShow, openShow, saveShow, showState } from '../show/document';
+import { forgetRecentShow, newShow, openExampleShow, openRecentShow, openShow, saveShow, showState } from '../show/document';
 import { Store, STORE_EVENTS } from '../store/Store';
 import { ShowHistory } from '../store/ShowHistory';
 import { revealWindow } from './splash';
@@ -76,6 +76,7 @@ handle('show:state', async () => showState())
 handleWithWindow('app:rendered', revealWindow)
 handleWithWindow('show:new', newShow)
 handleWithWindow('show:open', openShow)
+handleWithWindow('show:open_example', openExampleShow)
 handleWithWindow('show:open_recent', openRecentShow)
 handle('show:remove_recent', async (dir) => forgetRecentShow(dir))
 handleWithWindow('show:save', saveShow)

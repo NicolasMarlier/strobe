@@ -16,12 +16,25 @@ let isShowOpen = false
 // Folder of the show currently open, null while a new show hasn't been saved yet
 let currentShowDir: string | null = null
 
+// The show an unsaved show was opened from (the example show), where its audio stays until it's saved
+let templateDir: string | null = null
+
 // Whether the store has changes that are not saved in currentShowDir
 let dirty = false
 
-export const currentAudioDir = () => currentShowDir && audioDir(currentShowDir)
+// Where the open show's audio is read from
+export const currentAudioDir = () => {
+    const dir = currentShowDir ?? templateDir
+    return dir && audioDir(dir)
+}
 
-const showName = () => currentShowDir ? path.basename(currentShowDir, SHOW_EXTENSION) : 'Untitled'
+// Where the open show's audio is saved: none for an unsaved show, whose audio (the example's) is read-only
+export const savedAudioDir = () => currentShowDir && audioDir(currentShowDir)
+
+const showName = () => {
+    const dir = currentShowDir ?? templateDir
+    return dir ? path.basename(dir, SHOW_EXTENSION) : 'Untitled'
+}
 
 export const updateWindowTitle = (win: BrowserWindow) => {
     // Run from source, the branch too: which worktree's window it is
@@ -95,11 +108,13 @@ export const guardWindowClose = (win: BrowserWindow) => {
     })
 }
 
-// Without a window (the show to start with), the window is yet to load the show
-const startShow = (win: BrowserWindow | null, data: ShowData, dir: string | null) => {
+// Without a window (the show to start with), the window is yet to load the show.
+// A show opened from a template (the example) is unsaved: its first save asks where, and copies its audio along
+const startShow = (win: BrowserWindow | null, data: ShowData, dir: string | null, template: string | null = null) => {
     Store.getInstance().load(data)
     isShowOpen = true
     currentShowDir = dir
+    templateDir = template
     if (dir) addRecentShow(dir)
     setDirty(false)
     // Start the UI from a clean state on the new show's data
@@ -148,6 +163,22 @@ export const newShow = async(win: BrowserWindow) => {
     if (!await confirmDiscardChanges(win)) return
 
     startShow(win, newShowData(), null)
+}
+
+// The example show, bundled with the app: a track of maad avenue with its buttons, MIDI and scene
+const exampleShowDir = () => app.isPackaged
+    ? path.join(process.resourcesPath, 'Example.strobe')
+    : path.join(app.getAppPath(), 'assets', 'Example.strobe')
+
+// Opens a copy of the example show, so the bundled one stays untouched: saving it asks where
+export const openExampleShow = async(win: BrowserWindow) => {
+    if (!await confirmDiscardChanges(win)) return
+
+    const dir = exampleShowDir()
+    withErrorBox('Could not open the example show', () => {
+        startShow(win, readShow(dir), null, dir)
+        signal('Strobe.exampleShowOpened')
+    })
 }
 
 export const openShow = async(win: BrowserWindow) => {
@@ -200,8 +231,9 @@ export const saveShowAs = async(win: BrowserWindow): Promise<boolean> => {
     if (!dir) return false
 
     return withErrorBox('Could not save show', () => {
-        writeShow(dir, Store.getInstance().toData(), currentShowDir)
+        writeShow(dir, Store.getInstance().toData(), currentShowDir ?? templateDir)
         currentShowDir = dir
+        templateDir = null
         addRecentShow(dir)
         setDirty(false)
     })

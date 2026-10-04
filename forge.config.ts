@@ -28,8 +28,9 @@ const config: ForgeConfig = {
     icon: './assets/icon',
     // Never change it: macOS ties the app's permissions to it
     appBundleId: 'com.nicolasmarlier.strobe',
-    // Copied into Contents/Resources, where CFBundleTypeIconFile looks for it
-    extraResource: ['./assets/show.icns'],
+    // Copied into Contents/Resources: the show icon, where CFBundleTypeIconFile looks for it, and the example show
+    // (see openExampleShow)
+    extraResource: ['./assets/show.icns', './assets/Example.strobe'],
     // A show (MyShow.strobe/, see src/main/show/show_file.ts) is a document package: the Finder shows it
     // as a single file with a Strobe icon, and opening it opens Strobe (see openShowFromFinder)
     extendInfo: {

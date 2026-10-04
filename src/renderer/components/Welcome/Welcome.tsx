@@ -1,7 +1,7 @@
 import './Welcome.scss'
 
 import { useState } from 'react'
-import { newShow, openRecentShow, openShow, removeRecentShow } from '../../ApiClient'
+import { newShow, openExampleShow, openRecentShow, openShow, removeRecentShow } from '../../ApiClient'
 import icon from '../../../../assets/icon-256.png'
 
 interface Props {
@@ -41,6 +41,10 @@ const Welcome = (props: Props) => {
             <div className="welcome-actions">
                 <div className="welcome-button primary" onClick={() => newShow()}>New Show</div>
                 <div className="welcome-button" onClick={() => openShow()}>Open Other Show…</div>
+            </div>
+
+            <div className="welcome-example">
+                New to Strobe? <span className="link" onClick={() => openExampleShow()}>Open the example show</span>
             </div>
         </div>
     </div>
