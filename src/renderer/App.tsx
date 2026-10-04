@@ -74,6 +74,7 @@ function App() {
             <div className="small-buttons-bar">
               <SmallButton
                   className="red"
+                  title={isRecording ? 'Stop Recording' : 'Record'}
                   value={isRecording}
                   onClick={() => setIsRecording(!isRecording)}>
                   <RecordIcon/>
