@@ -12,7 +12,7 @@
 - [x] Proper version and About
 - [x] Code signing
 - [x] Explain the MainStage integration
-- [ ] Example show file (`example-show` branch)
+- [x] Example show file
   - Bundled with the app (`assets/Example.strobe`): the first 100 seconds of maad avenue's "Dead In My Head", with its buttons, MIDI patterns and the stage's scene (done)
   - Opened from the Welcome screen ("New to Strobe? Open the example show") and File › Open Example Show, as an unsaved copy: Save asks where and copies its audio along (done)
   - Its own usage signal, `Strobe.exampleShowOpened`, listed in the README's Privacy section (done)
