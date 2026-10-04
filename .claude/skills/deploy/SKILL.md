@@ -93,12 +93,12 @@ In the website repo:
 - Commit `Strobe <version>`, with the attribution lines, then `git push origin main`.
 - Vercel deploys within a minute or two: check that https://strobe-website.vercel.app shows `Version <version>` (`curl -s … | grep`), a few times at most, a minute apart.
 
-## 9. Website videos, animation and screenshots
+## 9. Website animations and screenshots
 
-The website shows the app in a video (`assets/videos/overview`), in animations in HTML (in `index.html`, driven by `script.js`: the cues `.cues-demo`, recording `.record-demo`, and the stage `.stage-demo`, MainStage driving Strobe in a narrow window), in a live 3D scene (`scene3d.js`, three.js, a copy of the app's), in screenshots (`assets/mainstage/` in `mainstage/`, and `assets/screenshots/cues.webp`, the cues' fallback without JavaScript) and in a feature list.
+The website shows the app in animations in HTML (in `index.html`, driven by `script.js`: the cues `.cues-demo`, recording `.record-demo`, and the stage `.stage-demo`, MainStage driving Strobe in a narrow window), in a live 3D scene (`scene3d.js`, three.js, a copy of the app's), in screenshots (`assets/mainstage/` in `mainstage/`, and `assets/screenshots/cues.webp`, the cues' fallback without JavaScript) and in a feature list.
 
-- **Videos**: redo them at each release with the website-videos skill, from the released installer. It needs nobody at the keyboard and doesn't touch the user's Strobe: start it as soon as the release is published, in the background, and put them on the website after the user has watched them.
-- **The rest**: go through the approved notes; for each change a user would see on screen (a new mode, a panel that moved, a new button), name what it makes outdated: an animation (the cues': the buttons, their settings, the effects; recording's: the transport, the timeline, recording; the stage's: the narrow window, what Strobe takes from MainStage; the 3D scene's: its look, the fixtures, the example show's stage), a screenshot, a feature-list item. Tell the user which ones, and why. Change nothing without their go; a feature-list item, you may rewrite once they agree. Nothing outdated: say so in one line.
+- No video to redo: the website has none anymore (the website-videos skill only runs on request).
+- Go through the approved notes; for each change a user would see on screen (a new mode, a panel that moved, a new button), name what it makes outdated: an animation (the cues': the buttons, their settings, the effects; recording's: the transport, the timeline, recording; the stage's: the narrow window, what Strobe takes from MainStage; the 3D scene's: its look, the fixtures, the example show's stage), a screenshot, a feature-list item. Tell the user which ones, and why. Change nothing without their go; a feature-list item, you may rewrite once they agree. Nothing outdated: say so in one line.
 
 Screenshots to redo are taken from the released app, once the Strobe in `/Applications` has updated itself to it (step 10; `defaults read /Applications/Strobe.app/Contents/Info.plist CFBundleShortVersionString`):
 
