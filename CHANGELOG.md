@@ -2,6 +2,16 @@
 
 What changed in each version of Strobe. The installers are on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
 
+## 0.6.0 — 2026-10-04
+
+### New
+- **Example show:** new to Strobe? Open the example show from the Welcome screen or File › Open Example Show: the first 100 seconds of maad avenue's "Dead In My Head", with its lights, buttons, MIDI patterns and stage. It opens as an unsaved copy: the first Save asks where to keep it, and copies its audio along.
+- **Automatic updates:** new versions download in the background and are installed the next time Strobe starts, never during a show. Strobe › Check for Updates… looks right away, and Strobe › Restart to Install installs a downloaded version at once. From this version on, you won't need to download Strobe again.
+
+### Improved
+- **Keyboard shortcuts:** every shortcut is now in the menus, to be found: a new Pattern menu (Split T, Join J, Loop L), Copy, Paste, Delete and Select All on patterns and notes in the Edit menu, one beat back or forward and the previous or next track in the Playback menu, and View › Show / Hide Setlist (⌘\). The timeline shows the keys that apply right now: the cursor's when nothing is selected, the selection's otherwise.
+- **Switch tracks with the setlist hidden:** ↑ and ↓ go to the previous or next track even when the setlist is collapsed.
+
 ## 0.5.0 — 2026-10-04
 
 ### New

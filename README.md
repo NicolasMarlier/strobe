@@ -21,17 +21,15 @@ Open `Strobe.dmg`, then drag Strobe into Applications. The app is signed and not
 All versions and their notes are on the [releases page](https://github.com/NicolasMarlier/strobe/releases), and in the [changelog](CHANGELOG.md).
 
 <!-- whats-new:start -->
-## What's new in 0.5.0
+## What's new in 0.6.0
 
 ### New
-- **Seek while playing:** click in the timeline, or use the arrows, Return or Back to Start, and the cursor jumps there while the show keeps playing, the audio with it. Over the timeline, the mouse becomes a playhead and a faint cursor shows where a click will land.
-- **MainStage in charge:** while MainStage drives playback, a pulsing MainStage badge glows next to the transport, and Play, Space and Back to Start are greyed out so the two can't fight. Strobe's own playback stops when MainStage starts.
-- **Playback menu:** Play / Pause (Space) and Back to Start (Return), with the shortcuts also shown in the transport buttons' tooltips.
-- **Show file icon:** show files have their own icon, in the Finder and in the window's title bar.
-- **Anonymous usage statistics and crash reports:** Strobe sends which features are used and the crashes it hits, never a show's or a track's name, nor any content. Turn it off in Strobe › Share Anonymous Usage Statistics and Crash Reports. The README's Privacy section lists exactly what is sent.
+- **Example show:** new to Strobe? Open the example show from the Welcome screen or File › Open Example Show: the first 100 seconds of maad avenue's "Dead In My Head", with its lights, buttons, MIDI patterns and stage. It opens as an unsaved copy: the first Save asks where to keep it, and copies its audio along.
+- **Automatic updates:** new versions download in the background and are installed the next time Strobe starts, never during a show. Strobe › Check for Updates… looks right away, and Strobe › Restart to Install installs a downloaded version at once. From this version on, you won't need to download Strobe again.
 
 ### Improved
-- **Window title:** before any show is open, the window is just titled STROBE, not "Untitled".
+- **Keyboard shortcuts:** every shortcut is now in the menus, to be found: a new Pattern menu (Split T, Join J, Loop L), Copy, Paste, Delete and Select All on patterns and notes in the Edit menu, one beat back or forward and the previous or next track in the Playback menu, and View › Show / Hide Setlist (⌘\). The timeline shows the keys that apply right now: the cursor's when nothing is selected, the selection's otherwise.
+- **Switch tracks with the setlist hidden:** ↑ and ↓ go to the previous or next track even when the setlist is collapsed.
 
 Older versions: on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
 <!-- whats-new:end -->

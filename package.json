@@ -1,7 +1,7 @@
 {
   "name": "strobe",
   "productName": "Strobe",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Strobe: a DMX show runner on your Macbook",
   "main": ".webpack/main",
   "private": true,
