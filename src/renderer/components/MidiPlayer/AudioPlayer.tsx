@@ -12,7 +12,7 @@ import { trackEndTick, useAudioEndTick } from "./useTrackEndTick"
 const AudioPlayer = () => {
     const { track, audioUrl } = useDmxButtonsContext()
     const { midiCurrentTickRef, sendCurrentTickToServer, seek, onSeek, drivenByMidi } = useRealTimeContext()
-    const { setIsFollowing } = useDmxMidiContext()
+    const { setIsFollowing, isRecording, setIsRecording } = useDmxMidiContext()
     const [isPlaying, setIsPlaying] = useState(false)
 
     const isPlayingRef = useRef(isPlaying)
@@ -36,15 +36,25 @@ const AudioPlayer = () => {
         if (audioRef.current && !audioUrl) audioRef.current.src = ''
     }, [audioUrl, track?.id])
 
-    // MainStage starts while the app plays: it takes over, the app's own playback stops
+    // MainStage starts while the app plays: it takes over, the app's own playback stops.
+    // MainStage stops: recording stops too, as with the app's own Pause
+    const wasDrivenByMidiRef = useRef(drivenByMidi)
     useEffect(() => {
         if (drivenByMidi) pause()
+        else if (wasDrivenByMidiRef.current) setIsRecording(false)
+        wasDrivenByMidiRef.current = drivenByMidi
     }, [drivenByMidi])
 
     const pause = () => {
         audioRef.current?.pause()
         clockRef.current = null
         setIsPlaying(false)
+    }
+
+    // Pause, or the track's end: recording stops with playback
+    const stop = () => {
+        pause()
+        setIsRecording(false)
     }
 
     // The audio plays from there when it has something to play there, else the clock goes
@@ -77,6 +87,20 @@ const AudioPlayer = () => {
 
     const onRewindButton = () => seek(0)
 
+    // Record starts playback, so that the cursor moves while recording. A frame later: with no room to
+    // record at the cursor, the track editor turns recording off right away, and nothing plays
+    const playRef = useRef(play)
+    playRef.current = play
+    const isRecordingRef = useRef(isRecording)
+    isRecordingRef.current = isRecording
+    useEffect(() => {
+        if (!isRecording || isPlayingRef.current || drivenByMidi) return
+        const frame = requestAnimationFrame(() => {
+            if (isRecordingRef.current && !isPlayingRef.current) playRef.current()
+        })
+        return () => cancelAnimationFrame(frame)
+    }, [isRecording])
+
     // The cursor moved by hand (a click in the timeline, the arrows, Back to Start): the audio goes
     // there too, so that playback carries on from it rather than bringing the cursor back
     const playFromRef = useRef(playFrom)
@@ -103,7 +127,7 @@ const AudioPlayer = () => {
 
                 if (tick >= endTickRef.current) {
                     sendCurrentTickToServer(endTickRef.current)
-                    pause()
+                    stop()
                 }
                 else sendCurrentTickToServer(tick)
             }, 30)
@@ -116,7 +140,7 @@ const AudioPlayer = () => {
     // land here too, and are the field's
     const menuActionsRef = useRef({ toggle: () => { /* set below */ }, rewind: () => { /* set below */ } })
     menuActionsRef.current = {
-        toggle: () => { if (!drivenByMidi && !isTextField(document.activeElement)) (isPlaying ? pause : play)() },
+        toggle: () => { if (!drivenByMidi && !isTextField(document.activeElement)) (isPlaying ? stop : play)() },
         rewind: () => { if (!isTextField(document.activeElement)) onRewindButton() },
     }
     useEffect(() => {
@@ -152,7 +176,7 @@ const AudioPlayer = () => {
         <SmallButton
             value={isPlaying}
             title={drivenTitle ?? (isPlaying ? 'Pause (Space)' : 'Play (Space)')}
-            onClick={() => {(isPlaying ? pause : play)() }}
+            onClick={() => {(isPlaying ? stop : play)() }}
             disabled={drivenByMidi}>
             { isPlaying ? <PauseIcon/> : <PlayIcon/> }
         </SmallButton>

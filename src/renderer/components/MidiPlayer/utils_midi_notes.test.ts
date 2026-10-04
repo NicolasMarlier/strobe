@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { MAX_TICK, nextFreeTick, setLoopEnd, toggleLoopForPatterns } from './utils_midi_notes'
+import { MAX_TICK, nearestMagnettedTick, nextFreeTick, PPQ, recordingRoomEnd, setLoopEnd, toggleLoopForPatterns, trimRecordedPattern } from './utils_midi_notes'
 
 const pattern = (ticks: number, durationTicks = 50): MidiPattern => ({ ticks, durationTicks, midi_notes: [] })
 
@@ -82,5 +82,52 @@ describe('setLoopEnd', () => {
     it('has no end without one', () => {
         expect(setLoopEnd([looped], looped, 5000)[0].loop_until_tick).toBe(5000)
         expect(MAX_TICK).toBeGreaterThan(5000)
+    })
+})
+
+describe('trimRecordedPattern', () => {
+    const note = (ticks: number, durationTicks = PPQ / 4): MidiNote => ({ ticks, durationTicks, midi: 60 })
+    const recorded = (ticks: number, durationTicks: number, notes: MidiNote[]): MidiPattern => ({ ticks, durationTicks, midi_notes: notes })
+
+    it('ends on the first beat after the last note', () => {
+        expect(trimRecordedPattern(recorded(960, MAX_TICK, [note(960), note(960 + 5 * PPQ + 10)])).durationTicks).toBe(6 * PPQ)
+    })
+
+    it('ends right at a note ending on a beat', () => {
+        expect(trimRecordedPattern(recorded(0, MAX_TICK, [note(PPQ, PPQ)])).durationTicks).toBe(2 * PPQ)
+    })
+
+    it('reaches the beat after the cursor while recording, one beat at least', () => {
+        expect(trimRecordedPattern(recorded(0, MAX_TICK, []), 0).durationTicks).toBe(PPQ)
+        expect(trimRecordedPattern(recorded(0, MAX_TICK, []), 3 * PPQ).durationTicks).toBe(4 * PPQ)
+        expect(trimRecordedPattern(recorded(0, MAX_TICK, [note(5 * PPQ)]), 3 * PPQ).durationTicks).toBe(6 * PPQ)
+    })
+
+    it('never goes past the room it had', () => {
+        expect(trimRecordedPattern(recorded(0, PPQ * 2, [note(PPQ * 2 - 10, PPQ)])).durationTicks).toBe(PPQ * 2)
+    })
+})
+
+describe('recordingRoomEnd', () => {
+    it('stops at the next pattern, or the track end', () => {
+        expect(recordingRoomEnd([pattern(1000)], 200, 5000)).toBe(1000)
+        expect(recordingRoomEnd([pattern(0)], 200, 5000)).toBe(5000)
+    })
+
+    it('leaves no room inside a pattern', () => {
+        expect(recordingRoomEnd([pattern(100, 200)], 200, 5000)).toBe(200)
+    })
+
+    it('leaves no room on the repeats of a loop', () => {
+        expect(recordingRoomEnd([{ ...pattern(0, 100), loop_until_tick: 1000 }], 500, 5000)).toBe(500)
+        expect(recordingRoomEnd([{ ...pattern(0, 100), loop_until_tick: 1000 }], 1000, 5000)).toBe(5000)
+    })
+})
+
+describe('nearestMagnettedTick', () => {
+    it('goes on the nearest sixteenth', () => {
+        expect(nearestMagnettedTick(PPQ - 10)).toBe(PPQ)
+        expect(nearestMagnettedTick(PPQ + 10)).toBe(PPQ)
+        expect(nearestMagnettedTick(PPQ + PPQ / 8 + 1)).toBe(PPQ + PPQ / 4)
     })
 })

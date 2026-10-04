@@ -18,6 +18,13 @@
   - Its own usage signal, `Strobe.exampleShowOpened`, listed in the README's Privacy section (done)
 - [ ] Handle input devices to trigger a button
 - [ ] Better MIDI recording and MIDI editing
+  - Pause stops recording, and so do the track's end and MainStage stopping (done)
+  - A recorded pattern ends on the first beat after its last note (done)
+  - While recording, a short shadow pattern that grows with the cursor; nothing recorded, no empty pattern (done)
+  - Recording stops at the next pattern (a loop's repeats included) or the track's end; with no room at the cursor, Record turns itself off (done)
+  - The cursor moved by hand while recording: what was recorded is kept, recording goes on from there (done)
+  - Played notes go on the nearest sixteenth (done)
+  - Record starts playback (done)
 - [x] Bug: Space didn't start playback after selecting a track, the Play button did; Space plays the selected track now
 - [x] Lights aren't dark enough
 - [x] Block Play when playback is driven by MainStage
