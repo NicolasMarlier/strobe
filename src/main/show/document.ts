@@ -26,7 +26,9 @@ const showName = () => currentShowDir ? path.basename(currentShowDir, SHOW_EXTEN
 export const updateWindowTitle = (win: BrowserWindow) => {
     // Run from source, the branch too: which worktree's window it is
     const branch = devWorktree ? ` [${devWorktree.branch}]` : ''
-    win.setTitle(`${showName()}${dirty ? ' •' : ''} — ${APP_NAME}${branch}`)
+    // On the Welcome screen, before any show is open, no "Untitled": just the app's name
+    const show = isShowOpen ? `${showName()}${dirty ? ' •' : ''} — ` : ''
+    win.setTitle(`${show}${APP_NAME}${branch}`)
     win.setRepresentedFilename(currentShowDir ?? '')
     win.setDocumentEdited(dirty)
 }
