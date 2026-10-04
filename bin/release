@@ -6,9 +6,10 @@
 #
 # Needs, once: the notarization credentials in the keychain (see NOTARY_PROFILE in forge.config.ts), and
 # a Sentry auth token, to send the source maps of the crash reports (see webpack.plugins.ts). Create one at
-# Sentry › Settings › Organization Tokens, then:
-#   security add-generic-password -a "$USER" -s strobe-sentry-token -w
-# (it asks for the token, so it never shows in the shell's history)
+# Sentry › Settings › Organization Tokens, copy it, then:
+#   security add-generic-password -U -a "$USER" -s strobe-sentry-token -w "$(pbpaste)"
+# (from the clipboard, so it never shows in the shell's history; security's own prompt would cut it at 128
+# characters, and the token is longer)
 
 set -euo pipefail
 
