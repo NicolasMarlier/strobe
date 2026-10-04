@@ -62,7 +62,7 @@
   - The feature-worktree skill explains it (done)
 - [ ] Audio files management
 - [ ] Loop and max length management
-- [ ] Auto-update (`auto-update` branch)
+- [ ] Auto-update (merged, to validate after the next release)
   - Electron's autoUpdater (Squirrel.Mac) fed by update.electronjs.org, which reads the GitHub releases: checked 10 s after launch, then every 4 hours, downloaded in the background, installed when Strobe quits, never during a show (done)
   - Strobe › Check for Updates…, then Restart to Install Strobe X once downloaded, asking about unsaved changes first (done)
   - `bin/release` also builds the ZIP, `bin/publish` uploads it; the deploy skill checks the feed (done)
