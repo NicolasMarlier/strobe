@@ -8,6 +8,9 @@ interface Props {
     ticksScroll: number
     pixelsPerBeat: number
     audioWaveData: Uint8Array
+    // The track's end, and its length written there (m:ss)
+    endTick: number
+    endLabel: string
     ppq: number
     allMidiKeys: MidiKey[]
     selectedMidiPatterns: MidiPattern[]
@@ -49,6 +52,40 @@ const drawAudioWave = (props: DrawerFunctionProps, audioWaveData: Uint8Array) =>
     }
 }
 
+const END_TAB_FONT = '10px monospace'
+const END_TAB_PADDING = 5
+const measureContext = document.createElement('canvas').getContext('2d')
+
+// The track's end tab, in the timeline, right after the end line: its length, to drag or double-click
+export const endTabRect = (endX: number, endLabel: string, timelineHeight: number): Rectangle => {
+    if(measureContext) measureContext.font = END_TAB_FONT
+    const textWidth = measureContext?.measureText(endLabel).width ?? endLabel.length * 6
+    return { x0: endX, y0: 2, x1: endX + textWidth + 2 * END_TAB_PADDING, y1: timelineHeight - 2 }
+}
+
+// Past the track's end: darkened, after a line, with its tab in the timeline
+const drawPastEnd = (props: DrawerFunctionProps, endTick: number, endLabel: string) => {
+    const { ctx, ticksScroll, pixelsPerBeat, width, height, baseYOffset } = props
+    const x = ticksOffsetToPixels(endTick, ticksScroll, pixelsPerBeat)
+    if(x > width) return
+
+    ctx.fillStyle = "#000000aa";
+    ctx.fillRect(Math.max(0, x), 0, width - Math.max(0, x), height)
+    ctx.fillStyle = "#ffffff66";
+    ctx.fillRect(x, 0, 1, height)
+
+    const tab = endTabRect(x, endLabel, baseYOffset || 0)
+    ctx.fillStyle = "#555";
+    ctx.beginPath();
+    ctx.roundRect(tab.x0, tab.y0, tab.x1 - tab.x0, tab.y1 - tab.y0, [0, 4, 4, 0])
+    ctx.fill();
+    ctx.font = END_TAB_FONT;
+    ctx.textAlign = "left"
+    ctx.textBaseline = "middle"
+    ctx.fillStyle = "#fff";
+    ctx.fillText(endLabel, tab.x0 + END_TAB_PADDING, (tab.y0 + tab.y1) / 2)
+}
+
 const drawMidiPattern = (props: DrawerFunctionProps, params: {midiPattern: MidiPattern, currentMidiTick: number}) => {
     const { ctx, width, height, ticksScroll, pixelsPerBeat, allMidiKeys } = props
     const { midiPattern, currentMidiTick } = params
@@ -83,13 +120,14 @@ interface DrawMidiPatternsArgs {
     midiPatterns: MidiPattern[],
     selectedMidiPatterns: MidiPattern[],
     currentMidiTick: number,
+    endTick: number,
     mouseSelection: MouseSelection | null
     transformMidiPattern: (midiPattern: MidiPattern, x: number, y: number) => MidiPattern
 }
 
 const drawMidiPatterns = (props: DrawerFunctionProps, params: DrawMidiPatternsArgs) => {
     const { ctx } = props
-    const { midiPatterns, selectedMidiPatterns, currentMidiTick, mouseSelection, transformMidiPattern } = params
+    const { midiPatterns, selectedMidiPatterns, currentMidiTick, endTick, mouseSelection, transformMidiPattern } = params
     midiPatterns.forEach((midiPattern) => {
             const isSelected = selectedMidiPatterns.find((n) => n.ticks == midiPattern.ticks)
             ctx.fillStyle = isSelected ? SELECTED_COLOR : ITEM_COLOR
@@ -104,7 +142,8 @@ const drawMidiPatterns = (props: DrawerFunctionProps, params: DrawMidiPatternsAr
             
             
             if(midiPattern.loop_until_tick) {
-                const loopUntilTick = midiPattern.loop_until_tick
+                // Loops made before the track's end was known can run past it: they stop there
+                const loopUntilTick = Math.min(midiPattern.loop_until_tick, endTick)
                 for(let i = midiPattern.ticks + midiPattern.durationTicks; i < loopUntilTick; i += midiPattern.durationTicks) {
                     const loopedPattern = {
                         ticks: i,
@@ -141,6 +180,8 @@ export const redrawFullCanvas = (props: Props) => {
             midiPatterns,
             recordingMidiPattern,
             audioWaveData,
+            endTick,
+            endLabel,
             ghostMidiPattern,
             selectedMidiPatterns,
             currentMidiTick,
@@ -175,7 +216,7 @@ export const redrawFullCanvas = (props: Props) => {
         drawTimeline(drawerFunctionProps)
         
         // Middle part
-        drawMidiPatterns(drawerFunctionProps, {midiPatterns, selectedMidiPatterns, currentMidiTick, mouseSelection, transformMidiPattern})
+        drawMidiPatterns(drawerFunctionProps, {midiPatterns, selectedMidiPatterns, currentMidiTick, endTick, mouseSelection, transformMidiPattern})
         if(recordingMidiPattern) drawRecordingMidiPattern(drawerFunctionProps, {recordingMidiPattern, currentMidiTick})
         if(ghostMidiPattern) {
             drawGhostMidiPattern(drawerFunctionProps, ghostMidiPattern)
@@ -183,6 +224,7 @@ export const redrawFullCanvas = (props: Props) => {
 
         // Bottom part
         drawAudioWave(drawerFunctionProps, audioWaveData)
+        drawPastEnd(drawerFunctionProps, endTick, endLabel)
 
         // Overlay
         drawHoverTick(drawerFunctionProps, hoverTick)

@@ -64,7 +64,14 @@
   - Run from source, the window shows its branch: a frame in its color, its name at the bottom, in the title and as the Dock badge (done)
   - The feature-worktree skill explains it (done)
 - [ ] Audio files management
-- [ ] Loop and max length management
+- [ ] Loop and max length management (`loop-length` branch)
+  - Every track has an end: its length set by hand, else its audio's, else 64 bars
+  - The track's end: a tab in the timeline with its length (m:ss ⟷), dragged (snaps to the audio's end) or double-clicked to type it (3:30, or 96 bars)
+  - The view goes on 8 bars past the end, and scrolls by itself while an end is dragged near its sides
+  - Loops and recordings stop at the next pattern or the track's end, not after ~5 hours
+  - A loop's end can be dragged with the mouse, on the beats
+  - The timeline ends with the track: no scrolling nor cursor past its end
+  - Play without audio: a clock moves the cursor; playback stops at the track's end
 - [x] Auto-update
   - Electron's autoUpdater (Squirrel.Mac) fed by update.electronjs.org, which reads the GitHub releases: checked 10 s after launch, then every 4 hours, downloaded in the background, installed when Strobe quits, never during a show (done)
   - Strobe › Check for Updates…, then Restart to Install Strobe X once downloaded, asking about unsaved changes first (done)

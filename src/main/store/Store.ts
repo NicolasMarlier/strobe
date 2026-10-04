@@ -113,6 +113,7 @@ export class Store extends EventEmitter {
 
         track.name = params.name ?? track.name
         track.bpm = params.bpm ?? track.bpm
+        if (params.length_ticks !== undefined) track.length_ticks = params.length_ticks
         if ('audio_filename' in params) track.audio_filename = params.audio_filename ?? null
 
         if (newId != id) this.emit(STORE_EVENTS.TRACK_RENAMED, id, newId)

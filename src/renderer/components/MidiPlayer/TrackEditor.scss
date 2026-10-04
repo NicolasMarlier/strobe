@@ -30,6 +30,26 @@
       width: 100%;
       height: 100%;
     }
+
+    // The track's length, typed over its tab in the timeline
+    .track-length-field {
+      position: absolute;
+      top: 2px;
+      z-index: 1;
+
+      .track-length-input {
+        width: 60px;
+        height: 16px;
+        box-sizing: border-box;
+        padding: 0 5px;
+        font: 10px monospace;
+        color: #fff;
+        background: #111;
+        border: 1px solid #48ff00;
+        border-radius: 0 4px 4px 0;
+        outline: none;
+      }
+    }
   }
   .controls-panel {
     width: 160px;

@@ -38,6 +38,14 @@ describe('tracks', () => {
         expect(store.getTrack(1)).toMatchObject({ name: 'B', bpm: 100 })
     })
 
+    it('updates the length', () => {
+        store.createTrack({ name: 'A' })
+        store.updateTrack(1, { length_ticks: 48000 })
+        expect(store.getTrack(1).length_ticks).toBe(48000)
+        store.updateTrack(1, { name: 'B' })
+        expect(store.getTrack(1).length_ticks).toBe(48000)
+    })
+
     it('throws NotFoundError on unknown ids', () => {
         expect(() => store.getTrack(1)).toThrow(NotFoundError)
         expect(() => store.updateTrack(1, {})).toThrow(NotFoundError)

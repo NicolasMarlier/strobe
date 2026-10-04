@@ -43,6 +43,8 @@ type Track = {
     // The id the track's audio file is named after (audio/track_<audio_id>.<ext>), when not its own:
     // the track changed id (MIDI program) or is a copy, and its file was left as it was
     audio_id?: number
+    // Its length, set by hand: else its audio's, else a default one (useTrackEndTick)
+    length_ticks?: number
 }
 
 type TrackCreationParams = {
@@ -54,6 +56,7 @@ type TrackUpdateParams = {
     name?: string
     id?: number
     bpm?: number
+    length_ticks?: number
 }
 
 type MidiNote = {

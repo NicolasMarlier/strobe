@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { doRectanglesIntersect } from './utils'
+import { doRectanglesIntersect, parseTrackLength, PPQ } from './utils'
 
 const rect = (x0: number, y0: number, x1: number, y1: number) => ({ x0, y0, x1, y1 })
 
@@ -50,5 +50,23 @@ describe('doRectanglesIntersect', () => {
     it('handles edge-touching rectangles (shared border)', () => {
         // touching but not overlapping — x segments touch at x=5
         expect(doRectanglesIntersect(rect(0, 0, 5, 5), rect(5, 0, 10, 5))).toBe(false)
+    })
+})
+
+describe('parseTrackLength', () => {
+    it('reads minutes and seconds', () => {
+        expect(parseTrackLength('3:30', 120)).toBe(210 * 2 * PPQ)
+        expect(parseTrackLength(' 0:05 ', 60)).toBe(5 * PPQ)
+    })
+
+    it('reads bars of 4 beats', () => {
+        expect(parseTrackLength('96', 120)).toBe(96 * 4 * PPQ)
+    })
+
+    it('refuses anything else', () => {
+        expect(parseTrackLength('', 120)).toBeNull()
+        expect(parseTrackLength('3:75', 120)).toBeNull()
+        expect(parseTrackLength('long', 120)).toBeNull()
+        expect(parseTrackLength('-4', 120)).toBeNull()
     })
 })
