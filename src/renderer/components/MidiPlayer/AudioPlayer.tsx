@@ -10,7 +10,7 @@ import { isTextField } from "../../useEditMenu"
 
 const AudioPlayer = () => {
     const { track, audioUrl } = useDmxButtonsContext()
-    const { midiCurrentTickRef, sendCurrentTickToServer, drivenByMidi } = useRealTimeContext()
+    const { midiCurrentTickRef, sendCurrentTickToServer, seek, onSeek, drivenByMidi } = useRealTimeContext()
     const { setIsFollowing } = useDmxMidiContext()
     const [isPlaying, setIsPlaying] = useState(false)
 
@@ -48,11 +48,17 @@ const AudioPlayer = () => {
     }
 
 
-    const onRewindButton = () => {
-        if(!audioRef.current || drivenByMidi) return 
-        audioRef.current.currentTime = 0
-        sendCurrentTickToServer(0)
-    }
+    const onRewindButton = () => seek(0)
+
+    // The cursor moved by hand (a click in the timeline, the arrows, Back to Start): the audio goes
+    // there too, so that playback carries on from it rather than bringing the cursor back
+    const trackRef = useRef(track)
+    trackRef.current = track
+    useEffect(() => onSeek(tick => {
+        if (audioRef.current && trackRef.current) {
+            audioRef.current.currentTime = Math.max(0, tickToTime(tick, trackRef.current.bpm))
+        }
+    }), [])
 
     useEffect(() => {
         if(isPlaying && track) {
@@ -71,7 +77,7 @@ const AudioPlayer = () => {
     const menuActionsRef = useRef({ toggle: () => { /* set below */ }, rewind: () => { /* set below */ } })
     menuActionsRef.current = {
         toggle: () => { if (!drivenByMidi && !isTextField(document.activeElement)) (isPlaying ? pause : play)() },
-        rewind: () => { if (!isPlaying && !isTextField(document.activeElement)) onRewindButton() },
+        rewind: () => { if (!isTextField(document.activeElement)) onRewindButton() },
     }
     useEffect(() => {
         const unsubscribes = [
@@ -113,7 +119,7 @@ const AudioPlayer = () => {
             value={false}
             title={drivenTitle ?? 'Back to Start (Return)'}
             onClick={onRewindButton}
-            disabled={isPlaying || drivenByMidi}>
+            disabled={drivenByMidi}>
             <BackToStartIcon/>
         </SmallButton>
     </>

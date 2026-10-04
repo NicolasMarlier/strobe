@@ -33,7 +33,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
     } = props
 
     const { setActiveEditor } = useDmxMidiContext()
-    const { sendCurrentTickToServer } = useRealTimeContext()
+    const { seek } = useRealTimeContext()
 
     // Keep all non-ref props fresh so the registered-once handlers never use stale closures
     const p = useRef({
@@ -42,7 +42,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         x0: props.x0 ?? 0,
         editorMode: props.editorMode ?? 'TrackEditor' as const,
         setActiveEditor,
-        sendCurrentTickToServer,
+        seek,
     })
     p.current = {
         ...props,
@@ -50,7 +50,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         x0: props.x0 ?? 0,
         editorMode: props.editorMode ?? 'TrackEditor' as const,
         setActiveEditor,
-        sendCurrentTickToServer,
+        seek,
     }
 
     const canvasTop = () => canvasRef.current?.getBoundingClientRect().top || 0
@@ -83,7 +83,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
 
             selectionRef.current = null
             const magnetBeats = pixelsPerBeatRef.current > 20 ? 0.25 : 1
-            p.current.sendCurrentTickToServer(
+            p.current.seek(
                 xToTicks({
                     x: event.clientX - canvasLeft(),
                     ticksScroll: ticksScrollRef.current,
