@@ -21,21 +21,15 @@ Open `Strobe.dmg`, then drag Strobe into Applications. The app is signed and not
 All versions and their notes are on the [releases page](https://github.com/NicolasMarlier/strobe/releases), and in the [changelog](CHANGELOG.md).
 
 <!-- whats-new:start -->
-## What's new in 0.7.0
+## What's new in 1.0.0
 
-### New
-- **Audio files that really import:** drop an audio file on a track's waveform, or right-click it and choose Choose Audio File…, Replace Audio File… or Remove Audio (also in the setlist's right-click menu). The file is copied into the show when you save it. WAV, MP3, M4A, FLAC and OGG play as they are; AIFF and CAF are turned into WAV. While a file is dragged over the waveform, it says what dropping it will do. A file Strobe can't find shows up in red, with its name.
-- **Track length:** every track now has an end: the length you set, else its audio's, else 64 bars. Drag the tab at the track's end (it snaps to the audio's end), or double-click it to type a length, like 3:30 or 96 bars. Playback stops there, and a track without audio plays too.
-- **Loops you can stretch:** drag a loop's end to make it repeat longer or shorter. A loop stops at the next pattern or at the track's end.
+Strobe 1.0: the app has run maad avenue's live shows, and it's ready for yours. Nothing changes from 0.7.0, apart from the version number: 1.0 says Strobe is stable, and that shows made with it will keep opening in the versions to come.
 
-### Improved
-- **Recording:** Record starts playback, and Pause stops both. The pattern being recorded grows with the cursor, ends on the beat after its last note, and stops where the next pattern starts (a loop included) or at the track's end. Notes go on the nearest sixteenth, so a note played a hair early still lands on the beat. If you click elsewhere in the timeline while recording, what you've played is kept and recording goes on from there. If nothing was played, no empty pattern is left behind.
-- **Saving keeps only the audio the tracks play:** files of deleted tracks no longer pile up in the show.
-
-### Fixed
-- **Space after picking a track:** Space now starts playback right after you select a track, like the Play button.
-- **Clicking a pattern or a note:** a click that slips by a pixel or two only selects it, without moving it.
-- **Recording with a pattern right after the cursor:** Record now turns itself off when there's no room at the cursor, instead of staying on and recording nothing.
+### Highlights
+- **A setlist of tracks:** each with its audio, its length and its light automation, played from Strobe or driven by MainStage.
+- **DMX buttons:** each lights a set of cells with a color and an effect, fired by a click, a key of a MIDI controller, or patterns recorded along with the song.
+- **A 3D view of the stage:** your lights in place, showing live what the DMX output does, fog included. Add your own devices with fixture files.
+- **Made for the stage:** a narrow window for playing a show, automatic updates that never come during one, and an example show to start from.
 
 Older versions: on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
 <!-- whats-new:end -->

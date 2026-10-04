@@ -2,6 +2,16 @@
 
 What changed in each version of Strobe. The installers are on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
 
+## 1.0.0 — 2026-10-04
+
+Strobe 1.0: the app has run maad avenue's live shows, and it's ready for yours. Nothing changes from 0.7.0, apart from the version number: 1.0 says Strobe is stable, and that shows made with it will keep opening in the versions to come.
+
+### Highlights
+- **A setlist of tracks:** each with its audio, its length and its light automation, played from Strobe or driven by MainStage.
+- **DMX buttons:** each lights a set of cells with a color and an effect, fired by a click, a key of a MIDI controller, or patterns recorded along with the song.
+- **A 3D view of the stage:** your lights in place, showing live what the DMX output does, fog included. Add your own devices with fixture files.
+- **Made for the stage:** a narrow window for playing a show, automatic updates that never come during one, and an example show to start from.
+
 ## 0.7.0 — 2026-10-04
 
 ### New
