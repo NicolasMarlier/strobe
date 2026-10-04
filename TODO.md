@@ -37,7 +37,7 @@
 - [ ] Crash monitoring
 - [ ] Display the keyboard shortcuts
   - The transport's: a Playback menu (Play / Pause, Back to Start) and its buttons' tooltips (done)
-- [ ] App icon
+- [ ] App icon (`app-icon` branch)
 - [ ] No window title ("Untitled — Strobe") while no show is open yet
 - [x] Run several worktrees at once
   - Webpack dev ports made from the worktree's name, `STROBE_DEV_PORT` to force one (done)
