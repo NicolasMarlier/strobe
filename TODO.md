@@ -33,3 +33,4 @@
   - A Privacy section in the README listing exactly what is sent (done on the branch)
   - Add the installs and active users to `bin/stats` and the stats skill
   - Ship it in a release (the deploy skill)
+- [ ] Crash monitoring
