@@ -63,7 +63,7 @@
   - Webpack dev ports made from the worktree's name, `STROBE_DEV_PORT` to force one (done)
   - Run from source, the window shows its branch: a frame in its color, its name at the bottom, in the title and as the Dock badge (done)
   - The feature-worktree skill explains it (done)
-- [ ] Audio files management (`audio-files` branch)
+- [x] Audio files management
   - Importing really works: a file dropped on the track, or Choose / Replace Audio File… in the setlist's right-click menu, is copied into the show, under a new id so a copy of the track keeps the old one. WAV, MP3, M4A, FLAC, OGG as they are; AIFF and CAF turned into WAV by macOS (afconvert), since the window can't play them (done)
   - Until the show is saved, imported files wait in a pending folder: an unsaved show doesn't change on disk, and a new show can get audio before its first save (done)
   - Remove Audio in the right-click menu; the file stays until the save, so an undo brings it back (done)
