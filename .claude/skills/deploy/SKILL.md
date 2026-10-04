@@ -1,6 +1,6 @@
 ---
 name: deploy
-description: Release a new version of Strobe — bump the version (minor by default, patch or major), write the release notes, build the signed and notarized installer, publish it as a GitHub release, update the README's "What's new" and the CHANGELOG, update the version shown on the website (sibling repo strobe-website), and install the released app on this Mac. Use when the user asks to deploy, release, ship or publish a new version of Strobe.
+description: Release a new version of Strobe — bump the version (minor by default, patch or major), write the release notes, build the signed and notarized installer, publish it as a GitHub release, update the README's "What's new" and the CHANGELOG, and update the version shown on the website (sibling repo strobe-website); the installed app updates itself. Use when the user asks to deploy, release, ship or publish a new version of Strobe.
 ---
 
 # Deploy a new version of Strobe
@@ -100,7 +100,7 @@ The website shows the app in videos (`assets/videos/`: the overview, the 3D scen
 - **Videos**: redo them at each release with the website-videos skill, from the released installer. It needs nobody at the keyboard and doesn't touch the user's Strobe: start it as soon as the release is published, in the background, and put them on the website after the user has watched them.
 - **The rest**: go through the approved notes; for each change a user would see on screen (a new mode, a panel that moved, a new button), name what it makes outdated: the cues animation (the buttons, their settings, the effects), a screenshot, a feature-list item. Tell the user which ones, and why. Change nothing without their go; a feature-list item, you may rewrite once they agree. Nothing outdated: say so in one line.
 
-Screenshots to redo are taken from the released app, after step 10 has installed it:
+Screenshots to redo are taken from the released app, once the Strobe in `/Applications` has updated itself to it (step 10; `defaults read /Applications/Strobe.app/Contents/Info.plist CFBundleShortVersionString`):
 
 1. Launch it with the debugging port: `open -a /Applications/Strobe.app --args --remote-debugging-port=9222` (quit it first if it runs), and check `curl -s http://127.0.0.1:9222/json/list` lists the `STROBE` page.
 2. The user sets the stage: their show open, the panel or passage the screenshot needs.
@@ -108,14 +108,10 @@ Screenshots to redo are taken from the released app, after step 10 has installed
 4. Make contact sheets (`magick montage …`), look at them, recommend the best, and open the folder for the user (`open <dir>`).
 5. Once they pick: `cwebp -q 85` into the website's assets, update the `<img>`'s `width`, `height` and `alt`, preview the site locally (`npx --yes http-server -p 8080 -c-1 -s .`, then `open`), and commit and push the website after their go.
 
-## 10. Install the released version on this Mac
+## 10. The installed app updates itself
 
-The released installer, the one users get: not `bin/deploy`, which builds an unsigned local copy.
-
-- Strobe running from `/Applications/Strobe.app`: ask the user to quit it, and wait.
-- Download the public link to a temporary folder, mount it (`hdiutil attach -nobrowse -readonly`), copy `Strobe.app` next to the installed one (`ditto` into `/Applications/.Strobe.app.installing`), swap it in for the old one, then detach the image.
-- Check: `defaults read /Applications/Strobe.app/Contents/Info.plist CFBundleShortVersionString` gives `<version>`, and `spctl --assess --type execute --verbose /Applications/Strobe.app` accepts it (`source=Notarized Developer ID`).
+Don't install the release by hand on this Mac: the Strobe in `/Applications` finds it with its auto-update (checked 10 s after launch, then every 4 hours), downloads it in the background and installs it when Strobe quits. Strobe › Check for Updates… gets it right away. The feed check of step 7 is enough.
 
 ## 11. Wrap up
 
-Tell the user, in French and briefly: the version, the release link, the public download link, what changed on the website, the installed app, and what's left (a check that failed, a screenshot to redo).
+Tell the user, in French and briefly: the version, the release link, the public download link, what changed on the website, and what's left (a check that failed, a screenshot to redo).
