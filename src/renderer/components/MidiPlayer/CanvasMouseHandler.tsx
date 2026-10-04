@@ -115,6 +115,8 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
 
     const onMouseDown = (event: MouseEvent) => {
         p.current.setActiveEditor(p.current.editorMode)
+        // A right-click (or Ctrl-click) opens a menu, it doesn't select nor move the cursor
+        if(event.button == 2 || event.ctrlKey) return
 
         if(event.clientY - canvasTop() >= 0 &&
             event.clientY - canvasTop() < p.current.timelineHeight) {

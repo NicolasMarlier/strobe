@@ -96,7 +96,7 @@ export class Store extends EventEmitter {
         return structuredClone(track)
     }
 
-    updateTrack = (id: number, params: TrackUpdateParams & { audio_filename?: string | null }): Track => {
+    updateTrack = (id: number, params: TrackUpdateParams & { audio_filename?: string | null, audio_id?: number }): Track => {
         const track = this.tracks.find(p => p.id == id)
         if (!track) throw new NotFoundError("Track not found")
 
@@ -114,6 +114,7 @@ export class Store extends EventEmitter {
         track.name = params.name ?? track.name
         track.bpm = params.bpm ?? track.bpm
         if ('audio_filename' in params) track.audio_filename = params.audio_filename ?? null
+        if (params.audio_id !== undefined) track.audio_id = params.audio_id
 
         if (newId != id) this.emit(STORE_EVENTS.TRACK_RENAMED, id, newId)
         this.changed()

@@ -86,32 +86,73 @@ const readScene = (file: ShowFile): DmxScene => {
 
 const isTrackAudioFile = (filename: string) => /^track_\d+\.\w+$/.test(filename)
 
-const listAudioFiles = (dir: string) => fs.existsSync(audioDir(dir))
-    ? fs.readdirSync(audioDir(dir)).filter(isTrackAudioFile)
+const listAudioFiles = (audio: string) => fs.existsSync(audio)
+    ? fs.readdirSync(audio).filter(isTrackAudioFile)
     : []
 
-// Writes the show into `dir`. When `fromDir` is another show (Save As), its audio is copied along.
-export const writeShow = (dir: string, data: ShowData, fromDir: string | null) => {
+// The id a track's audio file is named after: audio/track_<id>.<ext>
+export const audioFileId = (track: Track) => track.audio_id ?? track.id
+
+// The track's audio file in the first of these audio folders that has it
+export const findAudioFile = (audioDirs: (string | null)[], fileId: number): string | null => {
+    for (const audio of audioDirs) {
+        const name = audio && listAudioFiles(audio).find(f => f.startsWith(`track_${fileId}.`))
+        if (name) return path.join(audio, name)
+    }
+    return null
+}
+
+// An id no audio file of the show uses, in any of these folders, so a new file never replaces another track's
+export const newAudioFileId = (tracks: Track[], audioDirs: (string | null)[]) => 1 + Math.max(0,
+    ...tracks.flatMap(t => [t.id, t.audio_id ?? 0]),
+    ...audioDirs.flatMap(audio => audio ? listAudioFiles(audio) : []).map(f => Number(/^track_(\d+)\./.exec(f)![1])),
+)
+
+// Rename across volumes too (the pending folder is in the system's temporary folder)
+const moveFile = (from: string, to: string) => {
+    try {
+        fs.renameSync(from, to)
+    } catch (e) {
+        if ((e as NodeJS.ErrnoException).code != 'EXDEV') throw e
+        fs.copyFileSync(from, to, fs.constants.COPYFILE_FICLONE)
+        fs.unlinkSync(from)
+    }
+}
+
+// Writes the show into `dir`, with the audio files of its tracks and no other.
+// Each file is taken from `pendingDir` (imported since the last save: moved in) or else from the show
+// it was opened from, `fromDir` (`dir` itself for a save in place, another show for a Save As).
+// Files no track plays any more are moved to `pendingDir` on a save in place, so an undo still finds them
+export const writeShow = (dir: string, data: ShowData, fromDir: string | null, pendingDir: string | null = null) => {
     if (fs.existsSync(dir) && !isShowDir(dir) && fs.readdirSync(dir).length > 0) {
         throw new ShowFileError(`${path.basename(dir)} already exists and is not a show`)
     }
-    fs.mkdirSync(audioDir(dir), { recursive: true })
+    const audio = audioDir(dir)
+    fs.mkdirSync(audio, { recursive: true })
+    const inPlace = !!fromDir && path.resolve(fromDir) == path.resolve(dir)
 
-    if (fromDir && path.resolve(fromDir) != path.resolve(dir)) {
-        // Replacing another show: drop its audio so it doesn't leak into this one
-        listAudioFiles(dir).forEach(f => fs.unlinkSync(path.join(audioDir(dir), f)))
-
+    // Copies of a track play the same file
+    const fileIds = new Set(data.tracks.filter(t => t.audio_filename).map(audioFileId))
+    const kept = new Set<string>()
+    fileIds.forEach(fileId => {
+        const source = findAudioFile([pendingDir, fromDir && audioDir(fromDir)], fileId)
+        if (!source) return
+        const target = path.join(audio, path.basename(source))
+        kept.add(path.basename(source))
+        if (path.resolve(source) == path.resolve(target)) return
+        if (pendingDir && path.dirname(source) == pendingDir) moveFile(source, target)
         // Clone on APFS (instant, no extra disk space), plain copy elsewhere
-        listAudioFiles(fromDir).forEach(f => fs.copyFileSync(
-            path.join(audioDir(fromDir), f),
-            path.join(audioDir(dir), f),
-            fs.constants.COPYFILE_FICLONE
-        ))
-    }
+        else fs.copyFileSync(source, target, fs.constants.COPYFILE_FICLONE)
+    })
 
     // Write then rename, so a failed save never leaves a half-written show.json
     const file: ShowFile = { format: FORMAT, version: VERSION, ...data }
     const tmpPath = `${showJsonPath(dir)}.tmp`
     fs.writeFileSync(tmpPath, JSON.stringify(file, null, 2))
     fs.renameSync(tmpPath, showJsonPath(dir))
+
+    // A show replaced by a Save As takes its audio with it
+    listAudioFiles(audio).filter(f => !kept.has(f)).forEach(f => inPlace && pendingDir
+        ? moveFile(path.join(audio, f), path.join(pendingDir, f))
+        : fs.unlinkSync(path.join(audio, f)))
 }

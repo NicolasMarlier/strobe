@@ -31,13 +31,19 @@ export interface ApiContract {
     result: Track
   }
   
+  // A file dropped on the track, by its path: the track, or null if it's not an audio file
   'tracks:audio:upload': {
-    args: [track_id: number, file: File]
-    result: string
+    args: [track_id: number, filePath: string]
+    result: Track | null
+  }
+  // Choose Audio File…: the track, or null if cancelled
+  'tracks:audio:choose': {
+    args: [track_id: number]
+    result: Track | null
   }
   'tracks:audio:reset': {
     args: [track_id: number]
-    result: void
+    result: Track
   }
   'tracks:audio:get': {
     args: [track_id: number]

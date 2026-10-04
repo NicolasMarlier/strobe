@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useRealTimeContext } from '../../contexts/RealTimeContext';
 import { getWave } from './waves';
 import { redrawFullCanvas } from './TrackEditorCanvasDrawer';
-import Draggable from '../DesignSystem/Draggable/Draggable';
 import { addNoteAtTick, insertPatternsAtTick, magnettedTick, nextFreeTick, toggleLoopForPatterns } from './utils_midi_notes';
 import { doRectanglesIntersect, midiPatternToRectangle, PPQ, xToTicks } from './utils';
 import CanvasMouseHandler from './CanvasMouseHandler';
@@ -12,6 +11,8 @@ import { useDmxMidiContext } from '../../contexts/DmxMidiContext';
 import { useDmxButtonsContext } from '../../contexts/DmxButtonsContext';
 import { isSelected, midiPatternArrayEqual, midiPatternsInclude, splitPatternsAtTick, sum } from './utils_midi_patterns';
 import { isPageEdit, useMenuMessage } from '../../useEditMenu';
+import ContextMenu from '../DesignSystem/ContextMenu/ContextMenu';
+import { audioMenuItems } from '../../audioMenu';
 
 const BEATS_OFFSET = 2
 // Following the cursor, the view turns its page once the cursor passes this share of its width
@@ -23,6 +24,26 @@ interface Props {
 }
 
 const BASE_PIXELS_PER_BEAT = 40
+
+// Where the waveform goes, the bottom 2/5 of the track (see drawAudioWave): the only place an audio file can be
+// dropped, and where a right-click is about the track's audio
+const isInAudioLane = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    return e.clientY >= rect.top + rect.height * 3 / 5
+}
+
+// Over the waveform's lane: says to drop a file there while the track has none (or can't find it),
+// and what a drop does while a file is dragged over it
+const AudioDropHint = ({ track, isDraggedOver }: { track: Track, isDraggedOver: boolean }) => {
+    const idle = !track.audio_filename ? 'Drop an audio file here'
+        : track.audio_missing ? `Audio file not found: ${track.audio_filename}. Drop it here again`
+        : null
+    return <div className={`audio-drop-hint ${idle ? '' : 'has-audio'} ${track.audio_missing ? 'missing' : ''} ${isDraggedOver ? 'drag-over' : ''}`}>
+        <svg viewBox='0 0 24 24'><path d='M9 3v12.3A4 4 0 1 0 11 19V8h8V3z'/></svg>
+        <span className='idle'>{idle}</span>
+        <span className='dragging'>{track.audio_filename ? "Drop to replace the track's audio" : "Drop to use as the track's audio"}</span>
+    </div>
+}
 
 const MidiPlayer = (props: Props) => {
     const { track } = props
@@ -40,7 +61,7 @@ const MidiPlayer = (props: Props) => {
     const isFollowingRef = useRef(isFollowing)
     isFollowingRef.current = isFollowing
 
-    const { audioUrl, uploadTrackAudioAndSync } = useDmxButtonsContext()
+    const { audioUrl, uploadTrackAudioAndSync, chooseTrackAudioAndSync, resetTrackAudioAndSync } = useDmxButtonsContext()
 
     const allMidiKeysRef = useRef(allMidiKeys)
     allMidiKeysRef.current = allMidiKeys
@@ -187,8 +208,31 @@ const MidiPlayer = (props: Props) => {
 
     const selectAll = () => setSelection(midiPatternsRef.current)
 
-    const onDropAudioFile = (file: File) => {
-        uploadTrackAudioAndSync(file)
+    const [isDraggingAudio, setIsDraggingAudio] = useState(false)
+    const [audioMenu, setAudioMenu] = useState(undefined as { x: number, y: number } | undefined)
+
+    const onContextMenu = (e: React.MouseEvent) => {
+        e.preventDefault()
+        if(isInAudioLane(e)) setAudioMenu({ x: e.clientX, y: e.clientY })
+    }
+
+    const onDragOver = (e: React.DragEvent) => {
+        const inLane = isInAudioLane(e)
+        setIsDraggingAudio(inLane)
+        if(!inLane) return
+        // Taken here: elsewhere, the window refuses the drop (see renderer.ts)
+        e.preventDefault()
+        e.stopPropagation()
+        e.dataTransfer.dropEffect = 'copy'
+    }
+
+    const onDrop = (e: React.DragEvent) => {
+        setIsDraggingAudio(false)
+        if(!isInAudioLane(e)) return
+        e.preventDefault()
+        e.stopPropagation()
+        const file = e.dataTransfer.files[0]
+        if(file) uploadTrackAudioAndSync(file)
     }
 
     const persistRecordingPattern = () => {
@@ -402,8 +446,11 @@ const MidiPlayer = (props: Props) => {
     
     return (<>
         <div className="midi-container">
-            <Draggable
-                onDropFile={onDropAudioFile}
+            <div
+                onDragOver={onDragOver}
+                onDragLeave={(e) => !e.currentTarget.contains(e.relatedTarget as Node) && setIsDraggingAudio(false)}
+                onDrop={onDrop}
+                onContextMenu={onContextMenu}
                 className={`midi-canvas-container${activeEditor === 'TrackEditor' ? ' midi-canvas-container--focused' : ''}`}>
                 <canvas
                     ref={canvasRef}
@@ -427,7 +474,12 @@ const MidiPlayer = (props: Props) => {
                     ghostItemRef={ghostMidiPatternRef}
                     hoverTickRef={hoverTickRef}
                     isItemInSelection={(item, selected) => midiPatternsInclude(selected, item)}/>
-            </Draggable>
+                <AudioDropHint track={track} isDraggedOver={isDraggingAudio}/>
+            </div>
+            { audioMenu && <ContextMenu
+                {...audioMenu}
+                onClose={() => setAudioMenu(undefined)}
+                items={audioMenuItems(track, chooseTrackAudioAndSync, resetTrackAudioAndSync)}/> }
         </div>
         
     </>)

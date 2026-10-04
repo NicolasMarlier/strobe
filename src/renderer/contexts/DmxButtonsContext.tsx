@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import { precomputeWaves } from "../components/MidiPlayer/waves";
-import { createDmxButton, deleteDmxButton, getTrackAudio, listDmxButtons, listTracks, selectTrack, updateDmxButton, uploadTrackAudio } from "../ApiClient";
+import { createDmxButton, deleteDmxButton, chooseTrackAudio, getTrackAudio, listDmxButtons, listTracks, resetTrackAudio, selectTrack, updateDmxButton, uploadTrackAudio } from "../ApiClient";
 import { useNarrowWindow } from "../useNarrowWindow";
 
 interface DmxButtonsContextType {
@@ -20,6 +20,8 @@ interface DmxButtonsContextType {
 
   audioUrl: string | undefined
   uploadTrackAudioAndSync: (file: File) => void
+  chooseTrackAudioAndSync: (trackId: number) => void
+  resetTrackAudioAndSync: (trackId: number) => void
 
 
   createDmxButtonAndSync: () => void
@@ -74,11 +76,17 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
     getTrackAudio(track.id).then((audioUrl) => setAudioUrl(typeof audioUrl == 'string' ? audioUrl : undefined))
   }
 
-  useEffect(syncTrackAudio, [track?.id])
-
+  // Also when the track gets another file
+  useEffect(syncTrackAudio, [track?.id, track?.audio_filename, track?.audio_id])
 
   const uploadTrackAudioAndSync = (file: File) => {
-    track && uploadTrackAudio(track.id, file).then(syncTrackAudio)
+    track && uploadTrackAudio(track.id, file).then(syncTracks)
+  }
+  const chooseTrackAudioAndSync = (trackId: number) => {
+    chooseTrackAudio(trackId).then(syncTracks)
+  }
+  const resetTrackAudioAndSync = (trackId: number) => {
+    resetTrackAudio(trackId).then(syncTracks)
   }
 
   useEffect(() => {
@@ -166,7 +174,7 @@ export const DmxButtonsContextProvider = ({ children }: {children: React.ReactNo
 
         syncTracks,
 
-        audioUrl, uploadTrackAudioAndSync,
+        audioUrl, uploadTrackAudioAndSync, chooseTrackAudioAndSync, resetTrackAudioAndSync,
 
         currentTrackId, setCurrentTrackId,
 

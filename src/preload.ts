@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import type { ApiContract, Channel } from './shared/ipc-contract';
 import { ApiReverseContract, ReverseChannel } from './shared/ipc-reverse-contract';
 
@@ -16,6 +16,8 @@ const onMessage = <C extends ReverseChannel>(channel: C, callback: (params: ApiR
 contextBridge.exposeInMainWorld('strobe', {
   appName: 'STROBE',
   version: process.versions.electron,
+  // A dropped file's path on disk, which the window can't read by itself
+  pathForFile: (file: File) => webUtils.getPathForFile(file),
   api: {
     invoke,
     onMessage
@@ -25,6 +27,7 @@ contextBridge.exposeInMainWorld('strobe', {
 declare global {
   interface Window {
     strobe: {
+      pathForFile: (file: File) => string
       api: {
         invoke: typeof invoke
         onMessage: typeof onMessage

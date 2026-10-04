@@ -1,11 +1,14 @@
 import { handleErrors } from "./application.controller";
 import { DmxLoop } from "../dmx_loop";
 import { Store } from "../store/Store";
+import { isAudioMissing } from "./tracks_audio.controller";
 
 
 export class TracksController {
 
-    static list = async() => handleErrors(async() => Store.getInstance().listTracks())
+    static list = async() => handleErrors(async() =>
+        Store.getInstance().listTracks().map(track => isAudioMissing(track) ? { ...track, audio_missing: true } : track)
+    )
 
     static create = async(params: TrackCreationParams) => handleErrors(async() =>
         Store.getInstance().createTrack(params)

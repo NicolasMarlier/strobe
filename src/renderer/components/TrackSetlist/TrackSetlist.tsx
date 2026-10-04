@@ -1,10 +1,11 @@
 import './TrackSetlist.scss'
 
 import { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { useDmxButtonsContext } from '../../contexts/DmxButtonsContext'
 import { createTrack, deleteTrack, duplicateTrack, reorderTracks, selectTrack, updateTrack } from '../../ApiClient'
 import ConfirmModal from '../DesignSystem/ConfirmModal/ConfirmModal'
+import ContextMenu from '../DesignSystem/ContextMenu/ContextMenu'
+import { audioMenuItems } from '../../audioMenu'
 import TrackSetlistRow, { type RowEditing } from './TrackSetlistRow'
 import { ChevronIcon } from './TrackSetlistCompact'
 
@@ -26,51 +27,6 @@ interface ContextMenuState {
     y: number
 }
 
-interface ContextMenuProps extends ContextMenuState {
-    trackName: string
-    onClose: () => void
-    onRename: () => void
-    onChangeProgram: () => void
-    onChangeBpm: () => void
-    onDuplicate: () => void
-    onDelete: () => void
-}
-
-// The right-click menu of a row. Closes on Escape or a click anywhere else
-const ContextMenu = ({ x, y, trackName, onClose, onRename, onChangeProgram, onChangeBpm, onDuplicate, onDelete }: ContextMenuProps) => {
-    useEffect(() => {
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key == 'Escape') onClose()
-            e.stopPropagation()
-        }
-        window.addEventListener('keydown', onKeyDown, true)
-        window.addEventListener('mousedown', onClose)
-        window.addEventListener('blur', onClose)
-        return () => {
-            window.removeEventListener('keydown', onKeyDown, true)
-            window.removeEventListener('mousedown', onClose)
-            window.removeEventListener('blur', onClose)
-        }
-    }, [onClose])
-
-    const item = (label: string, action: () => void, className = '') => <div
-        className={`setlist-menu-item ${className}`}
-        onClick={() => { onClose(); action() }}>{label}</div>
-
-    // Out of the section, which clips its content
-    return createPortal(
-        <div className='setlist-menu' style={{ left: x, top: y }} onMouseDown={(e) => e.stopPropagation()}>
-            { item('Rename', onRename) }
-            { item('Change MIDI program…', onChangeProgram) }
-            { item('Change BPM…', onChangeBpm) }
-            { item('Duplicate', onDuplicate) }
-            <div className='setlist-menu-separator'/>
-            { item(`Delete “${trackName}”…`, onDelete, 'danger') }
-        </div>,
-        document.body,
-    )
-}
-
 // The show's tracks in MIDI program order, in a column on the left of the window.
 // Collapsed (by its title or Cmd+\\), only the current track shows, next to the interfaces (TrackSetlistCompact).
 // Click selects a track, double-click renames it, drag reorders (renumbering the programs 1, 2, 3…),
@@ -80,10 +36,11 @@ interface Props {
 }
 
 const TrackSetlist = ({ collapse }: Props) => {
-    const { tracks, currentTrackId, syncTracks } = useDmxButtonsContext()
+    const { tracks, currentTrackId, syncTracks, chooseTrackAudioAndSync, resetTrackAudioAndSync } = useDmxButtonsContext()
 
     const [editing, setEditing] = useState(undefined as { trackId: number, field: RowEditing } | undefined)
     const [menu, setMenu] = useState(undefined as ContextMenuState | undefined)
+    const closeMenu = () => setMenu(undefined)
     const [deletingTrackId, setDeletingTrackId] = useState(undefined as number | undefined)
     const [error, setError] = useState(undefined as { trackId: number, message: string } | undefined)
     const [drag, setDrag] = useState(undefined as { trackId: number, dropIndex: number } | undefined)
@@ -268,14 +225,19 @@ const TrackSetlist = ({ collapse }: Props) => {
         </div>
 
         { menu && menuTrack && <ContextMenu
-            {...menu}
-            trackName={menuTrack.name}
-            onClose={() => setMenu(undefined)}
-            onRename={() => setEditing({ trackId: menuTrack.id, field: 'name' })}
-            onChangeProgram={() => setEditing({ trackId: menuTrack.id, field: 'program' })}
-            onChangeBpm={() => setEditing({ trackId: menuTrack.id, field: 'bpm' })}
-            onDuplicate={() => duplicate(menuTrack.id)}
-            onDelete={() => setDeletingTrackId(menuTrack.id)}/> }
+            x={menu.x}
+            y={menu.y}
+            onClose={closeMenu}
+            items={[
+                { label: 'Rename', action: () => setEditing({ trackId: menuTrack.id, field: 'name' }) },
+                { label: 'Change MIDI program…', action: () => setEditing({ trackId: menuTrack.id, field: 'program' }) },
+                { label: 'Change BPM…', action: () => setEditing({ trackId: menuTrack.id, field: 'bpm' }) },
+                { label: 'Duplicate', action: () => duplicate(menuTrack.id) },
+                'separator',
+                ...audioMenuItems(menuTrack, chooseTrackAudioAndSync, resetTrackAudioAndSync),
+                'separator',
+                { label: `Delete “${menuTrack.name}”…`, action: () => setDeletingTrackId(menuTrack.id), danger: true },
+            ]}/> }
 
         { deletingTrack && <ConfirmModal
             title={`Delete “${deletingTrack.name}”?`}

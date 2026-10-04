@@ -1,3 +1,5 @@
+// Its menu looks like a right-click menu
+import '../DesignSystem/ContextMenu/ContextMenu.scss'
 import './NarrowBar.scss'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -59,10 +61,10 @@ const TrackPicker = () => {
 
         {/* Out of the top bar, which clips its content */}
         { menuPosition && createPortal(
-            <div className='setlist-menu track-picker-menu' style={menuPosition} onMouseDown={(e) => e.stopPropagation()}>
+            <div className='context-menu track-picker-menu' style={menuPosition} onMouseDown={(e) => e.stopPropagation()}>
                 { tracks.map(t => <div
                     key={t.id}
-                    className={`setlist-menu-item ${t.id == currentTrackId ? 'current' : ''}`}
+                    className={`context-menu-item ${t.id == currentTrackId ? 'current' : ''}`}
                     onClick={() => {
                         close()
                         if (t.id != currentTrackId) selectTrack(t.id)

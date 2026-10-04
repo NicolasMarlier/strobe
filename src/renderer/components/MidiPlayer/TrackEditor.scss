@@ -31,6 +31,59 @@
       height: 100%;
     }
   }
+
+  // Over the waveform's lane, the bottom 2/5 (see drawAudioWave). Clicks go through, to the canvas
+  .audio-drop-hint {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 4px;
+    height: calc(40% - 8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    pointer-events: none;
+    font-size: 11px;
+    color: #666;
+    border: 1px dashed #444;
+    border-radius: 4px;
+
+    svg {
+      width: 10px;
+      height: 10px;
+      fill: currentColor;
+    }
+
+    .dragging {
+      display: none;
+    }
+
+    &.has-audio {
+      display: none;
+    }
+
+    &.missing {
+      color: #ff7b6b;
+      border-color: #ff7b6b66;
+    }
+  }
+
+  .audio-drop-hint.drag-over {
+    display: flex;
+    color: #ddd;
+    border-color: #ffffffaa;
+    background-color: #000000aa;
+
+    .idle {
+      display: none;
+    }
+
+    .dragging {
+      display: inline;
+    }
+  }
+
   .controls-panel {
     width: 160px;
     // box-shadow: 3px 3px 0px #111 inset, 2px 2px 0px #333;

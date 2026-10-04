@@ -32,4 +32,12 @@ import { init as initCrashReports } from '@sentry/electron/renderer';
 // Only when it reports them: then it has given the window a way to pass them on
 if ((window as { __SENTRY_IPC__?: unknown }).__SENTRY_IPC__) initCrashReports();
 
+// A file dropped where nothing takes it would replace the whole window with it: refused instead.
+// The track's audio lane takes audio files (see TrackEditor)
+window.addEventListener('dragover', (e) => {
+    e.preventDefault()
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'none'
+})
+window.addEventListener('drop', (e) => e.preventDefault())
+
 import './renderer/root';

@@ -89,9 +89,13 @@ const TrackSetlistRow = (props: Props) => {
             : <span className='name' title={track.name}>{track.name}</span> }
 
         <span className='meta'>
-            { track.audio_filename && <svg className='audio' viewBox='0 0 24 24' aria-label='Has audio'>
-                <path d='M9 3v12.3A4 4 0 1 0 11 19V8h8V3z'/>
-            </svg> }
+            { track.audio_filename && <span
+                className={`audio ${track.audio_missing ? 'missing' : ''}`}
+                title={track.audio_missing ? `Audio file not found: ${track.audio_filename}` : track.audio_filename}>
+                <svg viewBox='0 0 24 24' aria-label={track.audio_missing ? 'Audio file not found' : 'Has audio'}>
+                    <path d='M9 3v12.3A4 4 0 1 0 11 19V8h8V3z'/>
+                </svg>
+            </span> }
             { editing == 'bpm'
                 ? <InlineInput
                     className='bpm'

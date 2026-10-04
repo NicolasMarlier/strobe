@@ -45,7 +45,6 @@ handle('tracks:select',   TracksController.select)
 handle('tracks:reorder', TracksController.reorder)
 handle('tracks:duplicate', TracksController.duplicate)
 
-handle('tracks:audio:upload', TracksAudioController.upload)
 handle('tracks:audio:reset', TracksAudioController.reset)
 handle('tracks:audio:get', TracksAudioController.getAudio)
 
@@ -73,6 +72,8 @@ handle('fixtures:list', async () => FixtureLibrary.getInstance().list())
 FixtureLibrary.getInstance().on(FIXTURE_LIBRARY_EVENTS.CHANGED, () => sendToAllWindows('fixtures:changed', null))
 
 handle('show:state', async () => showState())
+handleWithWindow('tracks:audio:upload', TracksAudioController.upload)
+handleWithWindow('tracks:audio:choose', TracksAudioController.choose)
 handleWithWindow('app:rendered', revealWindow)
 handleWithWindow('show:new', newShow)
 handleWithWindow('show:open', openShow)
