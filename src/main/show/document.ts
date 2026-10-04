@@ -89,6 +89,15 @@ const confirmDiscardChanges = async(win: BrowserWindow) => {
     return response == 1
 }
 
+// Before the app quits by itself (to install an update): what to do with unsaved changes, asked once.
+// Returns whether it may quit
+export const confirmQuit = async(win: BrowserWindow) => {
+    if (!await confirmDiscardChanges(win)) return false
+    // Saved or discarded: closing the window won't ask again
+    dirty = false
+    return true
+}
+
 // Asks before closing the window (or quitting the app) with unsaved changes
 export const guardWindowClose = (win: BrowserWindow) => {
     let allowClose = false
