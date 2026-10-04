@@ -1,4 +1,5 @@
-import { WebUSB, WebUSBDevice } from 'usb';
+/// <reference types="w3c-web-usb" />
+import { WebUSB } from 'usb';
 import { dmxHexToArrayBuffer, emptyDmxHexString } from './utils';
 
 
@@ -15,7 +16,7 @@ const customWebUSB = new WebUSB({
 
 export class EnttecOpenDMXUSB {
     static instance: EnttecOpenDMXUSB | undefined
-    device: WebUSBDevice | undefined
+    device: USBDevice | undefined
     endpointNumber: number
     dmxHexString: string
     initSequenceSent: boolean

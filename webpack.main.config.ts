@@ -1,6 +1,5 @@
 import { execSync } from 'child_process';
-import path from 'path';
-import { DefinePlugin, NormalModuleReplacementPlugin, type Configuration } from 'webpack';
+import { DefinePlugin, type Configuration } from 'webpack';
 
 import { rules } from './webpack.rules';
 import { plugins } from './webpack.plugins';
@@ -27,11 +26,6 @@ export const mainConfig: Configuration = {
     ...plugins,
     // The commit shown in the About panel (see src/main/init/about.ts)
     new DefinePlugin({ STROBE_COMMIT: JSON.stringify(currentCommit()) }),
-    // Load usb's native binary with a plain require (see src/main/usb_bindings.js)
-    new NormalModuleReplacementPlugin(
-      /[/\\]usb[/\\]dist[/\\]usb[/\\]bindings\.js$/,
-      path.resolve(__dirname, 'src/main/usb_bindings.js'),
-    ),
   ],
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css', '.json'],
