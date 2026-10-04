@@ -3,6 +3,8 @@
 # Publishes the installer built by bin/release as a GitHub release (tag v<version>),
 # downloadable at a link that stays the same across versions:
 #   https://github.com/NicolasMarlier/strobe/releases/latest/download/Strobe.dmg
+# along with the ZIP the installed apps update from (Strobe-darwin-<arch>-<version>.zip: update.electronjs.org
+# knows it by its name, see src/main/auto_update.ts).
 #
 # The release is tagged on the commit the installer was built from, which must be on origin/main.
 # Its notes come from the Markdown file given as argument (bin/publish notes.md), followed by how to
@@ -28,10 +30,12 @@ cd "$APP_DIR"
 VERSION="$(node -p "require('./package.json').version")"
 TAG="v$VERSION"
 DMG="out/make/$APP_NAME-$VERSION-$ARCH.dmg"
+ZIP="out/make/zip/darwin/$ARCH/$APP_NAME-darwin-$ARCH-$VERSION.zip"
 
 command -v gh >/dev/null || { echo "gh is missing: brew install gh && gh auth login" >&2; exit 1; }
 [ -f "$DMG" ] || { echo "No installer at $DMG: run bin/release first" >&2; exit 1; }
 xcrun stapler validate "$DMG" >/dev/null || { echo "$DMG is not notarized: run bin/release" >&2; exit 1; }
+[ -f "$ZIP" ] || { echo "No update ZIP at $ZIP: run bin/release" >&2; exit 1; }
 
 # The commit bin/release built from (it refuses uncommitted changes)
 COMMIT="$(cat "$DMG.commit" 2>/dev/null)" || { echo "Unknown source commit for $DMG: run bin/release" >&2; exit 1; }
@@ -55,7 +59,7 @@ else
   echo "$INSTALL" > "$UPLOAD_DIR/notes.md"
 fi
 
-gh release create "$TAG" "$UPLOAD_DIR/$APP_NAME.dmg" \
+gh release create "$TAG" "$UPLOAD_DIR/$APP_NAME.dmg" "$ZIP" \
   --repo NicolasMarlier/strobe \
   --target "$COMMIT" \
   --title "$APP_NAME $VERSION" \

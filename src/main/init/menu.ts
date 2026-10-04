@@ -4,6 +4,7 @@ import { newShow, openExampleShow, openRecentShow, openShow, saveShow, saveShowA
 import { clearRecentShows, describeRecentShow, listRecentShows, onRecentShowsChange } from "../show/recent_shows"
 import { sendToAllWindows } from "./ipc-router"
 import { isTelemetryEnabled, setTelemetryEnabled } from "../telemetry"
+import { checkForUpdatesByUser, onUpdateStateChange, restartToInstallUpdate, updateState } from "../auto_update"
 
 // Menu callbacks receive the focused window, which is always our BrowserWindow
 const onWindow = (action: (win: BrowserWindow) => void) =>
@@ -31,6 +32,17 @@ const openRecentSubmenu = (): MenuItemConstructorOptions[] => {
     ]
 }
 
+// Strobe › Check for Updates…, or once a version is downloaded, the way to install it now (see auto_update.ts)
+const updateItem = (): MenuItemConstructorOptions => {
+    const state = updateState()
+    switch (state.status) {
+        case 'checking': return { label: 'Checking for Updates…', enabled: false }
+        case 'downloading': return { label: 'Downloading Update…', enabled: false }
+        case 'ready': return { label: `Restart to Install Strobe ${state.version}`, click: restartToInstallUpdate }
+        default: return { label: 'Check for Updates…', click: checkForUpdatesByUser }
+    }
+}
+
 // Every keyboard shortcut of the app is in this menu, to be found. The window handles the keys without a
 // modifier first (Space, Return, the arrows, T, J, L, Backspace), and takes them; on macOS, those it leaves
 // come here (registerAccelerator only works on Linux and Windows), so a key typed in a text field lands here too,
@@ -50,12 +62,13 @@ export const setPlaybackDrivenByMidi = (driven: boolean) => {
 
 const buildMenu = () => {
     const template: MenuItemConstructorOptions[] = [
-        // The standard app menu, plus whether to share the anonymous usage statistics and the crash reports
-        // (see telemetry.ts and crash_reports.ts)
+        // The standard app menu, plus the updates, and whether to share the anonymous usage statistics and the
+        // crash reports (see telemetry.ts and crash_reports.ts)
         ...(process.platform == 'darwin' ? [{
             role: 'appMenu',
             submenu: [
                 { role: 'about' },
+                updateItem(),
                 { type: 'separator' },
                 {
                     label: 'Share Anonymous Usage Statistics and Crash Reports',
@@ -182,4 +195,5 @@ const buildMenu = () => {
 export const initMenu = () => {
     buildMenu()
     onRecentShowsChange(buildMenu)
+    onUpdateStateChange(buildMenu)
 }

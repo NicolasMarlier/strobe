@@ -2,7 +2,9 @@
 #
 # Builds the Strobe installer to share: out/make/Strobe-<version>-<arch>.dmg,
 # signed with the Developer ID certificate of the keychain and notarized by Apple,
-# so that it opens on any Mac without a Gatekeeper warning.
+# so that it opens on any Mac without a Gatekeeper warning. And the same app as a ZIP,
+# out/make/zip/darwin/<arch>/Strobe-darwin-<arch>-<version>.zip, which the installed apps update from
+# (see src/main/auto_update.ts).
 #
 # Needs, once: the notarization credentials in the keychain (see NOTARY_PROFILE in forge.config.ts), and
 # a Sentry auth token, to send the source maps of the crash reports (see webpack.plugins.ts). Create one at
@@ -44,9 +46,10 @@ COMMIT="$(git rev-parse HEAD)"
 VERSION="$(node -p "require('./package.json').version")"
 BUILT_APP="out/$APP_NAME-darwin-$ARCH/$APP_NAME.app"
 DMG="out/make/$APP_NAME-$VERSION-$ARCH.dmg"
+ZIP="out/make/zip/darwin/$ARCH/$APP_NAME-darwin-$ARCH-$VERSION.zip"
 
-# Signs and notarizes the app, then signs the disk image around it
-STROBE_RELEASE=1 yarn make --targets dmg
+# Signs and notarizes the app, then signs the disk image around it, and zips it for the updates
+STROBE_RELEASE=1 yarn make --targets dmg,zip
 
 # The disk image is notarized too, so that macOS also trusts it offline
 xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
@@ -56,6 +59,8 @@ xcrun stapler staple "$DMG"
 spctl --assess --type execute --verbose "$BUILT_APP"
 spctl --assess --type open --context context:primary-signature --verbose "$DMG"
 xcrun stapler validate "$DMG"
+# The update: the same notarized app (the ZIP is made from it)
+[ -f "$ZIP" ] || { echo "No update ZIP at $ZIP" >&2; exit 1; }
 
 echo "$COMMIT" > "$DMG.commit"
 

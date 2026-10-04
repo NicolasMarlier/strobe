@@ -81,9 +81,9 @@ It ends on `Ready to share: …/out/make/Strobe-<version>-arm64.dmg`. On a failu
 
 ## 7. GitHub release
 
-`bin/publish out/release-notes-<version>.md`. It tags `v<version>` on the built commit, uploads `Strobe.dmg`, appends how to install to the notes, and marks the release as latest.
+`bin/publish out/release-notes-<version>.md`. It tags `v<version>` on the built commit, uploads `Strobe.dmg` and the update ZIP (`Strobe-darwin-arm64-<version>.zip`, which the installed apps update from), appends how to install to the notes, and marks the release as latest.
 
-Check: `gh release view v<version> --repo NicolasMarlier/strobe`, and the public link now leads to the new tag (`curl -sI https://github.com/NicolasMarlier/strobe/releases/latest/download/Strobe.dmg`: its `location` names `v<version>`).
+Check: `gh release view v<version> --repo NicolasMarlier/strobe`, and the public link now leads to the new tag (`curl -sI https://github.com/NicolasMarlier/strobe/releases/latest/download/Strobe.dmg`: its `location` names `v<version>`). The update feed offers it to the previous version: `curl -s https://update.electronjs.org/NicolasMarlier/strobe/darwin-arm64/<previous version>` gives a JSON whose `name` is `Strobe <version>` (the service caches the releases: it can take a few minutes).
 
 ## 8. Website
 

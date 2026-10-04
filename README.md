@@ -73,6 +73,8 @@ The crash reports, when Strobe hits an error it didn't expect or crashes:
 - **About the Mac:** Strobe's, Electron's and macOS's versions, the Mac's model, processor and memory.
 - **When Strobe itself crashes:** a crash dump, sent at the next launch. It holds a snapshot of a part of Strobe's memory at the time of the crash, which Sentry reads to find where it happened, then discards.
 
+Updates: at launch and every few hours, Strobe asks [update.electronjs.org](https://github.com/electron/update.electronjs.org), a free service run by the Electron project that reads Strobe's GitHub releases, whether there's a newer version. It sends Strobe's version and the Mac's architecture, nothing else. A new version downloads in the background and is installed the next time Strobe starts, never during a show; **Strobe › Restart to Install** installs it right away.
+
 Never sent: the names of your shows, tracks or buttons, their content, your audio, your IP address (neither TelemetryDeck nor Strobe's crash reports keep it), or anything typed in Strobe.
 
 ## Fixture plugins: add your own devices
