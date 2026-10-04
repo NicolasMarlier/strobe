@@ -74,3 +74,4 @@
   - Validated on real releases: an installed 0.6.0 found 0.6.1, downloaded it and restarted into it, still notarized (done)
 - [x] Welcome screen redesign, in the app's look
   - Buttons like the app's, with white line icons, New Show the primary one; no more offset shadows; the recent shows framed as before, rows highlighted on hover with the remove cross and an open chevron; the example show as a quiet link with a play icon (done)
+- [ ] Website: SEO
