@@ -48,7 +48,7 @@
 - [ ] Display the keyboard shortcuts
   - The transport's: a Playback menu (Play / Pause, Back to Start) and its buttons' tooltips (done)
 - [x] Show file icon, in the Finder and the title bar
-- [ ] No window title ("Untitled — Strobe") while no show is open yet
+- [x] Window title is just STROBE, no "Untitled", while no show is open yet
 - [x] Run several worktrees at once
   - Webpack dev ports made from the worktree's name, `STROBE_DEV_PORT` to force one (done)
   - Run from source, the window shows its branch: a frame in its color, its name at the bottom, in the title and as the Dock badge (done)
