@@ -78,6 +78,6 @@
   - Keyword titles and descriptions, canonical URLs, a 1200x630 social preview image (`assets/og-image.jpg`), SoftwareApplication structured data (its version updated by the deploy skill's grep), robots.txt, sitemap.xml, clean URLs without trailing slash (done)
   - The GitHub repo's description, website link and topics (done)
   - Staying on strobe-website.vercel.app, no custom domain for now
-  - Google Search Console: the site verified (meta tag on the home page), the sitemap submitted, Google can index the home page (done). The indexing request failed right after the verification: to redo
+  - Google Search Console: the site verified (meta tag on the home page), Google can index the home page (done). To do: submit `sitemap.xml` if not done yet, and redo the indexing request (it failed right after the verification)
 - [ ] Promote Strobe: posts on r/MainStage, then r/macapps and r/lightingdesign, and a listing on AlternativeTo (suggested as an alternative to Lightkey and QLC+)
   - Drafts ready to paste in `~/Documents/Strobe - Promotion Reddit et AlternativeTo.pdf`
