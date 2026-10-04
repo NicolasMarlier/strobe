@@ -37,6 +37,8 @@
   - The cues: an animation in HTML and JavaScript of a cue's editing, in the app's look (done)
 - [x] Move the cursor while playing
 - [ ] Website: a short story, filmed with Nico, on why Strobe was made
+- [ ] Website: fewer videos, more animated HTML
+  - A section on recording a show: why it's useful, next to an HTML animation of a take (Record, the cues played on a MIDI keyboard along with the song, Pause) and its playback with nobody touching anything (done)
 - [x] Download monitoring: website visits (Vercel Web Analytics) and downloads per version (GitHub), in `bin/stats` and the stats skill
 - [x] Move the cursor by hand during playback (seek while playing)
   - A click in the timeline, the arrows, Return and Back to Start move the cursor while playing, and the audio follows; none of them while MainStage drives playback (done)
