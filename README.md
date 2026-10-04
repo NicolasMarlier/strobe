@@ -56,15 +56,22 @@ Feedback, bug reports and ideas are very welcome. They all go to **[GitHub Issue
 
 ## Privacy
 
-Strobe sends anonymous usage statistics to [TelemetryDeck](https://telemetrydeck.com), so we know how many people use it and which of its features matter. To turn them off: **Strobe › Share Anonymous Usage Statistics**.
+Strobe sends anonymous usage statistics to [TelemetryDeck](https://telemetrydeck.com), so we know how many people use it and which of its features matter, and crash reports to [Sentry](https://sentry.io), so we can fix what breaks. To turn both off: **Strobe › Share Anonymous Usage Statistics and Crash Reports**.
 
-What is sent, and nothing else:
+The usage statistics, and nothing else:
 
 - **At launch:** Strobe's version, the macOS version, the Mac's architecture (Apple silicon or Intel), and whether it's the first launch.
 - **Once a session, the first time it happens:** a show was opened, playback started, MainStage was connected, a DMX interface was connected, the narrow window was used.
 - **To tell installs apart:** a random ID made on the first launch, which TelemetryDeck hashes again before storing it. It says nothing about you or your Mac.
 
-Never sent: the names of your shows, tracks or buttons, their content, your audio, your IP address (TelemetryDeck doesn't keep it), or anything typed in Strobe.
+The crash reports, when Strobe hits an error it didn't expect or crashes:
+
+- **The error:** its message and where it happened in Strobe's code, with any file path replaced by `<path>`.
+- **What led to it:** the last things Strobe did (the window opened, a click on a button), never what the console printed.
+- **About the Mac:** Strobe's, Electron's and macOS's versions, the Mac's model, processor and memory.
+- **When Strobe itself crashes:** a crash dump, sent at the next launch. It holds a snapshot of a part of Strobe's memory at the time of the crash, which Sentry reads to find where it happened, then discards.
+
+Never sent: the names of your shows, tracks or buttons, their content, your audio, your IP address (neither TelemetryDeck nor Strobe's crash reports keep it), or anything typed in Strobe.
 
 ## Fixture plugins: add your own devices
 

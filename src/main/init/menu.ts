@@ -33,14 +33,15 @@ const openRecentSubmenu = (): MenuItemConstructorOptions[] => {
 
 const buildMenu = () => {
     const template: MenuItemConstructorOptions[] = [
-        // The standard app menu, plus whether to share the anonymous usage statistics (see telemetry.ts)
+        // The standard app menu, plus whether to share the anonymous usage statistics and the crash reports
+        // (see telemetry.ts and crash_reports.ts)
         ...(process.platform == 'darwin' ? [{
             role: 'appMenu',
             submenu: [
                 { role: 'about' },
                 { type: 'separator' },
                 {
-                    label: 'Share Anonymous Usage Statistics',
+                    label: 'Share Anonymous Usage Statistics and Crash Reports',
                     type: 'checkbox',
                     checked: isTelemetryEnabled(),
                     click: (item) => setTelemetryEnabled(item.checked),

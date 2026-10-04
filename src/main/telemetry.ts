@@ -6,7 +6,7 @@ import TelemetryDeck from "@telemetrydeck/sdk"
 
 // Anonymous usage statistics, sent to TelemetryDeck: how many installs, how many people use Strobe, and which of
 // its features. Never a show's or a track's name, nor any of its content (the README's Privacy section lists
-// what is sent). Turned off in Strobe › Share Anonymous Usage Statistics
+// what is sent). Turned off in Strobe › Share Anonymous Usage Statistics and Crash Reports
 
 const TELEMETRYDECK_APP_ID = '4891B7D2-EECB-4F7E-B001-F2DE2A466C5E'
 
@@ -30,11 +30,14 @@ interface Settings {
 const settingsPath = () => path.join(app.getPath('userData'), 'telemetry.json')
 
 let settings: Settings | undefined
+let firstLaunch = false
 let client: TelemetryDeck | undefined
 const sentThisSession = new Set<UsageSignal>()
 
 const writeSettings = () => {
     try {
+        // Before the app is ready (see loadSettings), its folder may not be there yet
+        fs.mkdirSync(path.dirname(settingsPath()), { recursive: true })
         fs.writeFileSync(settingsPath(), JSON.stringify(settings, null, 2))
     } catch (e) {
         console.error('Could not save the telemetry settings', e)
@@ -54,6 +57,17 @@ const readSettings = (): { settings: Settings, firstLaunch: boolean } => {
     return { settings: { installId: crypto.randomUUID(), enabled: true }, firstLaunch: true }
 }
 
+// Read on first use, and saved on the first launch: the crash reports need it before the app is ready
+const loadSettings = (): Settings => {
+    if (!settings) {
+        const read = readSettings()
+        settings = read.settings
+        firstLaunch = read.firstLaunch
+        if (firstLaunch) writeSettings()
+    }
+    return settings
+}
+
 // Sent in the background: a failure (offline, the service down) never shows to the user, nor stops the app
 const send = (type: string, payload?: Record<string, string | boolean>) => {
     if (!client || !settings?.enabled) return
@@ -63,11 +77,11 @@ const send = (type: string, payload?: Record<string, string | boolean>) => {
         .catch(e => { if (!app.isPackaged) console.log(`Telemetry: ${type} not sent`, e) })
 }
 
-export const isTelemetryEnabled = () => settings?.enabled ?? false
+// The crash reports follow it too (see crash_reports.ts)
+export const isTelemetryEnabled = () => loadSettings().enabled
 
 export const setTelemetryEnabled = (enabled: boolean) => {
-    if (!settings) return
-    settings.enabled = enabled
+    loadSettings().enabled = enabled
     writeSettings()
 }
 
@@ -78,13 +92,11 @@ export const signal = (type: UsageSignal) => {
 }
 
 export const initTelemetry = () => {
-    const read = readSettings()
-    settings = read.settings
-    if (read.firstLaunch) writeSettings()
+    const { installId } = loadSettings()
 
     client = new TelemetryDeck({
         appID: TELEMETRYDECK_APP_ID,
-        clientUser: settings.installId,
+        clientUser: installId,
         sessionID: crypto.randomUUID(),
         // Runs from source (yarn start): only in the dashboard's Test Mode, out of the real numbers
         testMode: !app.isPackaged,
@@ -97,6 +109,6 @@ export const initTelemetry = () => {
         'TelemetryDeck.Device.systemVersion': process.getSystemVersion(),
         'TelemetryDeck.Device.architecture': process.arch,
     }
-    if (read.firstLaunch) send('TelemetryDeck.Acquisition.newInstallDetected', about)
-    send('TelemetryDeck.Session.started', { ...about, 'Strobe.firstLaunch': read.firstLaunch })
+    if (firstLaunch) send('TelemetryDeck.Acquisition.newInstallDetected', about)
+    send('TelemetryDeck.Session.started', { ...about, 'Strobe.firstLaunch': firstLaunch })
 }

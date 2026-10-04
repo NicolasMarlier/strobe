@@ -26,4 +26,10 @@
  * ```
  */
 
+import { init as initCrashReports } from '@sentry/electron/renderer';
+
+// The window's crashes, sent through the main process, which sorts and sends them (see src/main/crash_reports.ts).
+// Only when it reports them: then it has given the window a way to pass them on
+if ((window as { __SENTRY_IPC__?: unknown }).__SENTRY_IPC__) initCrashReports();
+
 import './renderer/root';
