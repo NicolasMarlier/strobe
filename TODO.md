@@ -17,6 +17,7 @@
 - [ ] Better MIDI recording and MIDI editing
 - [x] Lights aren't dark enough
 - [ ] Block Play when playback is driven by MainStage
+  - Done on the `mainstage-play` branch, not merged yet: **test it with MainStage** (Play, Space and Rewind greyed out while MainStage plays, the app's own playback stops when MainStage starts, the cursor can't be moved by hand), then merge
 - [x] Slight camera movements on the 3D scene while the show plays
 - [x] Visual bug when the window is very narrow
 - [ ] Videos on the website
