@@ -8,7 +8,7 @@
 - [x] Public website
 - [ ] Communicate with Enttec
 - [x] Proper handling of show files on macOS
-- [ ] Test usb v3 on real lights (`usb-v3` branch)
+- [x] Test usb v3 on real lights
 - [x] Proper version and About
 - [x] Code signing
 - [x] Explain the MainStage integration
