@@ -24,6 +24,19 @@ interface Props {
 
 const BASE_PIXELS_PER_BEAT = 40
 
+// Where the waveform goes: says to drop a file there while the track has none (or can't find it),
+// and what a drop does while a file is dragged over the track
+const AudioDropHint = ({ track }: { track: Track }) => {
+    const idle = !track.audio_filename ? 'Drop an audio file here'
+        : track.audio_missing ? `Audio file not found: ${track.audio_filename}. Drop it here again`
+        : null
+    return <div className={`audio-drop-hint ${idle ? '' : 'has-audio'} ${track.audio_missing ? 'missing' : ''}`}>
+        <svg viewBox='0 0 24 24'><path d='M9 3v12.3A4 4 0 1 0 11 19V8h8V3z'/></svg>
+        <span className='idle'>{idle}</span>
+        <span className='dragging'>{track.audio_filename ? "Drop to replace the track's audio" : "Drop to use as the track's audio"}</span>
+    </div>
+}
+
 const MidiPlayer = (props: Props) => {
     const { track } = props
     const {
@@ -427,6 +440,7 @@ const MidiPlayer = (props: Props) => {
                     ghostItemRef={ghostMidiPatternRef}
                     hoverTickRef={hoverTickRef}
                     isItemInSelection={(item, selected) => midiPatternsInclude(selected, item)}/>
+                <AudioDropHint track={track}/>
             </Draggable>
         </div>
         
