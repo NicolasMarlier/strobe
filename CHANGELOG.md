@@ -2,6 +2,18 @@
 
 What changed in each version of Strobe. The installers are on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
 
+## 0.5.0 — 2026-10-04
+
+### New
+- **Seek while playing:** click in the timeline, or use the arrows, Return or Back to Start, and the cursor jumps there while the show keeps playing, the audio with it. Over the timeline, the mouse becomes a playhead and a faint cursor shows where a click will land.
+- **MainStage in charge:** while MainStage drives playback, a pulsing MainStage badge glows next to the transport, and Play, Space and Back to Start are greyed out so the two can't fight. Strobe's own playback stops when MainStage starts.
+- **Playback menu:** Play / Pause (Space) and Back to Start (Return), with the shortcuts also shown in the transport buttons' tooltips.
+- **Show file icon:** show files have their own icon, in the Finder and in the window's title bar.
+- **Anonymous usage statistics and crash reports:** Strobe sends which features are used and the crashes it hits, never a show's or a track's name, nor any content. Turn it off in Strobe › Share Anonymous Usage Statistics and Crash Reports. The README's Privacy section lists exactly what is sent.
+
+### Improved
+- **Window title:** before any show is open, the window is just titled STROBE, not "Untitled".
+
 ## 0.4.0 — 2026-10-03
 
 ### New
