@@ -45,7 +45,7 @@
   - Ship it in a release (the deploy skill)
 - [ ] Display the keyboard shortcuts
   - The transport's: a Playback menu (Play / Pause, Back to Start) and its buttons' tooltips (done)
-- [ ] App icon (`app-icon` branch)
+- [x] Show file icon, in the Finder and the title bar
 - [ ] No window title ("Untitled — Strobe") while no show is open yet
 - [x] Run several worktrees at once
   - Webpack dev ports made from the worktree's name, `STROBE_DEV_PORT` to force one (done)
