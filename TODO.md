@@ -38,8 +38,8 @@
   - First: the user creates the Sentry account and the project, and gives its DSN (done)
   - Implemented on the `crash-monitoring` branch, not merged yet (done): `src/main/crash_reports.ts`, the window in `src/renderer.ts`. The errors nobody caught in the main process and the window, and the native crashes (sent at the next launch). File paths replaced by `<path>`, no console nor requests in the breadcrumbs, no IP address nor variables' values
   - Turned off by the same setting as the usage statistics: Strobe › Share Anonymous Usage Statistics and Crash Reports (done). The README's Privacy section lists what is sent (done)
-  - The source maps sent to Sentry by `bin/release`, then deleted from the app (done, in `webpack.plugins.ts`): the organization and the project are set (done); **needs** an organization token in the keychain (see the top of `bin/release`)
-  - **Validate that the crashes show up** in Sentry: run from source with `STROBE_CRASH_REPORTS=1 yarn start` (from source, nothing is sent otherwise), open the DevTools and run `setTimeout(() => { throw new Error('Strobe test crash') })`, then merge
+  - The source maps sent to Sentry by `bin/release`, then deleted from the app (done, in `webpack.plugins.ts`): the organization, the project and the organization token in the keychain are set (done). The upload itself is checked at the next release
+  - Validate that the crashes show up in Sentry (done: a test error from the window arrived, in release Strobe@0.4.0). Run from source, `STROBE_CRASH_REPORTS=1 yarn start` sends them
   - In Sentry: an email alert on a new crash
   - Ship it in a release (the deploy skill)
 - [ ] Display the keyboard shortcuts
