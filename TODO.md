@@ -31,6 +31,6 @@
   - Signals (done): at launch (version, macOS version, first launch or not), then show opened, playback started, MainStage connected, DMX interface plugged, narrow window used. Never a show's or a track's name, nor any content
   - A "Share anonymous usage statistics" setting, on by default, that turns it off (done: Strobe › Share Anonymous Usage Statistics)
   - A Privacy section in the README listing exactly what is sent (done)
-  - Add the installs and active users to `bin/stats` and the stats skill
-  - Ship it in a release (the deploy skill)
+  - Installs and active users: read in the TelemetryDeck dashboard, not in `bin/stats` (its API needs a paid plan, we stay on the free one); `bin/stats` and the stats skill point to it (done)
+  - Ship it in a release (the deploy skill), along with the next features
 - [ ] Crash monitoring
