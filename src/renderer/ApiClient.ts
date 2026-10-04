@@ -12,6 +12,10 @@ export const deleteTrack = (id: number) =>
     i('tracks:destroy', id)
 export const selectTrack = (id: number) =>
     i('tracks:select', id)
+export const reorderTracks = (orderedIds: number[]) =>
+    i('tracks:reorder', orderedIds)
+export const duplicateTrack = (id: number) =>
+    i('tracks:duplicate', id)
 
 export const getTrackDmxMidi = (track_id: number) =>
     i('tracks:dmx_midi:get', track_id)
@@ -44,6 +48,9 @@ export const getDmxScene = () =>
 export const updateDmxScene = (dmxScene: DmxScene) =>
     i('dmx_scene:update', dmxScene)
 
+export const listFixtures = () =>
+    i('fixtures:list')
+
 export const getShowState = () =>
     i('show:state')
 
@@ -52,6 +59,9 @@ export const newShow = () =>
 
 export const openShow = () =>
     i('show:open')
+
+export const openExampleShow = () =>
+    i('show:open_example')
 
 export const openRecentShow = (dir: string) =>
     i('show:open_recent', dir)
@@ -65,3 +75,7 @@ export const saveShow = () =>
 export const getTrackAudio = (track_id: number) =>
     i('tracks:audio:get', track_id)
 
+
+// For the anonymous usage statistics: a feature seen used (once a session is enough, the app filters)
+export const sendUsageSignal = (type: 'Strobe.playbackStarted' | 'Strobe.narrowWindowUsed') =>
+    i('telemetry:signal', type)

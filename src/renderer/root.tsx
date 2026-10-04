@@ -8,13 +8,14 @@ import { DmxMidiContextProvider } from './contexts/DmxMidiContext'
 import Welcome from './components/Welcome/Welcome'
 import { DmxSceneContextProvider } from './contexts/DmxSceneContext'
 import { getShowState } from './ApiClient'
+import DevWorktreeBadge from './components/DevWorktreeBadge/DevWorktreeBadge'
 
 const root = createRoot(document.body)
 
 // Without an open show there is nothing to edit: show the welcome screen instead of the app.
 // Opening a show reloads the window, so this only needs checking once.
-getShowState().then(({ isOpen, recentShows }) => root.render(
-  isOpen
+getShowState().then(({ isOpen, recentShows }) => root.render(<>
+  {isOpen
     //<StrictMode>
     ? <DmxSceneContextProvider>
         <DmxButtonsContextProvider>
@@ -26,5 +27,10 @@ getShowState().then(({ isOpen, recentShows }) => root.render(
         </DmxButtonsContextProvider>
       </DmxSceneContextProvider>
     //</StrictMode>,
-    : <Welcome recentShows={recentShows} />
-))
+    : <Welcome recentShows={recentShows} />}
+  {/* Run from source only: which worktree's window it is */}
+  <DevWorktreeBadge/>
+</>)).then(() =>
+  // Once it's painted, the window can be shown (it's hidden until then, the splash showing meanwhile)
+  requestAnimationFrame(() => requestAnimationFrame(() => window.strobe.api.invoke('app:rendered')))
+)

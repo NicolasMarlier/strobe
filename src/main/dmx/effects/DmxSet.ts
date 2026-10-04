@@ -1,18 +1,19 @@
 import DmxEffect from "./DmxEffect"
-import { setDmxAt } from "./utils"
-import { colorHexToArray } from "./utils"
+import { CellLayouts } from "../../../shared/fixtures"
 
 class DmxSet extends DmxEffect {
     static transformDmxHexSignal = (
         dmxHexSignal: DmxHexSignal,
         _completeness: number,
         dmxButton: DmxButton,
-        _trigger: DmxButtonTrigger
+        _trigger: DmxButtonTrigger,
+        layouts: CellLayouts
     ) => {
         return DmxEffect.setToColor(
             dmxButton.red_channels,
             dmxButton.color,
-            dmxHexSignal
+            dmxHexSignal,
+            layouts
         )
     }
 }

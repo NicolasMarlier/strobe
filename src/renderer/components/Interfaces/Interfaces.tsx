@@ -5,9 +5,9 @@ import { useRealTimeContext } from '../../contexts/RealTimeContext'
 // The only DMX output Strobe drives (found by its serial number, see enttec_open_dmx_usb.ts)
 const DMX_OUTPUT_NAME = 'Enttec Open DMX USB'
 
-type Status = 'on' | 'pending' | 'off'
+export type Status = 'on' | 'pending' | 'off'
 
-const DMX_STATE_STATUS: Record<USBDeviceState, Status> = {
+export const DMX_STATE_STATUS: Record<USBDeviceState, Status> = {
     'Connected': 'on',
     'Initializing': 'pending',
     'Identified': 'pending',
@@ -26,6 +26,8 @@ interface DeviceInfo {
     status: Status
     // Shown on hover: the full name, the state
     title: string
+    // Stands in for a missing device: just the text, no frame, dot or wire
+    placeholder?: boolean
 }
 
 // A wire from a device to Strobe, in the section's pixels
@@ -55,15 +57,15 @@ let nextParticleId = 0
 
 // The dot tells the state. `flash` counts the device's signals: each one flashes the dot again
 const Device = ({ device, flash, deviceRef }: { device: DeviceInfo, flash?: number, deviceRef: (element: HTMLDivElement | null) => void }) =>
-    <div ref={deviceRef} className={`interface-device ${device.status}`} title={device.title}>
-        <span key={flash} className={`status-dot ${flash ? 'flash' : ''}`}/>
+    <div ref={deviceRef} className={`interface-device ${device.status} ${device.placeholder ? 'placeholder' : ''}`} title={device.title}>
+        { !device.placeholder && <span key={flash} className={`status-dot ${flash ? 'flash' : ''}`}/> }
         <span className='name'>{device.name}</span>
     </div>
 
 // What Strobe is connected to: the MIDI inputs it listens to stacked on the left, the DMX outputs it drives
 // on the right, each wired to Strobe in the middle
 const Interfaces = () => {
-    const { enttecOpenUSBState } = useRealTimeContext()
+    const { enttecOpenUSBState, dmxHexSignal } = useRealTimeContext()
     const [midiInputs, setMidiInputs] = useState<string[]>([])
     // A MIDI input sends something: its dot flashes, and a light travels along its wire to Strobe
     const [flashes, setFlashes] = useState<Record<string, number>>({})
@@ -87,9 +89,11 @@ const Interfaces = () => {
         ? [{ key: 'none', name: 'No MIDI input', status: 'off', title: 'No MIDI input connected' }]
         : midiInputs.map(name => ({ key: name, name: name.replace(IAC_PREFIX, ''), status: 'on', title: name }))
     const dmxStatus = DMX_STATE_STATUS[enttecOpenUSBState] ?? 'off'
-    const outputs: DeviceInfo[] = [
-        { key: 'enttec', name: DMX_OUTPUT_NAME, status: dmxStatus, title: `${DMX_OUTPUT_NAME} — ${enttecOpenUSBState}` },
-    ]
+    // Some light is going out: a channel isn't at 0 (the signal's first byte is the DMX start code, not a channel)
+    const dmxSending = dmxStatus == 'on' && /[^0]/.test(dmxHexSignal.slice(2))
+    const outputs: DeviceInfo[] = dmxStatus == 'off'
+        ? [{ key: 'none', name: `Connect your DMX device…`, status: 'off', title: `${DMX_OUTPUT_NAME} not found`, placeholder: true }]
+        : [{ key: 'enttec', name: DMX_OUTPUT_NAME, status: dmxStatus, title: `${DMX_OUTPUT_NAME} — ${enttecOpenUSBState}` }]
 
     // The wires follow the elements' real positions: measured, and again when the section's size changes
     const containerRef = useRef<HTMLDivElement>(null)
@@ -115,7 +119,8 @@ const Interfaces = () => {
             const origin = container.getBoundingClientRect()
             const strobeBox = strobe.getBoundingClientRect()
             const strobeY = strobeBox.top + strobeBox.height / 2 - origin.top
-            setWires(devices.flatMap(({ key, side, status }) => {
+            setWires(devices.flatMap(({ key, side, status, placeholder }) => {
+                if (placeholder) return []
                 const element = deviceRefs.current.get(`${side}:${key}`)
                 if (!element) return []
                 const box = element.getBoundingClientRect()
@@ -142,6 +147,9 @@ const Interfaces = () => {
     <div ref={containerRef} className='interfaces'>
         <svg className='interfaces-wires'>
             { wires.map(({ key, status, path }) => <path key={key} className={`wire ${status}`} d={path}/>) }
+            {/* Over the DMX wires, always there so their flow never restarts: shows while light is going out */}
+            { wires.filter(({ side }) => side == 'output').map(({ key, path }) =>
+                <path key={`${key}:flow`} className={`wire-flow ${dmxSending ? 'sending' : ''}`} d={path}/>) }
         </svg>
 
         {/* Each light follows its wire's path (CSS motion path), then goes away */}

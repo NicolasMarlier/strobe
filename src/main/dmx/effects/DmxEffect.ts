@@ -1,4 +1,5 @@
-import { colorHexToArray, setDmxAt } from "./utils"
+import { colorHexToArray } from "../../../shared/dmx_signal"
+import { CellLayouts, setCellColor } from "../../../shared/fixtures"
 
 type DmxHexSignal = string
 
@@ -7,7 +8,8 @@ class DmxEffect {
         dmxHexSignal: DmxHexSignal,
         _completeness: number,
         _dmxButton: DmxButton,
-        _trigger: DmxButtonTrigger
+        _trigger: DmxButtonTrigger,
+        _layouts: CellLayouts
     ) => {
         return dmxHexSignal
     }
@@ -18,22 +20,25 @@ class DmxEffect {
             : 1
     )
 
+    // Sets each cell to the color, dimmed by its intensity (0-1), the same for all or one per cell
     static setToColor = (
         redChannels: number[],
         color: string,
         dmxHexSignal: DmxHexSignal,
-        colorIntensity: number = 1
+        layouts: CellLayouts,
+        colorIntensity: number | ((redChannel: number) => number) = 1
     ) => {
-        let newSignal = dmxHexSignal
-
         const colorArray = colorHexToArray(color)
 
-        redChannels.forEach(redChannel => {
-            newSignal = setDmxAt(newSignal, redChannel + 0, Math.floor(colorArray[0] * colorIntensity))
-            newSignal = setDmxAt(newSignal, redChannel + 1, Math.floor(colorArray[1] * colorIntensity))
-            newSignal = setDmxAt(newSignal, redChannel + 2, Math.floor(colorArray[2] * colorIntensity))
-        })
-        return newSignal
+        return redChannels.reduce((signal, redChannel) => {
+            const intensity = typeof colorIntensity == 'function' ? colorIntensity(redChannel) : colorIntensity
+            return setCellColor(
+                signal,
+                redChannel,
+                layouts(redChannel),
+                colorArray.map(value => value * intensity) as [number, number, number]
+            )
+        }, dmxHexSignal)
     }
 }
 

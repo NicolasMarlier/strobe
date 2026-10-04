@@ -43,9 +43,14 @@ export const describeRecentShow = (dir: string): RecentShow => ({
 export const addRecentShow = (dir: string) => {
     const resolved = path.resolve(dir)
     writeRecentShows([resolved, ...listRecentShows().filter(d => d != resolved)])
+    // Also in macOS' recent documents: the Dock icon's menu
+    app.addRecentDocument(resolved)
 }
 
 export const removeRecentShow = (dir: string) =>
     writeRecentShows(listRecentShows().filter(d => d != path.resolve(dir)))
 
-export const clearRecentShows = () => writeRecentShows([])
+export const clearRecentShows = () => {
+    writeRecentShows([])
+    app.clearRecentDocuments()
+}

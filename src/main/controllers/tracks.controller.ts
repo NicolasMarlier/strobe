@@ -7,14 +7,9 @@ export class TracksController {
 
     static list = async() => handleErrors(async() => Store.getInstance().listTracks())
 
-    static create = async(params: TrackCreationParams) => handleErrors(async() => {
-        const track = Store.getInstance().createTrack(params)
-
-        return {
-            status: 'ok',
-            track: track
-        }
-    })
+    static create = async(params: TrackCreationParams) => handleErrors(async() =>
+        Store.getInstance().createTrack(params)
+    )
 
     static select = async(id: number) => handleErrors(async() => {
         const track = Store.getInstance().getTrack(id)
@@ -26,6 +21,14 @@ export class TracksController {
         Store.getInstance().updateTrack(id, params)
         return {status: 'ok'}
     })
+
+    static reorder = async(orderedIds: number[]) => handleErrors(async() =>
+        Store.getInstance().reorderTracks(orderedIds)
+    )
+
+    static duplicate = async(id: number) => handleErrors(async() =>
+        Store.getInstance().duplicateTrack(id)
+    )
 
     static destroy = async(id: number) => handleErrors(async() => {
         Store.getInstance().destroyTrack(id)

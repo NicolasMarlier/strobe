@@ -1,3 +1,5 @@
+import type { DevWorktree } from './dev_worktree';
+
 export interface ApiContract {
   'tracks:list':   {
       args: []
@@ -16,6 +18,15 @@ export interface ApiContract {
     result: void
   }
   'tracks:select': {
+    args: [id: number]
+    result: Track
+  }
+  // The tracks' ids, in their new order: they're renumbered 1, 2, 3… (their MIDI programs) in that order
+  'tracks:reorder': {
+    args: [orderedIds: number[]]
+    result: Track[]
+  }
+  'tracks:duplicate': {
     args: [id: number]
     result: Track
   }
@@ -81,6 +92,16 @@ export interface ApiContract {
     result: DmxScene
   }
 
+  'fixtures:list': {
+    args: []
+    result: FixtureLibraryContents
+  }
+
+  // The app has rendered in the calling window: it can be shown
+  'app:rendered': {
+    args: []
+    result: void
+  }
   'show:state': {
     args: []
     result: ShowState
@@ -90,6 +111,10 @@ export interface ApiContract {
     result: void
   }
   'show:open': {
+    args: []
+    result: void
+  }
+  'show:open_example': {
     args: []
     result: void
   }
@@ -119,6 +144,21 @@ export interface ApiContract {
   'show:redo': {
     args: []
     result: boolean
+  }
+  // Edit > Copy, Paste and Select All left to the page (a text field, selected text): the window does them
+  'edit:native': {
+    args: [action: 'copy' | 'paste' | 'selectAll']
+    result: void
+  }
+  // A feature the window saw used, for the anonymous usage statistics (see telemetry.ts)
+  'telemetry:signal': {
+    args: [type: 'Strobe.playbackStarted' | 'Strobe.narrowWindowUsed']
+    result: void
+  }
+  // Run from source, the worktree and branch it runs from, to show them; null when released
+  'dev:worktree': {
+    args: []
+    result: DevWorktree | null
   }
 
 }

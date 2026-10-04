@@ -32,7 +32,16 @@ h1 {
   box-sizing: border-box;
   background-color: #222;
 
-  // The Interfaces section over the Track automation one
+  // The open setlist: a column on the left of the window (TrackSetlist), collapsed with Cmd+\
+  &.with-setlist {
+    grid-template-columns: 200px 1fr 1fr;
+    grid-template-areas:
+      "commands commands commands"
+      "setlist  midi     buttons"
+      "setlist  midi     scene";
+  }
+
+  // The collapsed setlist and the Interfaces section side by side, over the Track automation section
   .left-column {
     grid-area: midi;
     display: flex;
@@ -40,6 +49,18 @@ h1 {
     gap: 20px;
     min-width: 0;
     min-height: 0;
+  }
+
+  .top-sections {
+    display: flex;
+    gap: 20px;
+    min-width: 0;
+
+    // MIDI in → Strobe → DMX out takes what the collapsed setlist leaves
+    .section.interfaces-section {
+      flex: 1;
+      min-width: 0;
+    }
   }
 
   .section {
@@ -195,13 +216,48 @@ h1 {
 
     &.commands-bar {
       grid-area: commands;
+      // The transport's tooltips hang below the bar, over the sections under it
+      overflow: visible;
+      z-index: 10;
       padding: 10px;
       flex-direction: row;
       align-items: center;
       border-radius: 0;
       box-shadow: 0 0 6px #000000;
       justify-content: center;
+
+      .save-slot {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
     }   
+    // Opposite the title, on the top border: the section's keyboard shortcuts, faint
+    .section-hint {
+      position: absolute;
+      z-index: 2;
+      top: -9px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      max-width: calc(100% - 200px);
+      overflow: hidden;
+      white-space: nowrap;
+      line-height: 14px;
+      font-size: 10px;
+      background-color: #161616;
+      color: #4a4a4a;
+      padding: 2px 8px;
+      border-radius: 5px;
+      user-select: none;
+
+      kbd {
+        font-family: inherit;
+        color: #777;
+      }
+    }
+
     .section-title {
       text-transform: uppercase;
       position: absolute;
@@ -221,6 +277,46 @@ h1 {
 
 }
 
+.transport {
+  // The badge hangs on the right: the transport itself stays centered
+  position: relative;
+
+  .small-buttons-bar {
+    transition: box-shadow 0.3s;
+  }
+  &.driven-by-midi .small-buttons-bar {
+    box-shadow: 0 0 0 1px rgba(114, 203, 63, 0.5), 0 0 8px rgba(114, 203, 63, 0.35);
+  }
+
+  .driven-by-midi-badge {
+    position: absolute;
+    left: calc(100% + 12px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: rgb(114, 203, 63);
+
+    .light {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: rgb(114, 203, 63);
+      box-shadow: 0 0 6px rgb(114, 203, 63);
+      animation: driven-by-midi-pulse 1.2s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes driven-by-midi-pulse {
+  50% { opacity: 0.4; }
+}
+
 .commands-bar {
   display: flex;
   padding: 10px;
@@ -236,14 +332,53 @@ h1 {
 }
 
 @media (max-width: 800px) {
-  #app {
+  // One column: the setlist and the interfaces move to the top bar (the current track, and a dot each
+  // for MIDI and DMX), the track automation keeps one low lane, then the buttons and the scene.
+  // Neither the note editor nor the buttons' and the scene's details panels: the width goes to the
+  // buttons and the scene. Nor adding a button
+  #app .section.setlist,
+  #app .top-sections,
+  #app .note-editor,
+  #app .dmx-button-details,
+  #app .selection-link,
+  #app .dmx-scene-details,
+  #app .add-dmx-button {
+    display: none;
+  }
+
+  // No room for the MainStage badge next to the transport: its glow alone says it
+  #app .driven-by-midi-badge {
+    display: none;
+  }
+
+  #app, #app.with-setlist {
     grid-template-columns: 100%;
-    grid-template-rows: 50px 100px 1fr 1fr;
+    grid-template-rows: 50px auto minmax(0, 1fr) minmax(0, 1.3fr);
     grid-template-areas:
       "commands"
       "midi"
       "buttons"
       "scene";
+  }
+
+  #app .section.commands-bar {
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 10px 14px;
+
+    .save-slot {
+      position: static;
+      transform: none;
+    }
+
+    .narrow-only {
+      display: flex;
+    }
+  }
+
+  #app .midi-container {
+    height: 70px;
+    margin-bottom: 12px;
   }
 }
 

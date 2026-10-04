@@ -35,6 +35,33 @@
         }
     }
 
+    // Hidden until the mouse stays on the button a moment, then fading in; gone as soon as it leaves
+    &[data-tooltip]::after {
+        content: attr(data-tooltip);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.15s, visibility 0s 0.15s;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 100;
+        white-space: nowrap;
+        pointer-events: none;
+        padding: 4px 8px;
+        border-radius: 5px;
+        background-color: #111;
+        box-shadow: 0 2px 6px #000000aa;
+        color: #ccc;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    &[data-tooltip]:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.15s 1s, visibility 0s 1s;
+    }
+
     &.red {
         &.enabled {
             svg { fill: #de3c2a88; }

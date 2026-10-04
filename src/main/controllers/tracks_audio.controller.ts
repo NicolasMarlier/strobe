@@ -3,7 +3,7 @@ import path from "path"
 import fs from "fs"
 import { Store } from "../store/Store"
 import { handleErrors, NotFoundError } from "./application.controller"
-import { currentAudioDir } from "../show/document"
+import { currentAudioDir, savedAudioDir } from "../show/document"
 
 // const storage = multer.diskStorage({
 //   destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
@@ -29,7 +29,8 @@ export const existingAudioPath = (trackId: number): string | null => {
   const dir = currentAudioDir()
   if (!dir || !fs.existsSync(dir)) return null
 
-  const candidates = fs.readdirSync(dir).filter(f => f.startsWith(`track_${trackId}.`))
+  const fileId = Store.getInstance().findTrack(trackId)?.audio_id ?? trackId
+  const candidates = fs.readdirSync(dir).filter(f => f.startsWith(`track_${fileId}.`))
   return candidates.length > 0 ? path.join(dir, candidates[0]!) : null
 }
 
@@ -56,8 +57,10 @@ export class TracksAudioController {
   static reset = async(track_id: number) => handleErrors(async () => {
     const track = await getTrack(track_id)
 
+    // The example show's audio, bundled with the app, is left alone: only the track forgets it
     const existing = existingAudioPath(track.id)
-    if (existing) fs.unlinkSync(existing)
+    const saved = savedAudioDir()
+    if (existing && saved && path.dirname(existing) == saved) fs.unlinkSync(existing)
 
     return Store.getInstance().updateTrack(track.id, { audio_filename: null })
   })

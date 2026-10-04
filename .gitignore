@@ -100,3 +100,5 @@ dumps/
 !dumps/.keep
 
 main.sqlite
+# Claude Code: worktrees are local
+.claude/worktrees/

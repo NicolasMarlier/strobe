@@ -1,0 +1,72 @@
+# TODO
+
+- [x] Better tracks management UX
+- [x] Handle "plugins" for devices / scene elements
+- [x] Scene element for the fog machine (machine à brouillard)
+- [x] Installer
+- [x] Feedback collection process
+- [x] Public website
+- [ ] Communicate with Enttec
+- [x] Proper handling of show files on macOS
+- [ ] Test usb v3 on real lights (`usb-v3` branch)
+- [x] Proper version and About
+- [x] Code signing
+- [x] Explain the MainStage integration
+- [x] Example show file
+  - Bundled with the app (`assets/Example.strobe`): the first 100 seconds of maad avenue's "Dead In My Head", with its buttons, MIDI patterns and the stage's scene (done)
+  - Opened from the Welcome screen ("New to Strobe? Open the example show") and File › Open Example Show, as an unsaved copy: Save asks where and copies its audio along (done)
+  - Its own usage signal, `Strobe.exampleShowOpened`, listed in the README's Privacy section (done)
+- [ ] Handle input devices to trigger a button
+- [ ] Better MIDI recording and MIDI editing
+- [x] Lights aren't dark enough
+- [x] Block Play when playback is driven by MainStage
+  - Play, Space and Back to Start greyed out while MainStage plays, the app's own playback stops when MainStage starts, the cursor can't be moved by hand; a pulsing MainStage badge next to the transport (done)
+- [x] Slight camera movements on the 3D scene while the show plays
+- [x] Visual bug when the window is very narrow
+- [ ] Videos on the website
+- [x] Move the cursor while playing
+- [ ] Website: a short story, filmed with Nico, on why Strobe was made
+- [x] Download monitoring: website visits (Vercel Web Analytics) and downloads per version (GitHub), in `bin/stats` and the stats skill
+- [x] Move the cursor by hand during playback (seek while playing)
+  - A click in the timeline, the arrows, Return and Back to Start move the cursor while playing, and the audio follows; none of them while MainStage drives playback (done)
+  - Over the timeline, where a click moves the cursor: a playhead mouse cursor and a very faint ghost cursor (done)
+- [x] Usage telemetry in the app, to count installs and real usage, with TelemetryDeck
+  - Why TelemetryDeck: an anonymous, hashed ID per install gives unique installs, monthly active users and retention (Aptabase keeps no user ID, so it can't count installs). JavaScript SDK, free plan of 50 to 100k signals a month
+  - First: the user creates the TelemetryDeck account and the app, and gives its app ID (done)
+  - Implemented and merged into main; the events show up in the TelemetryDeck dashboard (done)
+  - Signals (done): at launch (version, macOS version, first launch or not), then show opened, playback started, MainStage connected, DMX interface plugged, narrow window used. Never a show's or a track's name, nor any content
+  - A "Share anonymous usage statistics" setting, on by default, that turns it off (done: Strobe › Share Anonymous Usage Statistics and Crash Reports)
+  - A Privacy section in the README listing exactly what is sent (done)
+  - Installs and active users: read in the TelemetryDeck dashboard, not in `bin/stats` (its API needs a paid plan, we stay on the free one); `bin/stats` and the stats skill point to it (done)
+  - Ship it in a release (done: Strobe 0.5.0)
+- [x] Crash monitoring, with Sentry (`@sentry/electron`, free plan: 5,000 errors a month)
+  - Why Sentry rather than TelemetryDeck: readable stack traces, the same crashes grouped, email alerts, and the native crashes (USB, MIDI) that kill the app before it can send anything
+  - First: the user creates the Sentry account and the project, and gives its DSN (done)
+  - Implemented and merged into main (done): `src/main/crash_reports.ts`, the window in `src/renderer.ts`. The errors nobody caught in the main process and the window, and the native crashes (sent at the next launch). File paths replaced by `<path>`, no console nor requests in the breadcrumbs, no IP address nor variables' values
+  - Turned off by the same setting as the usage statistics: Strobe › Share Anonymous Usage Statistics and Crash Reports (done). The README's Privacy section lists what is sent (done)
+  - The source maps sent to Sentry by `bin/release`, then deleted from the app (done, in `webpack.plugins.ts`): the organization, the project and the organization token in the keychain are set (done). The upload itself checked (done: Strobe 0.5.0, the three bundles' source maps uploaded, none left in the installed app); in Sentry, an error from the window of the released 0.5.0 shows its TypeScript source, line and function (Welcome.tsx, onRemove), and a native crash of the main process arrives at the next launch
+  - Validate that the crashes show up in Sentry (done: a test error from the window arrived, in release Strobe@0.4.0). Run from source, `STROBE_CRASH_REPORTS=1 yarn start` sends them
+  - In Sentry: an email alert on a new crash (done: the project's alert rule already existed)
+  - Ship it in a release (done: Strobe 0.5.0)
+- [x] Display the keyboard shortcuts
+  - The transport's: a Playback menu (Play / Pause, Back to Start) and its buttons' tooltips (done)
+  - Every shortcut in the app's menu: Edit (Copy, Paste, Delete, Select All on patterns and notes), a Pattern menu (Split T, Join J, Loop L), Playback (one beat ← →, previous / next track ↑ ↓), View (Show / Hide Setlist ⌘\)
+  - The app's own shortcuts on screen (not the generic ones like Copy, Paste and Delete, only in the menu): hints on the Track automation's and the setlist's borders; the note editor's mouse hint removed, self-explanatory
+  - ↑ ↓ switch tracks even with the setlist collapsed
+  - The timeline's hint is contextual: with nothing selected, the cursor's keys (← → one beat, ↵ back to start); with a selection, its own (T split for one pattern, J join for two or more, L loop). Join does nothing below two
+- [x] Show file icon, in the Finder and the title bar
+- [x] Window title is just STROBE, no "Untitled", while no show is open yet
+- [x] Run several worktrees at once
+  - Webpack dev ports made from the worktree's name, `STROBE_DEV_PORT` to force one (done)
+  - Run from source, the window shows its branch: a frame in its color, its name at the bottom, in the title and as the Dock badge (done)
+  - The feature-worktree skill explains it (done)
+- [ ] Audio files management
+- [ ] Loop and max length management
+- [ ] Auto-update (merged, to validate after the next release)
+  - Electron's autoUpdater (Squirrel.Mac) fed by update.electronjs.org, which reads the GitHub releases: checked 10 s after launch, then every 4 hours, downloaded in the background, installed when Strobe quits, never during a show (done)
+  - Strobe › Check for Updates…, then Restart to Install Strobe X once downloaded, asking about unsaved changes first (done)
+  - `bin/release` also builds the ZIP, `bin/publish` uploads it; the deploy skill checks the feed (done)
+  - The README's Privacy section says what the update check sends (done)
+  - Validate on real releases: 0.5.0 has no ZIP, so the first version that updates by itself is the one after the release that ships this
+- [x] Welcome screen redesign, in the app's look
+  - Buttons like the app's, with white line icons, New Show the primary one; no more offset shadows; the recent shows framed as before, rows highlighted on hover with the remove cross and an open chevron; the example show as a quiet link with a play icon (done)

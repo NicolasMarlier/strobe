@@ -7,6 +7,7 @@ type DmxButton = {
     track_id: number | null
     color: string
     duration_ms: number
+    // First channel of each cell the button lights (the red of an RGB dot)
     red_channels: number[]
     nature: DmxEffectNature
     triggering_midi_key: MidiKey | null
@@ -39,6 +40,9 @@ type Track = {
     id: number
     bpm: number
     audio_filename: string | null
+    // The id the track's audio file is named after (audio/track_<audio_id>.<ext>), when not its own:
+    // the track changed id (MIDI program) or is a copy, and its file was left as it was
+    audio_id?: number
 }
 
 type TrackCreationParams = {
@@ -135,14 +139,42 @@ type MouseSelection = {
     rect: Rectangle
 }
 
-// A LED bar of the scene: rgb_dots_count RGB dots, starting at DMX channel `channel` (red of the first dot)
-type LedBarConfig = {
+// What a DMX channel of a fixture does. The colors make light; fog makes fog, as much as the color is bright
+type FixtureChannelKind = 'red' | 'green' | 'blue' | 'white' | 'fog'
+
+// A kind of device, described as data (see shared/fixtures.ts): built in, or a JSON file in the Fixtures folder.
+// A fixture is a row of identical cells (the dots of a LED bar), each taking the channels of `cell`, in order
+type FixtureProfile = {
+    // Stored in the show's elements: never change it once used
+    id: string
+    name: string
+    // How it's drawn: a bar whose lenses cover its front face, or a box with smaller lenses (or nozzles)
+    shape: 'bar' | 'box'
+    // Width, height, depth of the housing, in meters
+    size: Vector3Tuple
+    cell: FixtureChannelKind[]
+    // Cells of a new element of this fixture
+    cells: number
+    // Whether each element sets its own cell count, and what the cells are called (e.g. Dots)
+    resizable?: boolean
+    cell_label?: string
+}
+
+// The fixtures elements can be made of, and why fixture files were skipped
+type FixtureLibraryContents = {
+    fixtures: FixtureProfile[]
+    problems: string[]
+}
+
+// A device placed in the scene: `cells` cells of its fixture, starting at DMX channel `channel`
+type SceneElement = {
+    fixture: string,
     channel: number,
-    rgb_dots_count: number,
-    // Center of the bar in the 3D scene, in meters (Y up, origin at the front-center of the stage floor)
-    position?: Vector3Tuple,
+    cells: number,
+    // Center of the housing in the 3D scene, in meters (Y up, origin at the front-center of the stage floor)
+    position: Vector3Tuple,
     // Euler angles in degrees (XYZ order)
-    rotation?: Vector3Tuple
+    rotation: Vector3Tuple
 }
 
 type Vector3Tuple = [number, number, number]
@@ -151,12 +183,14 @@ type Vector3Tuple = [number, number, number]
 type DmxSceneDisplay = {
     show_grid: boolean,
     show_beams: boolean,
+    // Missing in shows saved before it existed: on
+    camera_motion?: boolean,
     zoom: number
 }
 
-// How the lights are laid out in the 3D scene
+// How the devices are laid out in the 3D scene
 type DmxScene = {
-    led_bars: LedBarConfig[],
+    elements: SceneElement[],
     display?: DmxSceneDisplay
 }
 
@@ -174,6 +208,8 @@ type DmxSignalParams = {
     },
     dmxHexSignal: DmxHexSignal,
     midiCurrentTick: number
+    // MainStage (MIDI Start and clock) drives playback: the app's Play is blocked meanwhile
+    drivenByMidi: boolean
     // Buttons whose effect is running, i.e. currently changing the DMX signal
     activeDmxButtonIds: string[]
 }

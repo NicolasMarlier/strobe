@@ -72,25 +72,25 @@ describe('show history', () => {
     })
 
     it("doesn't undo the display options, nor keep them as steps", () => {
-        store.updateDmxScene({ led_bars: [{ channel: 1, rgb_dots_count: 8 }] })
+        store.updateDmxScene({ elements: [{ fixture: 'led-bar', channel: 1, cells: 8, position: [0, 0.05, 0], rotation: [0, 0, 0] }] })
         later()
         store.updateDmxScene({ ...store.getDmxScene(), display: { show_grid: false, show_beams: true, zoom: 7 } })
         later()
-        store.updateDmxScene({ ...store.getDmxScene(), led_bars: [] })
+        store.updateDmxScene({ ...store.getDmxScene(), elements: [] })
 
         history.undo()
-        expect(store.getDmxScene().led_bars).toHaveLength(1)
+        expect(store.getDmxScene().elements).toHaveLength(1)
         expect(store.getDmxScene().display).toEqual({ show_grid: false, show_beams: true, zoom: 7 })
 
         // The display change wasn't a step: the next undo goes back before the bar
         history.undo()
-        expect(store.getDmxScene().led_bars).toHaveLength(0)
+        expect(store.getDmxScene().elements).toHaveLength(0)
         expect(history.canUndo()).toBe(false)
     })
 
     it('starts over when a show is opened', () => {
         store.createTrack({ name: 'A' })
-        store.load({ tracks: [], dmx_buttons: [], dmx_midis: [], dmx_scene: { led_bars: [] } })
+        store.load({ tracks: [], dmx_buttons: [], dmx_midis: [], dmx_scene: { elements: [] } })
 
         expect(history.canUndo()).toBe(false)
         expect(history.undo()).toBe(false)

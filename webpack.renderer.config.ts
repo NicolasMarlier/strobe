@@ -1,6 +1,6 @@
 import type { Configuration } from 'webpack';
 
-import { tsRule } from './webpack.rules';
+import { imageRule, tsRule } from './webpack.rules';
 import { plugins } from './webpack.plugins';
 
 // The renderer's TypeScript is compiled to ES modules (the main process' stays CommonJS).
@@ -22,6 +22,7 @@ export const rendererConfig: Configuration = {
   module: {
     rules: [
       rendererTsRule,
+      imageRule,
       {
         test: /\.css$/,
         use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],

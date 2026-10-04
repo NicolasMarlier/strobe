@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Store, STORE_EVENTS } from './Store'
 import { InvalidParamError, NotFoundError } from '../controllers/application.controller'
-import { defaultLedBarPosition } from '../../shared/led_bar'
 
 let store: Store
 
@@ -29,7 +28,7 @@ describe('tracks', () => {
         store.updateTrack(1, { id: 10 })
         expect(store.listTracks()).toEqual([
             { id: 2, name: 'B', bpm: 85, audio_filename: null },
-            { id: 10, name: 'A', bpm: 120, audio_filename: null },
+            { id: 10, name: 'A', bpm: 120, audio_filename: null, audio_id: 1 },
         ])
     })
 
@@ -67,6 +66,69 @@ describe('tracks', () => {
         store.createTrack({ name: 'B' })
         expect(() => store.updateTrack(1, { id: 2 })).toThrow(InvalidParamError)
         expect(store.getTrack(1).name).toBe('A')
+    })
+
+    it('reordering renumbers the tracks 1, 2, 3… in the new order, moving their buttons and midi', () => {
+        store.createTrack({ name: 'A' })
+        store.createTrack({ name: 'B' })
+        store.createTrack({ name: 'C' })
+        store.updateTrack(3, { id: 10 })
+        store.createButton({ track_id: 10 })
+        createGlobalButton()
+        store.updateDmxMidi(1, [{ ticks: 0, midi_notes: [], durationTicks: 10 }])
+        const renumbered = vi.fn()
+        store.on(STORE_EVENTS.TRACKS_RENUMBERED, renumbered)
+
+        store.reorderTracks([10, 1, 2])
+
+        expect(store.listTracks().map(p => [p.id, p.name])).toEqual([[1, 'C'], [2, 'A'], [3, 'B']])
+        // Their audio files keep their names: C's is still the one of the track it was first (3)
+        expect(store.listTracks().map(p => p.audio_id)).toEqual([3, 1, 2])
+        expect(renumbered).toHaveBeenCalledWith({ 10: 1, 1: 2, 2: 3 })
+        expect(store.listButtons(1).map(b => b.track_id)).toEqual([1, null])
+        expect(store.listButtons(10).map(b => b.track_id)).toEqual([null])
+        expect(store.getOrInitDmxMidi(2).midi_patterns).toHaveLength(1)
+    })
+
+    it('rejects an order that does not list every track once, and ignores the same order', () => {
+        store.createTrack({ name: 'A' })
+        store.createTrack({ name: 'B' })
+        const changed = vi.fn()
+        store.on(STORE_EVENTS.CHANGED, changed)
+
+        expect(() => store.reorderTracks([1])).toThrow(InvalidParamError)
+        expect(() => store.reorderTracks([1, 1])).toThrow(InvalidParamError)
+        store.reorderTracks([1, 2])
+        expect(changed).not.toHaveBeenCalled()
+    })
+
+    it('reordering in the same order closes the gaps between programs', () => {
+        store.createTrack({ name: 'A' })
+        store.createTrack({ name: 'B' })
+        store.updateTrack(2, { id: 10 })
+
+        store.reorderTracks([1, 10])
+
+        expect(store.listTracks().map(p => [p.id, p.name])).toEqual([[1, 'A'], [2, 'B']])
+    })
+
+    it('duplicating copies the track, its buttons and midi as the last track', () => {
+        store.createTrack({ name: 'A', bpm: 120 })
+        store.createTrack({ name: 'B' })
+        const button = store.createButton({ track_id: 1, nature: 'Run' })
+        createGlobalButton()
+        store.updateDmxMidi(1, [{ ticks: 0, midi_notes: [], durationTicks: 10 }])
+
+        const copy = store.duplicateTrack(1)
+
+        // Plays the original's audio file
+        expect(copy).toEqual({ id: 3, name: 'A copy', bpm: 120, audio_filename: null, audio_id: 1 })
+        const copiedButtons = store.listButtons(3).filter(b => b.track_id == 3)
+        expect(copiedButtons).toHaveLength(1)
+        expect(copiedButtons[0]).toMatchObject({ nature: 'Run' })
+        expect(copiedButtons[0]!.id).not.toBe(button.id)
+        expect(store.getOrInitDmxMidi(3).midi_patterns).toHaveLength(1)
+        expect(store.listButtons(1).filter(b => b.track_id == 1)).toHaveLength(1)
     })
 
     it('destroying a track deletes its buttons and midi but keeps global buttons', () => {
@@ -141,7 +203,7 @@ describe('load and toData', () => {
             dmx_buttons: [],
             dmx_midis: [{ track_id: 31, midi_patterns: [] }],
             dmx_scene: {
-                led_bars: [{ channel: 97, rgb_dots_count: 16, position: [2, 0.5, -3], rotation: [0, 45, 0] }],
+                elements: [{ fixture: 'led-bar', channel: 97, cells: 16, position: [2, 0.5, -3], rotation: [0, 45, 0] }],
                 display: { show_grid: true, show_beams: false, zoom: 12 },
             },
         }
@@ -159,31 +221,16 @@ describe('load and toData', () => {
 })
 
 describe('dmx scene', () => {
-    it('drops the CSS style of shows saved before the 3D scene, and lays out bars without a position', () => {
-        const legacyBar = { channel: 1, rgb_dots_count: 8, style: { transform: 'rotateY(110deg)', left: '-30%' } }
-        store.load({
-            tracks: [],
-            dmx_buttons: [],
-            dmx_midis: [],
-            dmx_scene: { led_bars: [legacyBar, { channel: 25, rgb_dots_count: 8, position: [3, 2, -4], rotation: [0, 90, 0] }] },
-        } as ShowData)
-
-        expect(store.getDmxScene().led_bars).toEqual([
-            { channel: 1, rgb_dots_count: 8, position: defaultLedBarPosition(0), rotation: [0, 0, 0] },
-            { channel: 25, rgb_dots_count: 8, position: [3, 2, -4], rotation: [0, 90, 0] },
-        ])
-    })
-
     it('replaces the scene and emits changed', () => {
         const changed = vi.fn()
         store.on(STORE_EVENTS.CHANGED, changed)
-        const scene: DmxScene = { led_bars: [{ channel: 1, rgb_dots_count: 8 }] }
+        const scene: DmxScene = { elements: [{ fixture: 'led-bar', channel: 1, cells: 8, position: [0, 0.05, 0], rotation: [0, 0, 0] }] }
 
         store.updateDmxScene(scene)
-        scene.led_bars[0].channel = 99
+        scene.elements[0].channel = 99
 
         expect(changed).toHaveBeenCalledTimes(1)
-        expect(store.getDmxScene().led_bars[0].channel).toBe(1)
+        expect(store.getDmxScene().elements[0].channel).toBe(1)
     })
 })
 

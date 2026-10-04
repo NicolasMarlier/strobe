@@ -14,7 +14,10 @@ const data: ShowData = {
     }],
     dmx_midis: [{ track_id: 31, midi_patterns: [{ ticks: 0, midi_notes: [], durationTicks: 960 }] }],
     dmx_scene: {
-        led_bars: [{ channel: 1, rgb_dots_count: 8, position: [-1, 1.5, -2], rotation: [0, 90, 15] }],
+        elements: [
+            { fixture: 'led-bar', channel: 1, cells: 8, position: [-1, 1.5, -2], rotation: [0, 90, 15] },
+            { fixture: 'fog-machine', channel: 25, cells: 1, position: [2, 0.11, -3], rotation: [0, 0, 0] },
+        ],
         display: { show_grid: false, show_beams: true, zoom: 6.5 },
     },
 }
@@ -41,8 +44,35 @@ describe('show files', () => {
         fs.mkdirSync(dir)
         const { dmx_scene, ...withoutScene } = data
         fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'strobe-show', version: 2, ...withoutScene }))
-        expect(dmx_scene.led_bars).not.toEqual([])
-        expect(readShow(dir).dmx_scene).toEqual({ led_bars: [] })
+        expect(dmx_scene.elements).not.toEqual([])
+        expect(readShow(dir).dmx_scene).toEqual({ elements: [] })
+
+        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'strobe-show', version: 3, ...withoutScene, dmx_scene: {} }))
+        expect(() => readShow(dir)).toThrow(/elements/)
+    })
+
+    it('turns the LED bars of version 2 shows into elements, laying out those placed with CSS', () => {
+        const dir = path.join(tmp, 'V2.strobe')
+        fs.mkdirSync(dir)
+        const { dmx_scene, ...withoutScene } = data
+        const legacyBar = { channel: 1, rgb_dots_count: 8, style: { transform: 'rotateY(110deg)', left: '-30%' } }
+        fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({
+            format: 'strobe-show',
+            version: 2,
+            ...withoutScene,
+            dmx_scene: {
+                led_bars: [legacyBar, { channel: 25, rgb_dots_count: 16, position: [3, 2, -4], rotation: [0, 90, 0] }],
+                display: dmx_scene.display,
+            },
+        }))
+
+        expect(readShow(dir).dmx_scene).toEqual({
+            elements: [
+                { fixture: 'led-bar', channel: 1, cells: 8, position: [-2.5, 0.05, -1], rotation: [0, 0, 0] },
+                { fixture: 'led-bar', channel: 25, cells: 16, position: [3, 2, -4], rotation: [0, 90, 0] },
+            ],
+            display: dmx_scene.display,
+        })
 
         fs.writeFileSync(path.join(dir, 'show.json'), JSON.stringify({ format: 'strobe-show', version: 2, ...withoutScene, dmx_scene: {} }))
         expect(() => readShow(dir)).toThrow(/led_bars/)
@@ -84,13 +114,13 @@ describe('show files', () => {
         fs.writeFileSync(path.join(tmp, 'show.json'), '{ nope')
         expect(() => readShow(tmp)).toThrow(/not valid JSON/)
 
-        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ ...data, format: 'strobe-show', version: 3 }))
+        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ ...data, format: 'strobe-show', version: 4 }))
         expect(() => readShow(tmp)).toThrow(/newer version/)
 
         fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ programs: [], dmx_buttons: [], dmx_midis: [], format: 'strobe-show', version: 1 }))
         expect(() => readShow(tmp)).toThrow(/older format/)
 
-        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ format: 'strobe-show', version: 2 }))
+        fs.writeFileSync(path.join(tmp, 'show.json'), JSON.stringify({ format: 'strobe-show', version: 3 }))
         expect(() => readShow(tmp)).toThrow(/missing/)
     })
 })

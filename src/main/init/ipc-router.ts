@@ -6,9 +6,13 @@ import { DmxMidiController } from '../controllers/dmx_midi.controller';
 import { DmxButtonController } from '../controllers/dmx_buttons.controller';
 import { MainLoopController } from '../controllers/main_loop.controller';
 import { ApiReverseContract, ReverseChannel } from '../../shared/ipc-reverse-contract';
-import { forgetRecentShow, newShow, openRecentShow, openShow, saveShow, showState } from '../show/document';
+import { forgetRecentShow, newShow, openExampleShow, openRecentShow, openShow, saveShow, showState } from '../show/document';
 import { Store, STORE_EVENTS } from '../store/Store';
 import { ShowHistory } from '../store/ShowHistory';
+import { revealWindow } from './splash';
+import { FixtureLibrary, FIXTURE_LIBRARY_EVENTS } from '../fixture_library';
+import { RENDERER_SIGNALS, signal } from '../telemetry';
+import { devWorktree } from './dev_worktree';
 
 export function handle<C extends Channel>(
   channel: C,
@@ -38,6 +42,8 @@ handle('tracks:create', TracksController.create)
 handle('tracks:update', TracksController.update)
 handle('tracks:destroy', TracksController.destroy)
 handle('tracks:select',   TracksController.select)
+handle('tracks:reorder', TracksController.reorder)
+handle('tracks:duplicate', TracksController.duplicate)
 
 handle('tracks:audio:upload', TracksAudioController.upload)
 handle('tracks:audio:reset', TracksAudioController.reset)
@@ -53,15 +59,24 @@ handle('dmx_buttons:play', DmxButtonController.play)
 handle('dmx_buttons:update', DmxButtonController.update)
 handle('dmx_buttons:destroy', DmxButtonController.destroy)
 
+// Only the signals the window may send
+handle('telemetry:signal', async (type) => { if (RENDERER_SIGNALS.includes(type)) signal(type) })
+
+handle('dev:worktree', async () => devWorktree)
+
 
 handle('main_loop:update_current_tick', MainLoopController.update_current_tick)
 
 handle('dmx_scene:get', async () => Store.getInstance().getDmxScene())
 handle('dmx_scene:update', async (dmxScene) => Store.getInstance().updateDmxScene(dmxScene))
+handle('fixtures:list', async () => FixtureLibrary.getInstance().list())
+FixtureLibrary.getInstance().on(FIXTURE_LIBRARY_EVENTS.CHANGED, () => sendToAllWindows('fixtures:changed', null))
 
 handle('show:state', async () => showState())
+handleWithWindow('app:rendered', revealWindow)
 handleWithWindow('show:new', newShow)
 handleWithWindow('show:open', openShow)
+handleWithWindow('show:open_example', openExampleShow)
 handleWithWindow('show:open_recent', openRecentShow)
 handle('show:remove_recent', async (dir) => forgetRecentShow(dir))
 handleWithWindow('show:save', saveShow)
@@ -69,6 +84,7 @@ handleWithWindow('show:save', saveShow)
 ShowHistory.getInstance()
 handle('show:undo', async () => ShowHistory.getInstance().undo())
 handle('show:redo', async () => ShowHistory.getInstance().redo())
+handleWithWindow('edit:native', async (win, action) => { win.webContents[action]() })
 Store.getInstance().on(STORE_EVENTS.RESTORED, () => sendToAllWindows('show:restored', null))
 
 

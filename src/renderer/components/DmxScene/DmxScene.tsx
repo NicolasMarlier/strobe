@@ -5,20 +5,21 @@ import { MathUtils, PerspectiveCamera } from 'three'
 import { Grid } from '@react-three/drei'
 import { Bloom, EffectComposer } from '@react-three/postprocessing'
 import type { TransformControls as TransformControlsImpl } from 'three-stdlib'
-import LedBar, { isPointerOverGizmo } from "./LedBar";
+import Fixture3D, { isPointerOverGizmo } from "./Fixture3D";
 import SceneSettings from "./SceneSettings";
 import MoveHint from "./MoveHint";
 import { useModifierKeys } from "./useModifierKeys";
 import { framedArea } from "./framing";
+import { NO_OFFSET, useCameraMotion, type CameraOffset } from "./cameraMotion";
+import { useNarrowWindow } from "../../useNarrowWindow";
 import { useDmxButtonsContext } from "../../contexts/DmxButtonsContext";
 import { useRealTimeContext } from "../../contexts/RealTimeContext";
 import { useDmxSceneContext } from "../../contexts/DmxSceneContext";
-import { LED_BAR_CENTER_POSITION } from "../../../shared/led_bar";
 
 // Fixed camera: from the audience, a bit above head height, looking down at the middle of the stage
 const CAMERA_POSITION: Vector3Tuple = [0, 2.2, 5]
-// Aims at the middle of the stage, where a reset bar goes
-const CAMERA_TARGET: Vector3Tuple = LED_BAR_CENTER_POSITION
+// Aims at the middle of the stage, where a reset element goes
+const CAMERA_TARGET: Vector3Tuple = [0, 0.05, 0]
 // The camera frames this width of stage (in meters, at the target), whatever the panel's shape,
 // without its vertical angle going over the maximum on narrow panels
 const FRAMED_WIDTH = 8
@@ -41,7 +42,7 @@ const PINCH_SPEED = 0.01
 const SCROLL_SPEED = 0.002
 
 // For shows saved without display options
-const DEFAULT_DISPLAY: DmxSceneDisplay = { show_grid: true, show_beams: true, zoom: ZOOM_DEFAULT }
+const DEFAULT_DISPLAY: DmxSceneDisplay = { show_grid: true, show_beams: true, camera_motion: true, zoom: ZOOM_DEFAULT }
 
 // A zoom is saved once it settles: pinching sends dozens of changes per second
 const ZOOM_SAVE_DELAY_MS = 500
@@ -61,12 +62,31 @@ const verticalFov = (aspect: number, zoom: number) => {
     return MathUtils.radToDeg(2 * Math.atan(Math.tan(fov / 2) / zoom * WIDE_ANGLE))
 }
 
-// Fixed camera, re-framed when the section is resized.
+// Fixed camera, re-framed when the section is resized, drifting slightly while the show plays (cameraMotion).
 // It frames the free part of the section, and the canvas shows around it too (a view offset)
-const FixedCamera = ({ zoom }: { zoom: number }) => {
+const FixedCamera = ({ zoom, still }: { zoom: number, still: boolean }) => {
     const camera = useThree(state => state.camera) as PerspectiveCamera & { manual?: boolean }
     const { width, height } = useThree(state => state.size)
     const invalidate = useThree(state => state.invalidate)
+    const { midiCurrentTickRef } = useRealTimeContext()
+
+    const offsetRef = useRef(NO_OFFSET)
+    const zoomRef = useRef(zoom)
+    zoomRef.current = zoom
+    // Still when the motion is off, or under the pointer while an element is moved or rotated
+    const driftingRef = useRef(!still)
+    driftingRef.current = !still
+
+    const place = ({ position, target }: CameraOffset) => {
+        camera.position.set(...CAMERA_POSITION.map((value, i) => value + position[i]) as Vector3Tuple)
+        camera.lookAt(...CAMERA_TARGET.map((value, i) => value + target[i]) as Vector3Tuple)
+    }
+
+    useCameraMotion(midiCurrentTickRef, zoomRef, driftingRef, offset => {
+        offsetRef.current = offset
+        place(offset)
+        invalidate()
+    })
 
     // The scene is only drawn on demand: redraw it with the new framing,
     // or it would keep showing the previous zoom while the pointer picks with the new one
@@ -75,8 +95,7 @@ const FixedCamera = ({ zoom }: { zoom: number }) => {
 
         // The aspect is the framed part's, not the canvas': keep the canvas from resetting it
         camera.manual = true
-        camera.position.set(...CAMERA_POSITION)
-        camera.lookAt(...CAMERA_TARGET)
+        place(offsetRef.current)
         camera.aspect = framed.width / framed.height
         camera.fov = verticalFov(camera.aspect, zoom)
         camera.setViewOffset(framed.width, framed.height, -framed.left, -framed.top, width, height)
@@ -89,8 +108,9 @@ const FixedCamera = ({ zoom }: { zoom: number }) => {
 
 const DmxScene = () => {
     const { dmxButtons, selectedDmxButtonId } = useDmxButtonsContext()
-    const { dmxScene, updateDmxScene, placeLedBar, selectedLedBarIndex, setSelectedLedBarIndex } = useDmxSceneContext()
+    const { dmxScene, updateDmxScene, placeElement, selectedElementIndex, setSelectedElementIndex, fixtureOf } = useDmxSceneContext()
     const { dmxHexSignal } = useRealTimeContext()
+    const isNarrowWindow = useNarrowWindow()
 
     const { updateDmxButtonAndSync } = useDmxButtonsContext()
     const gizmoRef = useRef<TransformControlsImpl>(null)
@@ -126,8 +146,8 @@ const DmxScene = () => {
 
     const selectedRedChannels = dmxButtons.find(({id}) => selectedDmxButtonId == id)?.red_channels || []
 
-    // With a DMX button selected, clicks assign the bars' channels to it.
-    // Otherwise they select the bars, to move and rotate them.
+    // With a DMX button selected, clicks assign the elements' channels to it.
+    // Otherwise they select the elements, to move and rotate them.
     const assignMode = !!selectedDmxButtonId
 
     const onSelectRedChannels = (redChannels: number[], selected: boolean) => {
@@ -141,19 +161,19 @@ const DmxScene = () => {
       }
     }
 
-    // A click in the void closes the edited bar, but not a click on its rotation rings
+    // A click in the void closes the edited element, but not a click on its rotation rings
     const onPointerMissed = () => {
       if (isPointerOverGizmo(gizmoRef.current)) return
-      setSelectedLedBarIndex(undefined)
+      setSelectedElementIndex(undefined)
     }
 
-    // LED bars' channels are edited in the details panel next to the scene (DmxSceneDetails)
+    // Elements' channels are edited in the details panel next to the scene (DmxSceneDetails)
     return <div className='dmx-scene' ref={sceneRef}>
       <Canvas
         frameloop='demand'
         onPointerMissed={onPointerMissed}>
 
-        <FixedCamera zoom={zoom}/>
+        <FixedCamera zoom={zoom} still={!display.camera_motion || selectedElementIndex != undefined}/>
         <color attach='background' args={[BACKGROUND]}/>
 
         <Grid
@@ -168,21 +188,23 @@ const DmxScene = () => {
           sectionColor='#3d3d3d'
           fadeDistance={30}/>
 
-        { dmxScene.led_bars.map((ledBarConfig, index) => (
-          <LedBar
+        { dmxScene.elements.map((element, index) => (
+          <Fixture3D
             key={index}
-            config={ledBarConfig}
+            element={element}
+            fixture={fixtureOf(element.fixture)}
             dmxHexSignal={dmxHexSignal}
             assignMode={assignMode}
-            editing={selectedLedBarIndex == index}
+            editing={selectedElementIndex == index}
             selectedRedChannels={selectedRedChannels}
             onSelectRedChannels={onSelectRedChannels}
-            onSelect={() => setSelectedLedBarIndex(index)}
-            onMove={(position) => placeLedBar(index, { position })}
-            onRotate={(rotation) => placeLedBar(index, { rotation })}
+            onSelect={() => setSelectedElementIndex(index)}
+            onMove={(position) => placeElement(index, { position })}
+            onRotate={(rotation) => placeElement(index, { rotation })}
             gizmoRef={gizmoRef}
             showBeams={display.show_beams}
-            rotating={alt}/>
+            rotating={alt}
+            selectable={!isNarrowWindow}/>
         ))}
 
         <EffectComposer>
@@ -192,8 +214,8 @@ const DmxScene = () => {
 
       <SceneSettings display={display} onChange={updateDisplay}/>
 
-      {/* The selected bar can be moved: bars can't be moved while assigning channels */}
-      { selectedLedBarIndex != undefined && !assignMode && <MoveHint shift={shift} alt={alt}/> }
+      {/* The selected element can be moved: elements can't be moved while assigning channels */}
+      { selectedElementIndex != undefined && !assignMode && <MoveHint shift={shift} alt={alt}/> }
 
       {/* On a log scale, so each step zooms as much */}
       <input

@@ -1,11 +1,12 @@
 import EventEmitter from "events"
 import { randomUUID } from "crypto"
 import { InvalidParamError, NotFoundError } from "../controllers/application.controller"
-import { migrateDmxScene } from "../../shared/led_bar"
 
 export const STORE_EVENTS = {
     CHANGED: 'changed',
     TRACK_RENAMED: 'trackRenamed',
+    // Several tracks changed id at once (reordering): { [oldId]: newId }
+    TRACKS_RENUMBERED: 'tracksRenumbered',
     LOADED: 'loaded',
     // Undo or redo brought back a previous state (see ShowHistory): the UI reloads it
     RESTORED: 'restored',
@@ -19,7 +20,7 @@ export class Store extends EventEmitter {
     private tracks: Track[] = []
     private dmxButtons: DmxButton[] = []
     private dmxMidis: DmxMidiRecord[] = []
-    private dmxScene: DmxScene = { led_bars: [] }
+    private dmxScene: DmxScene = { elements: [] }
 
     static getInstance(): Store {
         if (!Store.instance) {
@@ -48,7 +49,7 @@ export class Store extends EventEmitter {
         this.tracks = structuredClone(data.tracks)
         this.dmxButtons = structuredClone(data.dmx_buttons)
         this.dmxMidis = structuredClone(data.dmx_midis)
-        this.dmxScene = migrateDmxScene(structuredClone(data.dmx_scene))
+        this.dmxScene = structuredClone(data.dmx_scene)
     }
 
     toData = (): ShowData => structuredClone({
@@ -106,6 +107,7 @@ export class Store extends EventEmitter {
             }
             this.dmxButtons.filter(b => b.track_id == id).forEach(b => b.track_id = newId)
             this.dmxMidis.filter(m => m.track_id == id).forEach(m => m.track_id = newId)
+            track.audio_id = track.audio_id ?? track.id
             track.id = newId
         }
 
@@ -114,6 +116,53 @@ export class Store extends EventEmitter {
         if ('audio_filename' in params) track.audio_filename = params.audio_filename ?? null
 
         if (newId != id) this.emit(STORE_EVENTS.TRACK_RENAMED, id, newId)
+        this.changed()
+        return structuredClone(track)
+    }
+
+    // The tracks are renumbered 1, 2, 3… in the new order: their ids are their MIDI programs
+    reorderTracks = (orderedIds: number[]): Track[] => {
+        const ids = this.tracks.map(p => p.id).sort((a, b) => a - b)
+        if (orderedIds.length != ids.length || [...orderedIds].sort((a, b) => a - b).some((id, i) => id != ids[i])) {
+            throw new InvalidParamError("The new order must list every track once")
+        }
+
+        const mapping: Record<number, number> = {}
+        orderedIds.forEach((id, i) => { if (id != i + 1) mapping[id] = i + 1 })
+        if (Object.keys(mapping).length == 0) return this.listTracks()
+
+        const renumber = (id: number) => mapping[id] ?? id
+        this.tracks.forEach(p => {
+            if (renumber(p.id) == p.id) return
+            // Its audio file keeps its name
+            p.audio_id = p.audio_id ?? p.id
+            p.id = renumber(p.id)
+        })
+        this.dmxButtons.forEach(b => { if (b.track_id != null) b.track_id = renumber(b.track_id) })
+        this.dmxMidis.forEach(m => m.track_id = renumber(m.track_id))
+
+        this.emit(STORE_EVENTS.TRACKS_RENUMBERED, mapping)
+        this.changed()
+        return this.listTracks()
+    }
+
+    // A copy of the track with its own buttons and automation, as the last track.
+    // It shares the original's audio file
+    duplicateTrack = (id: number): Track => {
+        const original = this.getTrack(id)
+        const track: Track = {
+            ...original,
+            id: Math.max(0, ...this.tracks.map(p => p.id)) + 1,
+            name: `${original.name} copy`,
+            // Both play the same audio file
+            audio_id: original.audio_id ?? original.id,
+        }
+        this.tracks.push(track)
+        this.dmxButtons.push(...this.dmxButtons
+            .filter(b => b.track_id == id)
+            .map(b => ({ ...structuredClone(b), id: randomUUID(), track_id: track.id })))
+        const dmxMidi = this.dmxMidis.find(m => m.track_id == id)
+        this.dmxMidis.push({ track_id: track.id, midi_patterns: structuredClone(dmxMidi?.midi_patterns ?? []) })
         this.changed()
         return structuredClone(track)
     }

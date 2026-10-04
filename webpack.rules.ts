@@ -11,6 +11,14 @@ export const tsRule: RuleSetRule = {
   },
 };
 
+// Our images (e.g. the app's icon on the splash and Welcome screens), inlined as data URLs: small, and the
+// splash loads its page from a data URL, with nowhere to fetch a file from
+export const imageRule: RuleSetRule = {
+  test: /\.png$/,
+  exclude: /node_modules/,
+  type: 'asset/inline',
+};
+
 // The asset relocator injects `__dirname` into the bundle, which doesn't exist in sandboxed
 // renderers, so these rules are for the main process only.
 export const rules: Required<ModuleOptions>['rules'] = [
@@ -32,4 +40,5 @@ export const rules: Required<ModuleOptions>['rules'] = [
     },
   },
   tsRule,
+  imageRule,
 ];
