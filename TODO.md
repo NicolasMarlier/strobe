@@ -66,11 +66,11 @@
   - The feature-worktree skill explains it (done)
 - [ ] Audio files management
 - [ ] Loop and max length management
-- [ ] Auto-update (merged, to validate after the next release)
+- [x] Auto-update
   - Electron's autoUpdater (Squirrel.Mac) fed by update.electronjs.org, which reads the GitHub releases: checked 10 s after launch, then every 4 hours, downloaded in the background, installed when Strobe quits, never during a show (done)
   - Strobe › Check for Updates…, then Restart to Install Strobe X once downloaded, asking about unsaved changes first (done)
   - `bin/release` also builds the ZIP, `bin/publish` uploads it; the deploy skill checks the feed (done)
   - The README's Privacy section says what the update check sends (done)
-  - Validate on real releases: 0.5.0 has no ZIP, so the first version that updates by itself is the one after the release that ships this
+  - Validated on real releases: an installed 0.6.0 found 0.6.1, downloaded it and restarted into it, still notarized (done)
 - [x] Welcome screen redesign, in the app's look
   - Buttons like the app's, with white line icons, New Show the primary one; no more offset shadows; the recent shows framed as before, rows highlighted on hover with the remove cross and an open chevron; the example show as a quiet link with a play icon (done)
