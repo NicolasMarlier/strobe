@@ -21,15 +21,10 @@ Open `Strobe.dmg`, then drag Strobe into Applications. The app is signed and not
 All versions and their notes are on the [releases page](https://github.com/NicolasMarlier/strobe/releases), and in the [changelog](CHANGELOG.md).
 
 <!-- whats-new:start -->
-## What's new in 0.6.0
-
-### New
-- **Example show:** new to Strobe? Open the example show from the Welcome screen or File › Open Example Show: the first 100 seconds of maad avenue's "Dead In My Head", with its lights, buttons, MIDI patterns and stage. It opens as an unsaved copy: the first Save asks where to keep it, and copies its audio along.
-- **Automatic updates:** new versions download in the background and are installed the next time Strobe starts, never during a show. Strobe › Check for Updates… looks right away, and Strobe › Restart to Install installs a downloaded version at once. From this version on, you won't need to download Strobe again.
+## What's new in 0.6.1
 
 ### Improved
-- **Keyboard shortcuts:** every shortcut is now in the menus, to be found: a new Pattern menu (Split T, Join J, Loop L), Copy, Paste, Delete and Select All on patterns and notes in the Edit menu, one beat back or forward and the previous or next track in the Playback menu, and View › Show / Hide Setlist (⌘\). The timeline shows the keys that apply right now: the cursor's when nothing is selected, the selection's otherwise.
-- **Switch tracks with the setlist hidden:** ↑ and ↓ go to the previous or next track even when the setlist is collapsed.
+- **A cleaner Welcome screen:** it now looks like the rest of Strobe. New Show and Open Other Show… are buttons like the app's, with an icon each. A recent show lights up under the mouse, with a cross to forget it and an arrow to open it. The link to the example show is quieter.
 
 Older versions: on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
 <!-- whats-new:end -->

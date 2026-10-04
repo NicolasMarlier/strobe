@@ -2,6 +2,11 @@
 
 What changed in each version of Strobe. The installers are on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
 
+## 0.6.1 — 2026-10-04
+
+### Improved
+- **A cleaner Welcome screen:** it now looks like the rest of Strobe. New Show and Open Other Show… are buttons like the app's, with an icon each. A recent show lights up under the mouse, with a cross to forget it and an arrow to open it. The link to the example show is quieter.
+
 ## 0.6.0 — 2026-10-04
 
 ### New
