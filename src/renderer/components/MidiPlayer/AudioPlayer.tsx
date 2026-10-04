@@ -131,8 +131,9 @@ const AudioPlayer = () => {
         if(e.key != ' ' || isTextField(document.activeElement)) return
         // Taken here, so that macOS doesn't pass it on to Playback > Play / Pause, which would toggle again
         e.preventDefault()
-        // Holding Space repeats the key: only its first press toggles
-        if(!e.repeat) (isPlaying ? pause : play)()
+        // Holding Space repeats the key: only its first press toggles. Through the ref, so that it plays the
+        // track selected since, like the button
+        if(!e.repeat) menuActionsRef.current.toggle()
     }
 
     useEffect(() => {
@@ -140,7 +141,7 @@ const AudioPlayer = () => {
         return () => {
             document.removeEventListener("keydown", onKeyDown)
         }
-    }, [isPlaying, drivenByMidi])
+    }, [])
 
     const drivenTitle = drivenByMidi ? 'Playback is driven by MainStage' : undefined
 

@@ -18,6 +18,7 @@
   - Its own usage signal, `Strobe.exampleShowOpened`, listed in the README's Privacy section (done)
 - [ ] Handle input devices to trigger a button
 - [ ] Better MIDI recording and MIDI editing
+- [x] Bug: Space didn't start playback after selecting a track, the Play button did; Space plays the selected track now
 - [x] Lights aren't dark enough
 - [x] Block Play when playback is driven by MainStage
   - Play, Space and Back to Start greyed out while MainStage plays, the app's own playback stops when MainStage starts, the cursor can't be moved by hand; a pulsing MainStage badge next to the transport (done)
