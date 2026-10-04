@@ -1,6 +1,4 @@
-// The app's look (App.scss): framed sections on #222, their title a small uppercase tab on the border,
-// buttons with a 2px border that lightens on hover, the green of what's live for what starts something
-$green: rgb(114, 203, 63);
+// The app's look (App.scss): buttons with a 2px border that lightens on hover, line icons
 
 .welcome {
     width: 100%;
@@ -43,31 +41,23 @@ $green: rgb(114, 203, 63);
         color: #ccc;
     }
 
-    // A section of the app
-    .welcome-recent-shows {
-        position: relative;
-        border: 2px solid #161616;
-        border-radius: 5px;
-        padding: 14px 6px 6px;
+    .welcome-section-title {
+        color: #888;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: -6px;
     }
 
-    .welcome-section-title {
-        position: absolute;
-        top: -10px;
-        left: 20px;
-        line-height: 14px;
-        font-size: 10px;
-        font-weight: 600;
-        text-transform: uppercase;
-        background-color: #161616;
-        color: #666;
-        padding: 2px 10px;
+    .welcome-recent-shows {
+        border: 2px solid #444;
         border-radius: 5px;
+        overflow: hidden;
     }
 
     .welcome-recent-show {
-        padding: 8px 10px 8px 14px;
-        border-radius: 4px;
+        padding: 10px 12px 10px 16px;
+        border-bottom: 1px solid #444;
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -118,6 +108,10 @@ $green: rgb(114, 203, 63);
             color: #555;
             opacity: 0;
             transition: opacity 0.1s ease, transform 0.15s ease;
+        }
+
+        &:last-child {
+            border-bottom: none;
         }
 
         &:hover {
@@ -188,7 +182,7 @@ $green: rgb(114, 203, 63);
             color: #eee;
 
             svg {
-                color: $green;
+                color: #fff;
             }
 
             &:hover {
@@ -219,8 +213,8 @@ $green: rgb(114, 203, 63);
         .play {
             width: 14px;
             height: 14px;
-            color: $green;
-            opacity: 0.7;
+            color: #fff;
+            opacity: 0.6;
             transition: opacity 0.1s ease;
         }
 

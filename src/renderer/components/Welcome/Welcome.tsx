@@ -10,7 +10,7 @@ interface Props {
 }
 
 // Shown when no show is open. Opening or creating a show reloads the window into the app.
-// Drawn like the app: the recent shows in a section with its title on the border, the actions as its buttons
+// Drawn like the app: its buttons, its line icons
 const Welcome = (props: Props) => {
     const [recentShows, setRecentShows] = useState(props.recentShows)
 
@@ -27,9 +27,9 @@ const Welcome = (props: Props) => {
                 <div className="welcome-title">STROBE</div>
             </div>
 
-            { recentShows.length > 0 &&
+            { recentShows.length > 0 && <>
+                <div className="welcome-section-title">Recent shows</div>
                 <div className="welcome-recent-shows">
-                    <div className="welcome-section-title">Recent shows</div>
                     { recentShows.map(({ dir, name, folder }) =>
                         <div key={dir} className="welcome-recent-show" onClick={() => openRecentShow(dir)}>
                             <div className="details">
@@ -41,7 +41,7 @@ const Welcome = (props: Props) => {
                         </div>
                     )}
                 </div>
-            }
+            </>}
 
             <div className="welcome-actions">
                 <div className="welcome-button primary" onClick={() => newShow()}>
