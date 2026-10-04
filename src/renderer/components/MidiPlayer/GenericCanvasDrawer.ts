@@ -48,7 +48,7 @@ export const drawCurrentTick = (props: DrawerFunctionProps, currentMidiTick: num
 export const drawHoverTick = (props: DrawerFunctionProps, hoverTick: number | null) => {
     if (hoverTick === null) return
     const { ctx, ticksScroll, pixelsPerBeat, height, baseXOffset } = props
-    ctx.fillStyle = "#ffffff30";
+    ctx.fillStyle = "#ffffff12";
     ctx.fillRect(
         ticksOffsetToPixels(hoverTick, ticksScroll, pixelsPerBeat, baseXOffset || 0),
         0,
