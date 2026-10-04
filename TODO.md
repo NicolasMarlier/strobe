@@ -87,3 +87,4 @@
   - Google Search Console: the site verified (meta tag on the home page), Google can index the home page (done). To do: submit `sitemap.xml` if not done yet, and redo the indexing request (it failed right after the verification)
 - [ ] Promote Strobe: posts on r/MainStage, then r/macapps and r/lightingdesign, and a listing on AlternativeTo (suggested as an alternative to Lightkey and QLC+)
   - Drafts ready to paste in `~/Documents/Strobe - Promotion Reddit et AlternativeTo.pdf`
+- [ ] Bug: selecting an area in the MIDI editor drags things along instead of only selecting
