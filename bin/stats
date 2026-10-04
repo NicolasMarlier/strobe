@@ -101,6 +101,8 @@ const main = async () => {
     console.log(`Strobe stats, ${isoDay(until)}`)
     downloads()
     await visits()
+    section('Installs and usage (TelemetryDeck)')
+    console.log('In the dashboard, https://dashboard.telemetrydeck.com (its API needs a paid plan)')
 }
 
 main()

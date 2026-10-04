@@ -11,6 +11,7 @@ import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 import { mainConfig } from './webpack.main.config';
 import { rendererConfig } from './webpack.renderer.config';
+import { devPorts, worktreeName } from './src/shared/dev_worktree';
 
 // Set by bin/release
 const release = !!process.env.STROBE_RELEASE;
@@ -73,6 +74,8 @@ const config: ForgeConfig = {
     new AutoUnpackNativesPlugin({}),
     new WebpackPlugin({
       mainConfig,
+      // yarn start: a worktree's own ports, so that several run at once (see src/shared/dev_worktree.ts)
+      ...devPorts(worktreeName(__dirname)),
       // Forge's default dev policy, plus loading the show's audio (show-audio://, see src/main/init/audio_protocol.ts)
       devContentSecurityPolicy: [
         "default-src 'self' 'unsafe-inline' data:",

@@ -19,4 +19,4 @@ When a section says "Unavailable", say why and how to fix it:
 - A 403 or 404 from Vercel: the project may belong to a team: `STROBE_VERCEL_TEAM=<team slug> bin/stats`.
 - gh not logged in: `! gh auth login`.
 
-Installs and real usage aren't measured yet: they need telemetry in the app (planned with TelemetryDeck).
+Installs and real usage (unique installs, active users, shows opened, playbacks, MainStage connections) are in the TelemetryDeck dashboard, https://dashboard.telemetrydeck.com, not in `bin/stats`: TelemetryDeck's API needs a paid plan, and Strobe is on the free one. Point the user there when they ask about installs or usage, and remind them that only the released app counts: runs from source go to Test Mode.

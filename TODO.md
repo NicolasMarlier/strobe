@@ -31,9 +31,9 @@
   - Signals (done): at launch (version, macOS version, first launch or not), then show opened, playback started, MainStage connected, DMX interface plugged, narrow window used. Never a show's or a track's name, nor any content
   - A "Share anonymous usage statistics" setting, on by default, that turns it off (done: Strobe › Share Anonymous Usage Statistics and Crash Reports)
   - A Privacy section in the README listing exactly what is sent (done)
-  - Add the installs and active users to `bin/stats` and the stats skill
-  - Ship it in a release (the deploy skill)
-- [ ] Crash monitoring, with Sentry (`@sentry/electron`, free plan: 5,000 errors a month)
+  - Installs and active users: read in the TelemetryDeck dashboard, not in `bin/stats` (its API needs a paid plan, we stay on the free one); `bin/stats` and the stats skill point to it (done)
+  - Ship it in a release (the deploy skill), along with the next features
+- [ ] Crash monitoring (`crash-monitoring` branch), with Sentry (`@sentry/electron`, free plan: 5,000 errors a month)
   - Why Sentry rather than TelemetryDeck: readable stack traces, the same crashes grouped, email alerts, and the native crashes (USB, MIDI) that kill the app before it can send anything
   - First: the user creates the Sentry account and the project, and gives its DSN (done)
   - Implemented on the `crash-monitoring` branch, not merged yet (done): `src/main/crash_reports.ts`, the window in `src/renderer.ts`. The errors nobody caught in the main process and the window, and the native crashes (sent at the next launch). File paths replaced by `<path>`, no console nor requests in the breadcrumbs, no IP address nor variables' values
@@ -42,3 +42,10 @@
   - **Validate that the crashes show up** in Sentry: run from source with `STROBE_CRASH_REPORTS=1 yarn start` (from source, nothing is sent otherwise), open the DevTools and run `setTimeout(() => { throw new Error('Strobe test crash') })`, then merge
   - In Sentry: an email alert on a new crash
   - Ship it in a release (the deploy skill)
+- [ ] Display the keyboard shortcuts
+- [ ] App icon
+- [ ] No window title ("Untitled — Strobe") while no show is open yet
+- [x] Run several worktrees at once
+  - Webpack dev ports made from the worktree's name, `STROBE_DEV_PORT` to force one (done)
+  - Run from source, the window shows its branch: a frame in its color, its name at the bottom, in the title and as the Dock badge (done)
+  - The feature-worktree skill explains it (done)

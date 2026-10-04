@@ -12,6 +12,7 @@ import { ShowHistory } from '../store/ShowHistory';
 import { revealWindow } from './splash';
 import { FixtureLibrary, FIXTURE_LIBRARY_EVENTS } from '../fixture_library';
 import { RENDERER_SIGNALS, signal } from '../telemetry';
+import { devWorktree } from './dev_worktree';
 
 export function handle<C extends Channel>(
   channel: C,
@@ -60,6 +61,8 @@ handle('dmx_buttons:destroy', DmxButtonController.destroy)
 
 // Only the signals the window may send
 handle('telemetry:signal', async (type) => { if (RENDERER_SIGNALS.includes(type)) signal(type) })
+
+handle('dev:worktree', async () => devWorktree)
 
 
 handle('main_loop:update_current_tick', MainLoopController.update_current_tick)
