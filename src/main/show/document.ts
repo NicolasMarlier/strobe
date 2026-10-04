@@ -6,6 +6,7 @@ import { audioDir, readShow, SHOW_EXTENSION, writeShow } from "./show_file"
 import { newShowData } from "./new_show"
 import { addRecentShow, describeRecentShow, listRecentShows, removeRecentShow } from "./recent_shows"
 import { signal } from "../telemetry"
+import { devWorktree } from "../init/dev_worktree"
 
 const APP_NAME = 'STROBE'
 
@@ -23,7 +24,9 @@ export const currentAudioDir = () => currentShowDir && audioDir(currentShowDir)
 const showName = () => currentShowDir ? path.basename(currentShowDir, SHOW_EXTENSION) : 'Untitled'
 
 export const updateWindowTitle = (win: BrowserWindow) => {
-    win.setTitle(`${showName()}${dirty ? ' •' : ''} — ${APP_NAME}`)
+    // Run from source, the branch too: which worktree's window it is
+    const branch = devWorktree ? ` [${devWorktree.branch}]` : ''
+    win.setTitle(`${showName()}${dirty ? ' •' : ''} — ${APP_NAME}${branch}`)
     win.setRepresentedFilename(currentShowDir ?? '')
     win.setDocumentEdited(dirty)
 }
