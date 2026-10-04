@@ -2,6 +2,22 @@
 
 What changed in each version of Strobe. The installers are on the [releases page](https://github.com/NicolasMarlier/strobe/releases).
 
+## 0.7.0 — 2026-10-04
+
+### New
+- **Audio files that really import:** drop an audio file on a track's waveform, or right-click it and choose Choose Audio File…, Replace Audio File… or Remove Audio (also in the setlist's right-click menu). The file is copied into the show when you save it. WAV, MP3, M4A, FLAC and OGG play as they are; AIFF and CAF are turned into WAV. While a file is dragged over the waveform, it says what dropping it will do. A file Strobe can't find shows up in red, with its name.
+- **Track length:** every track now has an end: the length you set, else its audio's, else 64 bars. Drag the tab at the track's end (it snaps to the audio's end), or double-click it to type a length, like 3:30 or 96 bars. Playback stops there, and a track without audio plays too.
+- **Loops you can stretch:** drag a loop's end to make it repeat longer or shorter. A loop stops at the next pattern or at the track's end.
+
+### Improved
+- **Recording:** Record starts playback, and Pause stops both. The pattern being recorded grows with the cursor, ends on the beat after its last note, and stops where the next pattern starts (a loop included) or at the track's end. Notes go on the nearest sixteenth, so a note played a hair early still lands on the beat. If you click elsewhere in the timeline while recording, what you've played is kept and recording goes on from there. If nothing was played, no empty pattern is left behind.
+- **Saving keeps only the audio the tracks play:** files of deleted tracks no longer pile up in the show.
+
+### Fixed
+- **Space after picking a track:** Space now starts playback right after you select a track, like the Play button.
+- **Clicking a pattern or a note:** a click that slips by a pixel or two only selects it, without moving it.
+- **Recording with a pattern right after the cursor:** Record now turns itself off when there's no room at the cursor, instead of staying on and recording nothing.
+
 ## 0.6.1 — 2026-10-04
 
 ### Improved
