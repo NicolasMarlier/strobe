@@ -34,10 +34,10 @@
   - A Privacy section in the README listing exactly what is sent (done)
   - Installs and active users: read in the TelemetryDeck dashboard, not in `bin/stats` (its API needs a paid plan, we stay on the free one); `bin/stats` and the stats skill point to it (done)
   - Ship it in a release (the deploy skill), along with the next features
-- [ ] Crash monitoring (`crash-monitoring` branch), with Sentry (`@sentry/electron`, free plan: 5,000 errors a month)
+- [ ] Crash monitoring, with Sentry (`@sentry/electron`, free plan: 5,000 errors a month)
   - Why Sentry rather than TelemetryDeck: readable stack traces, the same crashes grouped, email alerts, and the native crashes (USB, MIDI) that kill the app before it can send anything
   - First: the user creates the Sentry account and the project, and gives its DSN (done)
-  - Implemented on the `crash-monitoring` branch, not merged yet (done): `src/main/crash_reports.ts`, the window in `src/renderer.ts`. The errors nobody caught in the main process and the window, and the native crashes (sent at the next launch). File paths replaced by `<path>`, no console nor requests in the breadcrumbs, no IP address nor variables' values
+  - Implemented and merged into main (done): `src/main/crash_reports.ts`, the window in `src/renderer.ts`. The errors nobody caught in the main process and the window, and the native crashes (sent at the next launch). File paths replaced by `<path>`, no console nor requests in the breadcrumbs, no IP address nor variables' values
   - Turned off by the same setting as the usage statistics: Strobe › Share Anonymous Usage Statistics and Crash Reports (done). The README's Privacy section lists what is sent (done)
   - The source maps sent to Sentry by `bin/release`, then deleted from the app (done, in `webpack.plugins.ts`): the organization, the project and the organization token in the keychain are set (done). The upload itself is checked at the next release
   - Validate that the crashes show up in Sentry (done: a test error from the window arrived, in release Strobe@0.4.0). Run from source, `STROBE_CRASH_REPORTS=1 yarn start` sends them
