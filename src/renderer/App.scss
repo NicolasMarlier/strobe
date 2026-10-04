@@ -216,6 +216,9 @@ h1 {
 
     &.commands-bar {
       grid-area: commands;
+      // The transport's tooltips hang below the bar, over the sections under it
+      overflow: visible;
+      z-index: 10;
       padding: 10px;
       flex-direction: row;
       align-items: center;
