@@ -34,3 +34,4 @@
   - Installs and active users: read in the TelemetryDeck dashboard, not in `bin/stats` (its API needs a paid plan, we stay on the free one); `bin/stats` and the stats skill point to it (done)
   - Ship it in a release (the deploy skill), along with the next features
 - [ ] Crash monitoring
+- [ ] Display the keyboard shortcuts (`shortcuts` branch)
