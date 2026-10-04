@@ -45,6 +45,8 @@ type Track = {
     audio_id?: number
     // Listed only, never saved: it has audio but its file isn't found (moved or deleted outside Strobe)
     audio_missing?: boolean
+    // Its length, set by hand: else its audio's, else a default one (useTrackEndTick)
+    length_ticks?: number
 }
 
 type TrackCreationParams = {
@@ -56,6 +58,7 @@ type TrackUpdateParams = {
     name?: string
     id?: number
     bpm?: number
+    length_ticks?: number
 }
 
 type MidiNote = {

@@ -120,3 +120,12 @@ export const computedSelectedNotes = (selection: Rectangle, midiNotes: MidiNote[
 
 export const timeToTick = (timeInSeconds: number, bpm: number) => Math.round((timeInSeconds * bpm * PPQ) / 60)
 export const tickToTime = (tick: number, bpm: number) => (60.0 * tick) / (bpm * PPQ)
+
+// A track's length as typed: "3:30" (minutes and seconds) or "96" (bars of 4 beats). Null when it's neither
+export const parseTrackLength = (value: string, bpm: number) => {
+    const time = value.trim().match(/^(\d+):([0-5]?\d(?:\.\d+)?)$/)
+    if(time) return timeToTick(Number(time[1]) * 60 + Number(time[2]), bpm)
+    const bars = value.trim().match(/^\d+(?:\.\d+)?$/)
+    if(bars) return Math.round(Number(value) * 4 * PPQ)
+    return null
+}

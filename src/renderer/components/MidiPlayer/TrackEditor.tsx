@@ -3,9 +3,9 @@ import './TrackEditor.scss'
 import { useEffect, useRef, useState } from 'react';
 import { useRealTimeContext } from '../../contexts/RealTimeContext';
 import { getWave } from './waves';
-import { redrawFullCanvas } from './TrackEditorCanvasDrawer';
-import { addNoteAtTick, insertPatternsAtTick, magnettedTick, nextFreeTick, toggleLoopForPatterns } from './utils_midi_notes';
-import { doRectanglesIntersect, midiPatternToRectangle, PPQ, xToTicks } from './utils';
+import { endTabRect, redrawFullCanvas } from './TrackEditorCanvasDrawer';
+import { addNoteAtTick, insertPatternsAtTick, magnettedTick, nextFreeTick, setLoopEnd, toggleLoopForPatterns } from './utils_midi_notes';
+import { doRectanglesIntersect, midiPatternToRectangle, parseTrackLength, PPQ, tickToTime, ticksDurationToPixels, ticksOffsetToPixels, xToTicks } from './utils';
 import CanvasMouseHandler from './CanvasMouseHandler';
 import { useDmxMidiContext } from '../../contexts/DmxMidiContext';
 import { useDmxButtonsContext } from '../../contexts/DmxButtonsContext';
@@ -13,11 +13,31 @@ import { isSelected, midiPatternArrayEqual, midiPatternsInclude, splitPatternsAt
 import { isPageEdit, useMenuMessage } from '../../useEditMenu';
 import ContextMenu from '../DesignSystem/ContextMenu/ContextMenu';
 import { audioMenuItems } from '../../audioMenu';
+import { trackEndTick } from './useTrackEndTick';
+import { updateTrack } from '../../ApiClient';
+import InlineInput from '../DesignSystem/InlineInput/InlineInput';
 
 const BEATS_OFFSET = 2
 // Following the cursor, the view turns its page once the cursor passes this share of its width
 const FOLLOW_PAGE_EDGE = 0.9
 const FOLLOW_GLIDE_MS = 150
+// How close to a loop's or the track's end, in pixels, the mouse grabs it
+const END_GRAB_PX = 5
+// The view goes on this far past the track's end, to drag it further
+const PAST_END_TICKS = 8 * 4 * PPQ
+// Dragging an end this close to the view's sides scrolls the view, the faster the closer, up to this speed
+const EDGE_SCROLL_ZONE_PX = 40
+const EDGE_SCROLL_MAX_PX_PER_S = 150
+
+// What the mouse drags in the timeline, rather than seeking or selecting: an end, at fromTick when the
+// mouse grabbed it at grabTick
+type Edge = ({ kind: 'trackEnd' } | { kind: 'loopEnd', loopOf: MidiPattern }) & { fromTick: number, grabTick: number }
+
+// 185 s: "3:05"
+const formatDuration = (seconds: number) => {
+    const rounded = Math.round(seconds)
+    return `${Math.floor(rounded / 60)}:${String(rounded % 60).padStart(2, '0')}`
+}
 
 interface Props {
     track: Track
@@ -61,7 +81,10 @@ const MidiPlayer = (props: Props) => {
     const isFollowingRef = useRef(isFollowing)
     isFollowingRef.current = isFollowing
 
-    const { audioUrl, uploadTrackAudioAndSync, chooseTrackAudioAndSync, resetTrackAudioAndSync } = useDmxButtonsContext()
+    const { audioUrl, uploadTrackAudioAndSync, chooseTrackAudioAndSync, resetTrackAudioAndSync, syncTracks } = useDmxButtonsContext()
+
+    const trackRef = useRef(track)
+    trackRef.current = track
 
     const allMidiKeysRef = useRef(allMidiKeys)
     allMidiKeysRef.current = allMidiKeys
@@ -90,6 +113,19 @@ const MidiPlayer = (props: Props) => {
     const [audioWaveData, setAudioWaveData] = useState(new Uint8Array() as Uint8Array)
     const audioWaveDataRef = useRef(audioWaveData)
     audioWaveDataRef.current = audioWaveData
+
+    // The track's end: set by hand, else its audio's, else the default length. While its end is dragged,
+    // where the mouse puts it
+    const audioEndTick = audioWaveData.length > 0 ? audioWaveData.length - 1 : null
+    const audioEndTickRef = useRef(audioEndTick)
+    audioEndTickRef.current = audioEndTick
+    const endTick = trackEndTick(track, audioEndTick)
+    const endTickRef = useRef(endTick)
+    endTickRef.current = endTick
+    const draggedEndTickRef = useRef<number | null>(null)
+    const currentEndTick = () => draggedEndTickRef.current ?? endTickRef.current
+    // The length dropped is saved: the track has it now
+    useEffect(() => { draggedEndTickRef.current = null }, [track])
 
     const recordingPatternRef = useRef<MidiPattern>(null)
 
@@ -152,14 +188,14 @@ const MidiPlayer = (props: Props) => {
 
     const toggleLoop = () => {
         if(!selectedMidiPatternsRef.current) return
-        updateTrackDmxMidiAndSyncRef.current(toggleLoopForPatterns(midiPatternsRef.current, selectedMidiPatternsRef.current))
+        updateTrackDmxMidiAndSyncRef.current(toggleLoopForPatterns(midiPatternsRef.current, selectedMidiPatternsRef.current, currentEndTick()))
     }
 
     // Back to Start, one beat back or forward. While MainStage drives playback, it alone moves the cursor
     const moveCursor = (to: 'start' | 'back' | 'forward') => {
         if(drivenByMidiRef.current) return
         const beat = magnettedTick(midiCurrentTickRef.current, 1)
-        const targetTick = to == 'start' ? 0 : to == 'back' ? Math.max(0, beat - PPQ) : beat + PPQ
+        const targetTick = to == 'start' ? 0 : to == 'back' ? Math.max(0, beat - PPQ) : Math.min(currentEndTick(), beat + PPQ)
         seek(targetTick)
         scrollGlideRef.current = null
         ticksScrollRef.current = to == 'start' ? 0 : targetTick - BEATS_OFFSET * PPQ
@@ -246,7 +282,7 @@ const MidiPlayer = (props: Props) => {
     useEffect(() => {
         if(isRecording) {
             if(!recordingPatternRef.current) {
-                const duration = nextFreeTick(midiPatternsRef.current, midiCurrentTickRef.current) - midiCurrentTickRef.current
+                const duration = nextFreeTick(midiPatternsRef.current, midiCurrentTickRef.current, currentEndTick()) - midiCurrentTickRef.current
                 if(duration > 0) {
                     recordingPatternRef.current = {
                         ticks: magnettedTick(midiCurrentTickRef.current),
@@ -316,12 +352,19 @@ const MidiPlayer = (props: Props) => {
             ticksScroll: ticksScrollRef.current,
             pixelsPerBeat: pixelsPerBeatRef.current,
             audioWaveData: audioWaveDataRef.current,
+            endTick: currentEndTick(),
+            endLabel: endLabel(),
             allMidiKeys: allMidiKeysRef.current,
             mouseSelection: mouseSelectionRef.current,
             ghostMidiPattern: ghostMidiPatternRef.current,
             transformMidiPattern,
         })
     }
+
+    const visibleTicks = () => (canvasRef.current?.getBoundingClientRect().width ?? 0) * PPQ / pixelsPerBeatRef.current
+
+    // The view stops a few bars past the track's end
+    const maxScroll = () => Math.max(0, currentEndTick() + PAST_END_TICKS - visibleTicks())
 
     // Only a moving cursor turns the page: zooming while it stands still leaves the view alone
     const followCursor = (now: number) => {
@@ -330,9 +373,9 @@ const MidiPlayer = (props: Props) => {
         lastFollowedTickRef.current = tick
         if(!canvasRef.current) return
 
-        const visibleTicks = canvasRef.current.getBoundingClientRect().width * PPQ / pixelsPerBeatRef.current
         const scroll = scrollGlideRef.current?.to ?? ticksScrollRef.current
-        const inPage = tick >= scroll && tick <= scroll + visibleTicks * FOLLOW_PAGE_EDGE
+        // Near the track's end, the page can't turn any further
+        const inPage = tick >= scroll && (tick <= scroll + visibleTicks() * FOLLOW_PAGE_EDGE || scroll >= maxScroll())
 
         // Scrolled away by hand: following again once the cursor shows in the view
         if(!isFollowingRef.current) {
@@ -344,7 +387,7 @@ const MidiPlayer = (props: Props) => {
 
         scrollGlideRef.current = {
             from: ticksScrollRef.current,
-            to: Math.max(0, tick - BEATS_OFFSET * PPQ),
+            to: Math.min(maxScroll(), Math.max(0, tick - BEATS_OFFSET * PPQ)),
             start: now,
         }
     }
@@ -365,9 +408,16 @@ const MidiPlayer = (props: Props) => {
         setIsFollowing(false)
     }
 
+    const lastScrollRef = useRef(0)
+
     const mainLoop = (now: number) => {
         followCursor(now)
         glideScroll(now)
+        scrollWhileDraggingEdge(now)
+        // Not scrolled any further past the track's end. A view already further (the end just moved back)
+        // stays where it is
+        ticksScrollRef.current = Math.min(ticksScrollRef.current, Math.max(maxScroll(), lastScrollRef.current))
+        lastScrollRef.current = ticksScrollRef.current
         redrawMidiCanvas()
     }
 
@@ -393,6 +443,112 @@ const MidiPlayer = (props: Props) => {
                 )
             )
         )
+
+    const isNearTick = (x: number, tick: number) =>
+        Math.abs(x - ticksOffsetToPixels(tick, ticksScrollRef.current, pixelsPerBeatRef.current)) <= END_GRAB_PX
+
+    const tickAt = (x: number) => xToTicks({ x, ticksScroll: ticksScrollRef.current, pixelsPerBeat: pixelsPerBeatRef.current })
+
+    // The track's length, in its tab: "3:05 ⟷"
+    const endLabel = () => `${formatDuration(tickToTime(currentEndTick(), trackRef.current.bpm))} ⟷`
+
+    // The track can't end before its last pattern
+    const minTrackLength = () => Math.max(PPQ, ...midiPatternsRef.current.map(p => p.ticks + p.durationTicks))
+
+    // Among the patterns, a loop's end; elsewhere, from the timeline to the waveform, the track's end, or its tab
+    const edgeAt = (x: number, y: number): Edge | undefined => {
+        const height = canvasRef.current?.getBoundingClientRect().height || 1
+        const grabTick = tickAt(x)
+        if(y >= height / 5 && y <= height * 3 / 5) {
+            const looped = midiPatternsRef.current.find(p =>
+                p.loop_until_tick && isNearTick(x, Math.min(p.loop_until_tick, currentEndTick()))
+            )
+            if(looped?.loop_until_tick) {
+                return { kind: 'loopEnd', loopOf: looped, fromTick: Math.min(looped.loop_until_tick, currentEndTick()), grabTick }
+            }
+        }
+        const endTick = currentEndTick()
+        const rulerHeight = (height - 2) / 5
+        const tab = endTabRect(ticksOffsetToPixels(endTick, ticksScrollRef.current, pixelsPerBeatRef.current), endLabel(), rulerHeight)
+        const isOnTab = y < rulerHeight && x >= tab.x0 && x <= tab.x1
+        return isOnTab || isNearTick(x, endTick) ? { kind: 'trackEnd', fromTick: endTick, grabTick } : undefined
+    }
+
+    const edgeTitle = (edge: Edge) => edge.kind == 'trackEnd'
+        ? "Drag to change the track's length, double-click to type it"
+        : 'Drag to change where the loop ends'
+
+    // The end being dragged, and where the mouse is
+    const edgeDragRef = useRef<{ edge: Edge, x: number } | null>(null)
+
+    // The end moves as much as the mouse did since it grabbed it, on the beats
+    const dragEdge = (edge: Edge, x: number, dropped: boolean) => {
+        edgeDragRef.current = dropped ? null : { edge, x }
+        const aimedTick = edge.fromTick + tickAt(x) - edge.grabTick
+        const tick = Math.round(aimedTick / PPQ) * PPQ
+        if(edge.kind == 'trackEnd') dragTrackEnd(aimedTick, tick, dropped)
+        else dragLoopEnd(edge.loopOf, tick, dropped)
+    }
+
+    // Near the view's sides, the view scrolls and the end being dragged goes with it
+    const lastEdgeScrollAtRef = useRef<number | null>(null)
+    const scrollWhileDraggingEdge = (now: number) => {
+        const drag = edgeDragRef.current
+        const width = canvasRef.current?.getBoundingClientRect().width
+        const lastAt = lastEdgeScrollAtRef.current
+        lastEdgeScrollAtRef.current = drag ? now : null
+        if(!drag || !width || lastAt === null) return
+
+        // From 0 where the zone starts to 1 at the side, and past it
+        const depth = Math.max(drag.x - (width - EDGE_SCROLL_ZONE_PX), EDGE_SCROLL_ZONE_PX - drag.x, 0) / EDGE_SCROLL_ZONE_PX
+        if(depth == 0) return
+        const direction = drag.x > width / 2 ? 1 : -1
+        const pixels = Math.min(1, depth) * EDGE_SCROLL_MAX_PX_PER_S * (now - lastAt) / 1000
+        scrollGlideRef.current = null
+        ticksScrollRef.current = Math.max(0, ticksScrollRef.current + direction * pixels * PPQ / pixelsPerBeatRef.current)
+        dragEdge(drag.edge, drag.x, false)
+    }
+
+    const saveTrackLength = (lengthTicks: number) =>
+        updateTrack(trackRef.current.id, { length_ticks: Math.max(minTrackLength(), lengthTicks) }).then(syncTracks)
+
+    // The track's end follows the mouse, on the beats or on the audio's end, never before a pattern's end,
+    // and is saved once dropped
+    const dragTrackEnd = (aimedTick: number, tick: number, dropped: boolean) => {
+        const audioEnd = audioEndTickRef.current
+        const isNearAudioEnd = audioEnd !== null &&
+            ticksDurationToPixels(Math.abs(aimedTick - audioEnd), pixelsPerBeatRef.current) <= END_GRAB_PX
+        const endTick = Math.max(minTrackLength(), isNearAudioEnd ? audioEnd : tick)
+        draggedEndTickRef.current = endTick
+        if(dropped) saveTrackLength(endTick)
+    }
+
+    // A double-click on the track's end tab: its length typed in a field there
+    const [lengthFieldX, setLengthFieldX] = useState<number | null>(null)
+    useEffect(() => {
+        const canvas = canvasRef.current
+        const onDoubleClick = (e: MouseEvent) => {
+            if(!canvas) return
+            const rect = canvas.getBoundingClientRect()
+            if(edgeAt(e.clientX - rect.left, e.clientY - rect.top)?.kind != 'trackEnd') return
+            setLengthFieldX(ticksOffsetToPixels(currentEndTick(), ticksScrollRef.current, pixelsPerBeatRef.current))
+        }
+        canvas?.addEventListener('dblclick', onDoubleClick)
+        return () => canvas?.removeEventListener('dblclick', onDoubleClick)
+    }, [])
+
+    const commitTrackLength = (value: string) => {
+        setLengthFieldX(null)
+        const lengthTicks = parseTrackLength(value, track.bpm)
+        if(lengthTicks !== null) saveTrackLength(lengthTicks)
+    }
+
+    // A loop's end follows the mouse, on the beats, and is saved once dropped
+    const dragLoopEnd = (midiPattern: MidiPattern, tick: number, dropped: boolean) => {
+        const midiPatterns = setLoopEnd(midiPatternsRef.current, midiPattern, tick, currentEndTick())
+        midiPatternsRef.current = midiPatterns
+        if(dropped) updateTrackDmxMidiAndSyncRef.current(midiPatterns)
+    }
 
     const transformMidiPattern: (midiPattern: MidiPattern, x: number, y: number) => MidiPattern = (midiPattern, x, _y) => {
         const deltaTick = xToTicks({
@@ -473,7 +629,21 @@ const MidiPlayer = (props: Props) => {
                     itemFromXY={patternFromXY}
                     ghostItemRef={ghostMidiPatternRef}
                     hoverTickRef={hoverTickRef}
+                    maxTick={endTick}
+                    edgeAt={edgeAt}
+                    dragEdge={dragEdge}
+                    edgeTitle={edgeTitle}
                     isItemInSelection={(item, selected) => midiPatternsInclude(selected, item)}/>
+                { lengthFieldX !== null && <div
+                    className='track-length-field'
+                    style={{ left: Math.max(0, lengthFieldX) }}
+                    title='Minutes and seconds (3:30), or bars (96)'>
+                    <InlineInput
+                        className='track-length-input'
+                        initialValue={formatDuration(tickToTime(endTick, track.bpm))}
+                        onCommit={commitTrackLength}
+                        onCancel={() => setLengthFieldX(null)}/>
+                </div> }
                 <AudioDropHint track={track} isDraggedOver={isDraggingAudio}/>
             </div>
             { audioMenu && <ContextMenu

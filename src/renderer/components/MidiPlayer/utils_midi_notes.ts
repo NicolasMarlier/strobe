@@ -110,15 +110,29 @@ export const insertPatternsAtTick = (props: InsertPatternsAtTickProps) => {
     return [...midiPatterns, ...newMidiPatterns].toSorted((a, b) => a.ticks - b.ticks)
 }
 
-const MAX_TICK = 5 * 60 * 120 * 480
-export const nextFreeTick = (midiPatterns: MidiPattern[], tick: number) => midiPatterns
-    .filter(p => p.ticks + p.durationTicks > tick)
-    .reduce(
-        (freeTick, pattern) => Math.max(tick, Math.min(pattern.ticks, freeTick)),
-        MAX_TICK
-    )
+// No end: a track without audio, whose length nothing tells
+export const MAX_TICK = 5 * 60 * 120 * 480
 
-export const toggleLoopForPatterns = (midiPatterns: MidiPattern[], selectedMidiPatterns: MidiPattern[]) => {
+// Where a pattern starting at `tick` has to stop: the next pattern, or the track's end
+export const nextFreeTick = (midiPatterns: MidiPattern[], tick: number, endTick = MAX_TICK) => Math.max(
+    tick,
+    midiPatterns
+        .filter(p => p.ticks + p.durationTicks > tick)
+        .reduce((freeTick, pattern) => Math.min(pattern.ticks, freeTick), endTick)
+)
+
+// A loop's end, moved to `tick`: no further than the next pattern or the track's end, and back to the
+// pattern's own end, the loop is gone
+export const setLoopEnd = (midiPatterns: MidiPattern[], midiPattern: MidiPattern, tick: number, endTick = MAX_TICK) => {
+    const patternEnd = midiPattern.ticks + midiPattern.durationTicks
+    const loopUntilTick = Math.min(tick, nextFreeTick(midiPatterns, patternEnd, endTick))
+    return midiPatterns.map(p => p.ticks != midiPattern.ticks ? p : {
+        ...p,
+        loop_until_tick: loopUntilTick > patternEnd ? loopUntilTick : undefined
+    })
+}
+
+export const toggleLoopForPatterns = (midiPatterns: MidiPattern[], selectedMidiPatterns: MidiPattern[], endTick = MAX_TICK) => {
     const shouldToggleOn = !selectedMidiPatterns.some(p => p.loop_until_tick)
     return midiPatterns.map(p => {
         const isSelected = selectedMidiPatterns.some(({ticks}) => p.ticks == ticks)
@@ -126,7 +140,7 @@ export const toggleLoopForPatterns = (midiPatterns: MidiPattern[], selectedMidiP
             return {
                 ...p,
                 ...{
-                    loop_until_tick: shouldToggleOn ? nextFreeTick(midiPatterns, p.ticks + p.durationTicks) : undefined
+                    loop_until_tick: shouldToggleOn ? nextFreeTick(midiPatterns, p.ticks + p.durationTicks, endTick) : undefined
                 }
             }
         }

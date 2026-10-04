@@ -7,6 +7,7 @@ import { useRealTimeContext } from "../../contexts/RealTimeContext"
 import { useDmxMidiContext } from "../../contexts/DmxMidiContext"
 import { sendUsageSignal } from "../../ApiClient"
 import { isTextField } from "../../useEditMenu"
+import { trackEndTick, useAudioEndTick } from "./useTrackEndTick"
 
 const AudioPlayer = () => {
     const { track, audioUrl } = useDmxButtonsContext()
@@ -14,14 +15,26 @@ const AudioPlayer = () => {
     const { setIsFollowing } = useDmxMidiContext()
     const [isPlaying, setIsPlaying] = useState(false)
 
+    const isPlayingRef = useRef(isPlaying)
+    isPlayingRef.current = isPlaying
+
     const audioRef = useRef<HTMLAudioElement>(null)
 
+    const trackRef = useRef(track)
+    trackRef.current = track
+
+    // Playback stops at the track's end
+    const endTickRef = useRef(0)
+    endTickRef.current = trackEndTick(track, useAudioEndTick(track, audioUrl))
+
+    // Without audio, or past its end, a clock moves the cursor: from this tick, since then
+    const clockRef = useRef<{ startTick: number, startedAt: number } | null>(null)
+
+    // Another track: playback stops
     useEffect(() => {
-        if (!audioRef.current) return
-        audioRef.current.pause()
-        setIsPlaying(false)
-        if (!audioUrl) audioRef.current.src = ''
-    }, [audioUrl])
+        pause()
+        if (audioRef.current && !audioUrl) audioRef.current.src = ''
+    }, [audioUrl, track?.id])
 
     // MainStage starts while the app plays: it takes over, the app's own playback stops
     useEffect(() => {
@@ -29,19 +42,33 @@ const AudioPlayer = () => {
     }, [drivenByMidi])
 
     const pause = () => {
-        if(!audioRef.current) return 
-        audioRef.current.pause()
+        audioRef.current?.pause()
+        clockRef.current = null
         setIsPlaying(false)
     }
 
-    const play = () => {
-        if(!audioRef.current || drivenByMidi) return
-
-        if(track) {
-            audioRef.current.currentTime = tickToTime(midiCurrentTickRef.current, track.bpm)
+    // The audio plays from there when it has something to play there, else the clock goes
+    const playFrom = (tick: number) => {
+        const audio = audioRef.current
+        const time = trackRef.current ? tickToTime(tick, trackRef.current.bpm) : 0
+        if (audio && audioUrl && time < (audio.duration || 0)) {
+            clockRef.current = null
+            audio.currentTime = time
+            // Paused before it really started (e.g. MainStage taking over): not an error
+            audio.play().catch(() => { /* interrupted by pause() */ })
         }
-        // Paused before it really started (e.g. MainStage taking over): not an error
-        audioRef.current.play().catch(() => { /* interrupted by pause() */ })
+        else {
+            audio?.pause()
+            clockRef.current = { startTick: tick, startedAt: performance.now() }
+        }
+    }
+
+    const play = () => {
+        if(!track || drivenByMidi) return
+
+        // At the track's end: from the start again
+        if(midiCurrentTickRef.current >= endTickRef.current) seek(0)
+        playFrom(midiCurrentTickRef.current)
         setIsPlaying(true)
         setIsFollowing(true)
         sendUsageSignal('Strobe.playbackStarted')
@@ -52,22 +79,35 @@ const AudioPlayer = () => {
 
     // The cursor moved by hand (a click in the timeline, the arrows, Back to Start): the audio goes
     // there too, so that playback carries on from it rather than bringing the cursor back
-    const trackRef = useRef(track)
-    trackRef.current = track
+    const playFromRef = useRef(playFrom)
+    playFromRef.current = playFrom
     useEffect(() => onSeek(tick => {
-        if (audioRef.current && trackRef.current) {
+        if (isPlayingRef.current) playFromRef.current(tick)
+        else if (audioRef.current && trackRef.current) {
             audioRef.current.currentTime = Math.max(0, tickToTime(tick, trackRef.current.bpm))
         }
     }), [])
 
     useEffect(() => {
         if(isPlaying && track) {
-            const audioInterval = setInterval(() => {
-                if(audioRef.current) {
-                    sendCurrentTickToServer(timeToTick(audioRef.current.currentTime, track.bpm))
+            const playbackInterval = setInterval(() => {
+                const audio = audioRef.current
+                // The audio over, the clock goes on from its end
+                if (!clockRef.current && audio?.ended) {
+                    clockRef.current = { startTick: timeToTick(audio.currentTime, track.bpm), startedAt: performance.now() }
                 }
+                const clock = clockRef.current
+                const tick = clock
+                    ? clock.startTick + timeToTick((performance.now() - clock.startedAt) / 1000, track.bpm)
+                    : timeToTick(audio?.currentTime ?? 0, track.bpm)
+
+                if (tick >= endTickRef.current) {
+                    sendCurrentTickToServer(endTickRef.current)
+                    pause()
+                }
+                else sendCurrentTickToServer(tick)
             }, 30)
-            return () => clearInterval(audioInterval)
+            return () => clearInterval(playbackInterval)
         }
     }, [isPlaying])
 

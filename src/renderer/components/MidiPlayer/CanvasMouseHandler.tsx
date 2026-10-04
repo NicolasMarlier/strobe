@@ -3,7 +3,7 @@ import { PPQ, xToTicks } from "./utils";
 import { useDmxMidiContext } from "../../contexts/DmxMidiContext";
 import { useRealTimeContext } from "../../contexts/RealTimeContext";
 
-interface Props<T> {
+interface Props<T, E> {
     canvasRef: RefObject<HTMLCanvasElement | null>
     ticksScrollRef: RefObject<number>
     pixelsPerBeatRef: RefObject<number>
@@ -22,6 +22,15 @@ interface Props<T> {
     onManualScroll?: () => void,
     // Where a click would put the cursor, while the mouse is over the timeline and may move it; else null
     hoverTickRef?: RefObject<number | null>,
+    // The cursor goes no further (the track's end)
+    maxTick?: number,
+    // The edge under x, y (a loop's end, the track's end): the mouse drags it, rather than seeking or
+    // selecting
+    edgeAt?: (x: number, y: number) => E | undefined,
+    // The edge dragged to x, then dropped there. A click that doesn't move leaves it alone
+    dragEdge?: (edge: E, x: number, dropped: boolean) => void,
+    // The tooltip over an edge
+    edgeTitle?: (edge: E) => string,
 }
 
 // A playhead: a triangle pointing down over a line, white outlined in black to show on any background.
@@ -35,7 +44,7 @@ const SEEK_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SEEK_CURSOR_SV
 // often slips by a pixel or two
 const DRAG_THRESHOLD = 5
 
-const CanvasMouseHandler = <T,>(props: Props<T>) => {
+const CanvasMouseHandler = <T, E = never>(props: Props<T, E>) => {
     const {
         canvasRef,
         ticksScrollRef,
@@ -75,15 +84,22 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
     const canvasLeft = () => canvasRef.current?.getBoundingClientRect().left || 0
 
     // The tick a click at this x in the timeline moves the cursor to
-    const seekTickAt = (clientX: number) => xToTicks({
-        x: clientX - canvasLeft(),
-        ticksScroll: ticksScrollRef.current,
-        pixelsPerBeat: pixelsPerBeatRef.current,
-        magnet: true,
-        magnetMode: 'line',
-        magnetBeats: pixelsPerBeatRef.current > 20 ? 0.25 : 1,
-        x0: p.current.x0,
-    })
+    const seekTickAt = (clientX: number) => Math.min(
+        p.current.maxTick ?? Infinity,
+        xToTicks({
+            x: clientX - canvasLeft(),
+            ticksScroll: ticksScrollRef.current,
+            pixelsPerBeat: pixelsPerBeatRef.current,
+            magnet: true,
+            magnetMode: 'line',
+            magnetBeats: pixelsPerBeatRef.current > 20 ? 0.25 : 1,
+            x0: p.current.x0,
+        })
+    )
+
+    // The edge being dragged, and whether the mouse moved since it was grabbed
+    const edgeDragRef = useRef<{ edge: E, moved: boolean } | null>(null)
+    const edgeAt = (event: MouseEvent) => p.current.edgeAt?.(event.clientX - canvasLeft(), event.clientY - canvasTop())
 
     // Over the timeline, where a click moves the cursor (not the piano keys on its left)
     const isOverTimeline = (event: MouseEvent) => {
@@ -101,8 +117,13 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         if (canvasRef.current) canvasRef.current.style.cursor = tick === null ? '' : SEEK_CURSOR
     }
 
-    const onMouseUp = (_event: MouseEvent) => {
-        if(selectionRef.current?.mode == 'drag') {
+    const onMouseUp = (event: MouseEvent) => {
+        if(edgeDragRef.current) {
+            const { edge, moved } = edgeDragRef.current
+            if(moved) p.current.dragEdge?.(edge, event.clientX - canvasLeft(), true)
+            edgeDragRef.current = null
+        }
+        else if(selectionRef.current?.mode == 'drag') {
             const deltaX = selectionRef.current.rect.x1 - selectionRef.current.rect.x0
             const deltaY = selectionRef.current.rect.y1 - selectionRef.current.rect.y0
             p.current.updateSelectedItems(
@@ -125,7 +146,12 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         // A right-click (or Ctrl-click) opens a menu, it doesn't select nor move the cursor
         if(event.button == 2 || event.ctrlKey) return
 
-        if(event.clientY - canvasTop() >= 0 &&
+        const edge = edgeAt(event)
+        if(edge !== undefined) {
+            selectionRef.current = null
+            edgeDragRef.current = { edge, moved: false }
+        }
+        else if(event.clientY - canvasTop() >= 0 &&
             event.clientY - canvasTop() < p.current.timelineHeight) {
 
             selectionRef.current = null
@@ -197,11 +223,24 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         }
     }
 
-    const onMouseMove = (event: MouseEvent) => (
-        !selectionRef.current ? onMouseUpMove : onMouseDownMove
-    )(event)
+    const onMouseMove = (event: MouseEvent) => {
+        if(edgeDragRef.current) {
+            edgeDragRef.current.moved = true
+            p.current.dragEdge?.(edgeDragRef.current.edge, event.clientX - canvasLeft(), false)
+            return
+        }
+        (!selectionRef.current ? onMouseUpMove : onMouseDownMove)(event)
+    }
 
     const onMouseUpMove = (event: MouseEvent) => {
+        const edge = edgeAt(event)
+        if (canvasRef.current) canvasRef.current.title = edge !== undefined ? p.current.edgeTitle?.(edge) ?? '' : ''
+        if(edge !== undefined) {
+            ghostItemRef.current = undefined
+            showSeekHover(null)
+            if (canvasRef.current) canvasRef.current.style.cursor = 'ew-resize'
+            return
+        }
         if(isOverTimeline(event)) {
             ghostItemRef.current = undefined
             showSeekHover(p.current.drivenByMidi ? null : seekTickAt(event.clientX))
