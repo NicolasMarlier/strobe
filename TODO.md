@@ -30,7 +30,7 @@
 - [x] Move the cursor by hand during playback (seek while playing)
   - A click in the timeline, the arrows, Return and Back to Start move the cursor while playing, and the audio follows; none of them while MainStage drives playback (done)
   - Over the timeline, where a click moves the cursor: a playhead mouse cursor and a very faint ghost cursor (done)
-- [ ] Usage telemetry in the app, to count installs and real usage, with TelemetryDeck
+- [x] Usage telemetry in the app, to count installs and real usage, with TelemetryDeck
   - Why TelemetryDeck: an anonymous, hashed ID per install gives unique installs, monthly active users and retention (Aptabase keeps no user ID, so it can't count installs). JavaScript SDK, free plan of 50 to 100k signals a month
   - First: the user creates the TelemetryDeck account and the app, and gives its app ID (done)
   - Implemented and merged into main; the events show up in the TelemetryDeck dashboard (done)
@@ -38,16 +38,16 @@
   - A "Share anonymous usage statistics" setting, on by default, that turns it off (done: Strobe › Share Anonymous Usage Statistics and Crash Reports)
   - A Privacy section in the README listing exactly what is sent (done)
   - Installs and active users: read in the TelemetryDeck dashboard, not in `bin/stats` (its API needs a paid plan, we stay on the free one); `bin/stats` and the stats skill point to it (done)
-  - Ship it in a release (the deploy skill), along with the next features
-- [ ] Crash monitoring, with Sentry (`@sentry/electron`, free plan: 5,000 errors a month)
+  - Ship it in a release (done: Strobe 0.5.0)
+- [x] Crash monitoring, with Sentry (`@sentry/electron`, free plan: 5,000 errors a month)
   - Why Sentry rather than TelemetryDeck: readable stack traces, the same crashes grouped, email alerts, and the native crashes (USB, MIDI) that kill the app before it can send anything
   - First: the user creates the Sentry account and the project, and gives its DSN (done)
   - Implemented and merged into main (done): `src/main/crash_reports.ts`, the window in `src/renderer.ts`. The errors nobody caught in the main process and the window, and the native crashes (sent at the next launch). File paths replaced by `<path>`, no console nor requests in the breadcrumbs, no IP address nor variables' values
   - Turned off by the same setting as the usage statistics: Strobe › Share Anonymous Usage Statistics and Crash Reports (done). The README's Privacy section lists what is sent (done)
-  - The source maps sent to Sentry by `bin/release`, then deleted from the app (done, in `webpack.plugins.ts`): the organization, the project and the organization token in the keychain are set (done). The upload itself is checked at the next release
+  - The source maps sent to Sentry by `bin/release`, then deleted from the app (done, in `webpack.plugins.ts`): the organization, the project and the organization token in the keychain are set (done). The upload itself checked (done: Strobe 0.5.0, the three bundles' source maps uploaded, none left in the installed app)
   - Validate that the crashes show up in Sentry (done: a test error from the window arrived, in release Strobe@0.4.0). Run from source, `STROBE_CRASH_REPORTS=1 yarn start` sends them
   - In Sentry: an email alert on a new crash (done: the project's alert rule already existed)
-  - Ship it in a release (the deploy skill)
+  - Ship it in a release (done: Strobe 0.5.0)
 - [ ] Display the keyboard shortcuts
   - The transport's: a Playback menu (Play / Pause, Back to Start) and its buttons' tooltips (done)
 - [x] Show file icon, in the Finder and the title bar
