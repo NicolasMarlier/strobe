@@ -1,15 +1,17 @@
 ---
 name: website-videos
-description: Record the website's videos of Strobe (the overview and the 3D scene) by itself, from a released version and the bundled example show, with nobody at the keyboard, then put them on the website (sibling repo strobe-website). Use when the user asks to record, redo or update the website's videos, and at each release (the deploy skill's website step).
+description: Record the website's video of Strobe (the overview) by itself, from a released version and the bundled example show, with nobody at the keyboard, then put them on the website (sibling repo strobe-website). Use when the user asks to record, redo or update the website's videos, and at each release (the deploy skill's website step).
 ---
 
 # The website's videos
 
 Talk to the user in French. Everything written in the repos stays in English.
 
-The home page of the website (`/Users/nicolasmarlier/perso/strobe-website`, `index.html`) shows short muted loops of the app, in `assets/videos/`: `overview` (the whole window) and `scene` (the 3D stage). Each comes with its poster, `<name>.webp`: its first frame, shown until it plays and to those who'd rather avoid motion. `script.js` plays the `.app-video`s only while on screen.
+The home page of the website (`/Users/nicolasmarlier/perso/strobe-website`, `index.html`) shows a short muted loop of the app, in `assets/videos/`: `overview` (the whole window), with its poster, `overview.webp`: its first frame, shown until it plays and to those who'd rather avoid motion. `script.js` plays the `.app-video`s only while on screen.
 
-Three sections aren't videos but animations in HTML and JavaScript (in `index.html`, their engines in `script.js`), copies of the app's look acting out a story by themselves: the cues (`.cues-demo`: a cue's editing), recording (`.record-demo`: a take played on a MIDI keyboard, then its playback) and the stage (`.stage-demo`: Strobe in a narrow window next to a sketch of MainStage, which drives it). Nothing to record for them; but when what they copy changes in the app (the buttons and their settings, the effects, the transport, the timeline, recording, the narrow window, what Strobe takes from MainStage), tell the user they may need updating too. `record.mjs` can still record a `cues` or a `narrow` video, on request only: `... 10 cues`. Without it, record the others: `... 10 overview,scene`.
+The 3D stage isn't a video either: `scene3d.js` draws it live with three.js, a copy of the app's scene (`src/renderer/components/DmxScene`: the example show's elements, the beams, the bloom, the fog, the camera's drift) playing a show of Strobe's effects. `assets/videos/scene.webp`, a still of the old scene video, stays under it until it's drawn, and instead of it without WebGL; `record.mjs` can redo it on request (`... 10 scene`, then keep only its poster). When the app's scene changes (its look, the fixtures, the example show's stage, the effects), tell the user `scene3d.js` may need updating too.
+
+Three sections aren't videos but animations in HTML and JavaScript (in `index.html`, their engines in `script.js`), copies of the app's look acting out a story by themselves: the cues (`.cues-demo`: a cue's editing), recording (`.record-demo`: a take played on a MIDI keyboard, then its playback) and the stage (`.stage-demo`: Strobe in a narrow window next to a sketch of MainStage, which drives it). Nothing to record for them; but when what they copy changes in the app (the buttons and their settings, the effects, the transport, the timeline, recording, the narrow window, what Strobe takes from MainStage), tell the user they may need updating too. `record.mjs` can still record a `cues`, `narrow` or `scene` video, on request only: `... 10 cues`. Without it, record the overview: `... 10 overview`.
 
 `record.mjs`, next to this file, records them all by itself: the user doesn't need to do anything, nor to quit their own Strobe.
 
@@ -26,7 +28,7 @@ hdiutil attach -nobrowse -readonly -mountpoint <scratchpad>/mnt <scratchpad>/Str
 
 ## 2. Record
 
-From the app repo: `node .claude/skills/website-videos/record.mjs <scratchpad>/mnt/Strobe.app <scratchpad>/videos 10 overview,scene`, in the background (5 to 10 minutes). Some of them only: `... <scratchpad>/videos 10 cues,scene` (the third argument is the passage's length in seconds).
+From the app repo: `node .claude/skills/website-videos/record.mjs <scratchpad>/mnt/Strobe.app <scratchpad>/videos 10 overview`, in the background (5 to 10 minutes). Some of them only: `... <scratchpad>/videos 10 cues,scene` (the third argument is the passage's length in seconds).
 
 What it does, so you can tell the user and debug it:
 - It starts its own Strobe from the mounted app, next to the user's if it's open: its own profile (no usage statistics nor crash reports sent, the user's recent shows and settings untouched), the sound muted, the Chrome DevTools protocol on port 9223. Its window shows up on screen; the user can keep working, but must not quit it (Cmd+Q may quit both Strobes).
