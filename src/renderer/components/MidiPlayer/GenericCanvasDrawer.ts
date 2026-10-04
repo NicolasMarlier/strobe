@@ -44,6 +44,19 @@ export const drawCurrentTick = (props: DrawerFunctionProps, currentMidiTick: num
     )
 }
 
+// Where a click in the timeline would put the cursor: a faint line under the mouse
+export const drawHoverTick = (props: DrawerFunctionProps, hoverTick: number | null) => {
+    if (hoverTick === null) return
+    const { ctx, ticksScroll, pixelsPerBeat, height, baseXOffset } = props
+    ctx.fillStyle = "#ffffff30";
+    ctx.fillRect(
+        ticksOffsetToPixels(hoverTick, ticksScroll, pixelsPerBeat, baseXOffset || 0),
+        0,
+        1,
+        height
+    )
+}
+
 const primaryGridStep = ({ ppq, pixelsPerBeat }: DrawerFunctionProps) => {
     if(pixelsPerBeat > 20) return ppq
     else if(pixelsPerBeat > 10) return ppq * 4

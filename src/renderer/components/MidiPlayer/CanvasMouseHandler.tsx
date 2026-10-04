@@ -20,6 +20,8 @@ interface Props<T> {
     x0?: number,
     editorMode?: 'TrackEditor' | 'PatternEditor',
     onManualScroll?: () => void,
+    // Where a click would put the cursor, while the mouse is over the timeline and may move it; else null
+    hoverTickRef?: RefObject<number | null>,
 }
 
 const CanvasMouseHandler = <T,>(props: Props<T>) => {
@@ -33,7 +35,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
     } = props
 
     const { setActiveEditor } = useDmxMidiContext()
-    const { seek } = useRealTimeContext()
+    const { seek, drivenByMidi } = useRealTimeContext()
 
     // Keep all non-ref props fresh so the registered-once handlers never use stale closures
     const p = useRef({
@@ -43,6 +45,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         editorMode: props.editorMode ?? 'TrackEditor' as const,
         setActiveEditor,
         seek,
+        drivenByMidi,
     })
     p.current = {
         ...props,
@@ -51,10 +54,37 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
         editorMode: props.editorMode ?? 'TrackEditor' as const,
         setActiveEditor,
         seek,
+        drivenByMidi,
     }
 
     const canvasTop = () => canvasRef.current?.getBoundingClientRect().top || 0
     const canvasLeft = () => canvasRef.current?.getBoundingClientRect().left || 0
+
+    // The tick a click at this x in the timeline moves the cursor to
+    const seekTickAt = (clientX: number) => xToTicks({
+        x: clientX - canvasLeft(),
+        ticksScroll: ticksScrollRef.current,
+        pixelsPerBeat: pixelsPerBeatRef.current,
+        magnet: true,
+        magnetMode: 'line',
+        magnetBeats: pixelsPerBeatRef.current > 20 ? 0.25 : 1,
+        x0: p.current.x0,
+    })
+
+    // Over the timeline, where a click moves the cursor (not the piano keys on its left)
+    const isOverTimeline = (event: MouseEvent) => {
+        const rect = canvasRef.current?.getBoundingClientRect()
+        if (!rect) return false
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+        return x >= p.current.x0 && x < rect.width && y >= 0 && y < p.current.timelineHeight
+    }
+
+    // A pointing hand and a faint cursor where a click would put it; neither while MainStage drives playback
+    const showSeekHover = (tick: number | null) => {
+        if (p.current.hoverTickRef) p.current.hoverTickRef.current = tick
+        if (canvasRef.current) canvasRef.current.style.cursor = tick === null ? '' : 'pointer'
+    }
 
     const onMouseUp = (_event: MouseEvent) => {
         if(selectionRef.current?.mode == 'drag') {
@@ -82,18 +112,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
             event.clientY - canvasTop() < p.current.timelineHeight) {
 
             selectionRef.current = null
-            const magnetBeats = pixelsPerBeatRef.current > 20 ? 0.25 : 1
-            p.current.seek(
-                xToTicks({
-                    x: event.clientX - canvasLeft(),
-                    ticksScroll: ticksScrollRef.current,
-                    pixelsPerBeat: pixelsPerBeatRef.current,
-                    magnet: true,
-                    magnetMode: 'line',
-                    magnetBeats,
-                    x0: p.current.x0,
-                })
-            )
+            p.current.seek(seekTickAt(event.clientX))
         }
         else if(event.clientY - canvasTop() > p.current.timelineHeight) {
             const x = event.clientX - canvasLeft()
@@ -135,6 +154,7 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
 
     const onMouseDownMove = (event: MouseEvent) => {
         ghostItemRef.current = undefined
+        showSeekHover(null)
 
         if(selectionRef.current) {
             selectionRef.current = {
@@ -157,6 +177,12 @@ const CanvasMouseHandler = <T,>(props: Props<T>) => {
     )(event)
 
     const onMouseUpMove = (event: MouseEvent) => {
+        if(isOverTimeline(event)) {
+            ghostItemRef.current = undefined
+            showSeekHover(p.current.drivenByMidi ? null : seekTickAt(event.clientX))
+            return
+        }
+        showSeekHover(null)
         if(p.current.itemsInRect({
             x0: event.clientX - canvasLeft(),
             y0: event.clientY - canvasTop(),

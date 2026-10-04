@@ -72,6 +72,7 @@ const MidiPlayer = (props: Props) => {
     const recordingPatternRef = useRef<MidiPattern>(null)
 
     const ghostMidiPatternRef = useRef<MidiPattern | undefined>(undefined)
+    const hoverTickRef = useRef<number | null>(null)
 
     const updateTrackDmxMidiAndSyncRef = useRef(updateTrackDmxMidiAndSync)
     updateTrackDmxMidiAndSyncRef.current = updateTrackDmxMidiAndSync
@@ -244,6 +245,7 @@ const MidiPlayer = (props: Props) => {
             recordingMidiPattern: recordingPatternRef.current,
             ppq: PPQ,
             currentMidiTick: midiCurrentTickRef.current,
+            hoverTick: hoverTickRef.current,
             ticksScroll: ticksScrollRef.current,
             pixelsPerBeat: pixelsPerBeatRef.current,
             audioWaveData: audioWaveDataRef.current,
@@ -400,6 +402,7 @@ const MidiPlayer = (props: Props) => {
                     updateSelectedItems={updateSelectedMidiPatterns}
                     itemFromXY={patternFromXY}
                     ghostItemRef={ghostMidiPatternRef}
+                    hoverTickRef={hoverTickRef}
                     isItemInSelection={(item, selected) => midiPatternsInclude(selected, item)}/>
             </Draggable>
         </div>

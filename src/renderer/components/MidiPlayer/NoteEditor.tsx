@@ -25,6 +25,8 @@ const NoteEditor = (props: Props) => {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     
     const ghostNoteRef = useRef<MidiNote | undefined>(undefined)
+    
+    const hoverTickRef = useRef<number | null>(null)
 
     // Mirror all values accessed in event handlers into refs so they stay fresh
     const patternRef = useRef(pattern)
@@ -136,6 +138,7 @@ const NoteEditor = (props: Props) => {
             selectedNotes: selectedNotesRef.current,
             ghostNote: ghostNoteRef.current,
             currentMidiTick: midiCurrentTickRef.current,
+            hoverTick: hoverTickRef.current,
             mouseSelection: mouseSelectionRef.current,
             dragDeltaTicks: dragDeltaRef.current.ticks,
             dragDeltaRow: dragDeltaRef.current.row,
@@ -215,6 +218,7 @@ const NoteEditor = (props: Props) => {
                     updateSelectedItems={updateSelectedMidiNote}
                     itemFromXY={midiNoteFromXY}
                     ghostItemRef={ghostNoteRef}
+                    hoverTickRef={hoverTickRef}
                     editorMode='PatternEditor'
                 />
             </div>

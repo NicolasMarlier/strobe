@@ -1,5 +1,5 @@
 import { humanizeMidiKey } from '../../utils'
-import { drawBeatsGrid, drawCurrentSelection, drawCurrentTick, drawTimeline, ITEM_COLOR, PRIMARY_GRID_COLOR, SELECTED_COLOR, type DrawerFunctionProps } from './GenericCanvasDrawer'
+import { drawBeatsGrid, drawCurrentSelection, drawCurrentTick, drawHoverTick, drawTimeline, ITEM_COLOR, PRIMARY_GRID_COLOR, SELECTED_COLOR, type DrawerFunctionProps } from './GenericCanvasDrawer'
 import { isVisibleX, PPQ, setupCanvasDPR, ticksDurationToPixels, ticksOffsetToPixels, xToTicks } from './utils'
 import { midiNotesIncludes } from './utils_midi_notes'
 
@@ -19,6 +19,7 @@ interface Props {
     dragDeltaTicks: number
     dragDeltaRow: number
     currentMidiTick: number
+    hoverTick: number | null
     transformMidiNote: (midiNote: MidiNote, x: number, y: number) => MidiNote
 }
 
@@ -131,6 +132,7 @@ export const redrawNoteEditor = (props: Props) => {
         canvas, pattern, sortedMidiKeys,
         selectedNotes, ghostNote, mouseSelection,
         currentMidiTick,
+        hoverTick,
         transformMidiNote,
         ticksScroll,
         pixelsPerBeat
@@ -177,6 +179,7 @@ export const redrawNoteEditor = (props: Props) => {
     })  
     if (ghostNote) drawGhostNote(drawerFunctionProps, ghostNote)
 
+    drawHoverTick(drawerFunctionProps, hoverTick)
     drawCurrentTick(drawerFunctionProps, currentMidiTick)
     if (mouseSelection?.mode == 'select') { drawCurrentSelection(drawerFunctionProps, mouseSelection.rect) }
     drawPianoKeyboard(drawerFunctionProps)
