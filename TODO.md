@@ -2,7 +2,8 @@
 
 ## Promotion
 
-- [ ] Communicate with Enttec
+- [x] Communicate with Enttec
+  - Contacted (done, 2026-10-05)
 - [x] Website: a short story, filmed with Nico, on why Strobe was made
   - Written instead of filmed: "Why we made Strobe", the band's story between the tour and the features, signed Nicolas, MAAD AVENUE; also in the Reddit and AlternativeTo drafts (done)
 - [x] Website: fewer videos, more animated HTML
@@ -10,8 +11,9 @@
   - "Made for the stage": MainStage driving Strobe, an HTML animation in place of the narrow window's video: Strobe narrow on the left of a screen, a sketch of MainStage on the right, its patch change, Play and Stop sent to Strobe along a MIDI wire; the narrow video removed, and from the website-videos skill (done)
   - "Your stage, in 3D": the scene drawn live with three.js, a copy of the app's (the example show's stage, beams, bloom, fog, the camera's drift), in place of its video; the website-videos skill only records the overview now (done)
   - The hero's overview video removed, the site has no video left; the "four steps" section removed; more room between sections, and blocks fading in as they scroll into view (done)
-- [ ] Promote Strobe: posts on r/MainStage, then r/macapps and r/lightingdesign, and a listing on AlternativeTo (suggested as an alternative to Lightkey and QLC+)
+- [x] Promote Strobe: posts on r/MainStage, then r/macapps and r/lightingdesign, and a listing on AlternativeTo (suggested as an alternative to Lightkey and QLC+)
   - Drafts ready to paste in `~/Documents/Strobe - Promotion Reddit et AlternativeTo.pdf`
+  - The Reddit posts and the AlternativeTo listing created (done, 2026-10-05)
 - [x] Feedback collection process
 - [x] Public website
 - [x] Videos on the website
