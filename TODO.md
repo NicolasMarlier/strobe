@@ -3,7 +3,8 @@
 ## Promotion
 
 - [ ] Communicate with Enttec
-- [ ] Website: a short story, filmed with Nico, on why Strobe was made
+- [x] Website: a short story, filmed with Nico, on why Strobe was made
+  - Written instead of filmed: "Why we made Strobe", the band's story between the tour and the features, signed Nicolas, MAAD AVENUE; also in the Reddit and AlternativeTo drafts (done)
 - [x] Website: fewer videos, more animated HTML
   - A section on recording a show: why it's useful, next to an HTML animation of a take (Record, the cues played on a MIDI keyboard along with the song, Pause) and its playback with nobody touching anything (done)
   - "Made for the stage": MainStage driving Strobe, an HTML animation in place of the narrow window's video: Strobe narrow on the left of a screen, a sketch of MainStage on the right, its patch change, Play and Stop sent to Strobe along a MIDI wire; the narrow video removed, and from the website-videos skill (done)
