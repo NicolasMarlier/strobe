@@ -23,7 +23,7 @@
   - Keyword titles and descriptions, canonical URLs, a 1200x630 social preview image (`assets/og-image.jpg`), SoftwareApplication structured data (its version updated by the deploy skill's grep), robots.txt, sitemap.xml, clean URLs without trailing slash (done)
   - The GitHub repo's description, website link and topics (done)
   - Staying on strobe-website.vercel.app, no custom domain for now
-  - Google Search Console: the site verified (meta tag on the home page), Google can index the home page (done). `sitemap.xml` submitted, read by Google with its 2 pages (done, 2026-10-05). To do: request the indexing of `/` and `/mainstage` in URL Inspection (it failed right after the verification)
+  - Google Search Console: the site verified (meta tag on the home page), Google can index the home page (done). `sitemap.xml` submitted, read by Google with its 2 pages (done, 2026-10-05). To do: request the indexing of `/` and `/mainstage` in URL Inspection (it failed right after the verification, then on 2026-10-05 with "Quota dépassé": retry from 2026-10-06)
 
 ## Fixes
 
